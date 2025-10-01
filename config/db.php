@@ -7,6 +7,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET' && realpath(__FILE__) == realpath($_SERV
 $host = 'localhost';
 $db = 'myirt_adaptive_learning';
 $user = 'root';
-$pass = 'root';
+$pass = 'KZpcshK2nKeG47DYZfHvC2tbehurKwx2AGzoj6fFpAoWoX1Gl43i4B9jWQhsJ0Oe';
 
 $conn = mysqli_connect($host, $user, $pass, $db);
