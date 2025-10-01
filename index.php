@@ -1,7 +1,7 @@
 <?php
 
-include('config/db.php');
 session_start();
+include('config/db.php');
 
 if (!isset($_SESSION['name'])) {
     header('location: sign-in.php');
