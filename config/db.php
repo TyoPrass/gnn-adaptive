@@ -4,8 +4,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET' && realpath(__FILE__) == realpath($_SERV
     die(header('location: ../index.php'));
 }
 
-<?php
-// ... (kode lainnya) ...
 
 // --- KONFIGURASI KONEKSI DATABASE ---
 
