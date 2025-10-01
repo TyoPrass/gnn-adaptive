@@ -8,7 +8,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET' && realpath(__FILE__) == realpath($_SERV
 // --- KONFIGURASI KONEKSI DATABASE ---
 
 // 💡 Host adalah NAMA SERVICE dari database di Coolify
-$host = 'mariadb-database-kwcggwkso48ocsks8880g40k'; 
+$host = 'localhost'; 
 
 // Nama database yang ingin Anda gunakan
 // ⚠️ Pastikan database ini sudah Anda buat! 
