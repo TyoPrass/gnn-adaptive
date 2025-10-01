@@ -4,9 +4,36 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET' && realpath(__FILE__) == realpath($_SERV
     die(header('location: ../index.php'));
 }
 
-$host = '2raEEvCp1AcJy3cFu6n0ozE808v7kGFQgTEB8YSUtAUc0Rlomce5N8XTGfcxm1kV@kwcggwkso48ocsks8880g40k';
-$db = 'myirt_adaptive_learning';
-$user = 'root';
+<?php
+// ... (kode lainnya) ...
+
+// --- KONFIGURASI KONEKSI DATABASE ---
+
+// 💡 Host adalah NAMA SERVICE dari database di Coolify
+$host = 'mariadb-database-kwcggwkso48ocsks8880g40k'; 
+
+// Nama database yang ingin Anda gunakan
+// ⚠️ Pastikan database ini sudah Anda buat! 
+// Dari screenshot, database awal yang dibuat Coolify adalah 'default'.
+$db = 'myirt_adaptive_learning'; 
+
+// User untuk koneksi
+$user = 'root'; 
+
+// Password untuk user root yang Anda set di Coolify
 $pass = 'KZpcshK2nKeG47DYZfHvC2tbehurKwx2AGzoj6fFpAoWoX1Gl43i4B9jWQhsJ0Oe';
 
-$conn = mysqli_connect($host, $user, $pass, $db);
+// Port internal database, defaultnya adalah 3306
+$port = 3306; 
+
+// Lakukan koneksi
+$conn = mysqli_connect($host, $user, $pass, $db, $port);
+
+// Cek koneksi
+if (!$conn) {
+    die("Koneksi gagal: " . mysqli_connect_error());
+}
+
+echo "Koneksi berhasil!";
+
+?>
