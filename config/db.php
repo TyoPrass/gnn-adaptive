@@ -1,23 +1,5 @@
 <?php
 
-// --- Dynamic Base URL Detection ---
-
-// Cek apakah koneksi asli via HTTPS
-$is_https = (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') || 
-            (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off');
-
-// Ambil host asli dari header proxy, atau fallback ke host biasa
-$host = isset($_SERVER['HTTP_X_FORWARDED_HOST']) ? $_SERVER['HTTP_X_FORWARDED_HOST'] : $_SERVER['HTTP_HOST'];
-
-// Bangun Base URL yang benar
-$protocol = $is_https ? 'https://' : 'http://';
-$base_url = $protocol . $host;
-
-define('BASE_URL', $base_url);
-
-// --- End of Detection ---
-
-
 
 if ($_SERVER['REQUEST_METHOD'] == 'GET' && realpath(__FILE__) == realpath($_SERVER['SCRIPT_FILENAME'])) {
     header('HTTP/1.0 403 Forbidden', TRUE, 403);
