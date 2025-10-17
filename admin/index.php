@@ -550,7 +550,7 @@ if (!isset($_SESSION['name'])) {
                     </p>
                 </div>
                 <div class="col-md-4 text-center">
-                    <img src="../assets/images/study.svg" alt="Welcome" class="img-fluid" style="max-height: 150px;">
+                    <img src="../../images/study.png" alt="Welcome" class="img-fluid" style="max-height: 150px;">
                 </div>
             </div>
         </div>
@@ -626,6 +626,10 @@ if (!isset($_SESSION['name'])) {
                     <a href="topik.php" class="action-btn info">
                         <i class="fas fa-book-open"></i>
                         Kelola Materi
+                    </a>
+                    <a href="soal-management.php" class="action-btn primary">
+                        <i class="fas fa-question-circle"></i>
+                        Kelola Soal
                     </a>
                 <?php } ?>
                 

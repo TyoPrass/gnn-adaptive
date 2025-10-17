@@ -165,41 +165,34 @@ if ($_GET['action'] == 'getKelasPost') {
             $jumlah_ambil_pre_test = 0;
             $student_id = 0;
             foreach ($student as $s) {
-                $sql = "SELECT * FROM pre_test_answer WHERE student_id = '{$s['id']}'";
+                $sql = "SELECT * FROM pre_test_answer WHERE student_id = '{$s['user_id']}'";
                 $query = mysqli_query($conn, $sql);
                 if (mysqli_num_rows($query) > 0) {
                     $jumlah_ambil_pre_test++;
                 }
-                $student_id = $s['id'];
             }
 
             $jumlah_ambil_survey = 0;
             // $student_id = 0;
             foreach ($student as $s) {
-                $sql = "SELECT * FROM survey_result WHERE student_id = '{$s['id']}'";
+                $sql = "SELECT * FROM survey_result WHERE student_id = '{$s['user_id']}'";
                 $query = mysqli_query($conn, $sql);
                 if (mysqli_num_rows($query) > 0) {
                     $jumlah_ambil_survey++;
                 }
-                // $student_id = $s['id'];
             }
 
             $jumlah_murid = mysqli_num_rows($query);
 
             $jumlah_hasil_pre_test = 0;
-
-            $ss = 0;
             foreach ($student as $s) {
-                $ss++;
-                $sql = "SELECT * FROM pre_test_result WHERE student_id = '{$s['id']}'";
+                $sql = "SELECT * FROM pre_test_result WHERE student_id = '{$s['user_id']}'";
                 $query = mysqli_query($conn, $sql);
 
                 if (mysqli_num_rows($query) > 0) {
                     $jumlah_hasil_pre_test++;
                 }
             }
-
-            // var_dump($ss);
 
             $nestedData['no'] = $no;
             $nestedData['id'] = $r['id']; // Add class ID to response

@@ -1,5 +1,4 @@
 <?php
-
 include('../config/db.php');
 session_start();
 
@@ -7,38 +6,101 @@ if (!isset($_SESSION['name'])) {
     header('location: ../sign-in.php');
 }
 
-// mengambil data jawaban pre_test dari murid
-$pre_test = mysqli_query($conn, "SELECT * FROM pre_test_answer where student_id = '{$_SESSION['student_id']}'");
-$pre_test_row = mysqli_num_rows($pre_test);
+// ✅ PENANGANAN PARAMETER SUBTOPIK
+$subtopik_id = null;
+$subtopik_data = null;
 
-// mengambil data hasil survey dari murid
-$survey = mysqli_query($conn, "SELECT * FROM survey_result where student_id = '{$_SESSION['student_id']}'");
-$survey_row = mysqli_num_rows($survey);
+if (isset($_GET['subtopik'])) {
+    $use_subtopik = true;
+    $use_topik = false;
 
-// mengecek jika murid sudah mengambil pre test dan survey
-if ($pre_test_row > 0 || $survey_row > 0) {
-    // mengambil data level murid dari database
-    $query = mysqli_query($conn, "SELECT * FROM level_student where student_id = '{$_SESSION['student_id']}'");
-    $_SESSION['survey_taken'] = true;
-    // jika data ada maka tes sudah di proses
-    if (mysqli_num_rows($query) > 0) {
-        $result = mysqli_fetch_array($query, MYSQLI_ASSOC);
-        $level_user = $result['level'];
-        // setting level modul sesuai level user
-        if ($level_user == 1) {
-            $level_modul = [1, 2, 3];
-        } else if ($level_user == 2) {
-            $level_modul = [2, 3, 1];
+    $subtopik_id = mysqli_real_escape_string($conn, $_GET['subtopik']);
+    
+    // ✅ Ambil data subtopik untuk display
+    $sql_subtopik = "SELECT st.*, t.topic_desc FROM sub_topic st 
+                     JOIN topic t ON st.topic_id = t.id 
+                     WHERE st.id = '{$subtopik_id}'";
+    $query_subtopik = mysqli_query($conn, $sql_subtopik);
+    
+    if (!$query_subtopik || mysqli_num_rows($query_subtopik) == 0) {
+        echo "<script>
+            alert('Data subtopik tidak ditemukan!');
+            window.location.href = 'index.php';
+        </script>";
+        exit();
+    }
+    
+    $subtopik_data = mysqli_fetch_array($query_subtopik, MYSQLI_ASSOC);
+} elseif (isset($_GET['topic_id'])) {
+    $use_topik = true;
+    $use_subtopik = false;
+    
+    $topik_id = mysqli_real_escape_string($conn, $_GET['topic_id']);
+    
+    // ✅ Ambil data topik untuk display
+    $sql_topik = "SELECT * FROM topic WHERE id = '{$topik_id}'";
+    $query_topik = mysqli_query($conn, $sql_topik);
+    
+    if (!$query_topik || mysqli_num_rows($query_topik) == 0) {
+        echo "<script>
+            alert('Data topik tidak ditemukan!');
+            window.location.href = 'index.php';
+        </script>";
+        exit();
+    }
+    
+    $topik_data = mysqli_fetch_array($query_topik, MYSQLI_ASSOC);
+    
+    // ✅ Ambil semua subtopik dalam topik ini
+    $sql_subtopik_list = "SELECT * FROM sub_topic WHERE topic_id = '{$topik_id}' ORDER BY id ASC";
+    $query_subtopik_list = mysqli_query($conn, $sql_subtopik_list);
+    $subtopik_list = mysqli_fetch_all($query_subtopik_list, MYSQLI_ASSOC);
+    
+} else {
+    $use_subtopik = false;
+    $use_topik = false;
+}
+
+// Logic untuk pre-test dan survey (tetap sama seperti sebelumnya)
+if (!$use_subtopik && !$use_topik) {
+    // mengambil data jawaban pre_test dari murid
+    $pre_test = mysqli_query($conn, "SELECT * FROM pre_test_answer where student_id = '{$_SESSION['student_id']}'");
+    $pre_test_row = mysqli_num_rows($pre_test);
+
+    // mengambil data hasil survey dari murid
+    $survey = mysqli_query($conn, "SELECT * FROM survey_result where student_id = '{$_SESSION['student_id']}'");
+    $survey_row = mysqli_num_rows($survey);
+
+    // mengecek jika murid sudah mengambil pre test dan survey
+    if ($pre_test_row > 0 || $survey_row > 0) {
+        // mengambil data level murid dari database
+        $query = mysqli_query($conn, "SELECT * FROM level_student where student_id = '{$_SESSION['student_id']}'");
+        $_SESSION['survey_taken'] = true;
+        // jika data ada maka tes sudah di proses
+        if (mysqli_num_rows($query) > 0) {
+            $result = mysqli_fetch_array($query, MYSQLI_ASSOC);
+            $level_user = $result['level'];
+            // setting level modul sesuai level user
+            if ($level_user == 1) {
+                $level_modul = [1, 2, 3];
+            } else if ($level_user == 2) {
+                $level_modul = [2, 3, 1];
+            } else {
+                $level_modul = [3, 1, 2];
+            }
+            $_SESSION['test_processed'] = true;
         } else {
-            $level_modul = [3, 1, 2];
+            // pre test belum diproses
+            $_SESSION['test_processed'] = false;
         }
-        $_SESSION['test_processed'] = true;
     } else {
-        // pre test belum diproses
-        $_SESSION['test_processed'] = false;
+        $_SESSION['survey_taken'] = false;
     }
 } else {
-    $_SESSION['survey_taken'] = false;
+    // Jika menggunakan subtopik atau topik, set default values
+    $_SESSION['survey_taken'] = true;
+    $_SESSION['test_processed'] = true;
+    $level_modul = [1, 2, 3]; // Tampilkan semua level untuk subtopik/topik
 }
 
 ?>
@@ -51,7 +113,17 @@ if ($pre_test_row > 0 || $survey_row > 0) {
     <meta http-equiv="X-UA-Compatible" content="IE=Edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-    <title>Modul Pembelajaran Biologi - MyIRT Adaptive Learning</title>
+    <title>
+        <?php 
+        if ($use_subtopik && $subtopik_data) {
+            echo "Modul " . htmlspecialchars($subtopik_data['sub_topic_desc']) . " - MyIRT Adaptive Learning";
+        } elseif ($use_topik && $topik_data) {
+            echo "Modul " . htmlspecialchars($topik_data['topic_desc']) . " - MyIRT Adaptive Learning";
+        } else {
+            echo "Modul Pembelajaran Biologi - MyIRT Adaptive Learning";
+        }
+        ?>
+    </title>
     <link rel="icon" href="../favicon.ico" type="image/x-icon">
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -106,6 +178,26 @@ if ($pre_test_row > 0 || $survey_row > 0) {
         @keyframes modulFloat {
             0%, 100% { transform: translateY(0px) rotate(0deg); }
             50% { transform: translateY(-25px) rotate(-10deg); }
+        }
+        
+        .breadcrumb-nav {
+            background: rgba(255,255,255,0.1);
+            border-radius: 25px;
+            padding: 0.8rem 1.5rem;
+            margin-bottom: 2rem;
+            backdrop-filter: blur(10px);
+            display: inline-flex;
+            align-items: center;
+        }
+        
+        .breadcrumb-nav a {
+            color: rgba(255,255,255,0.9);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        
+        .breadcrumb-nav a:hover {
+            color: white;
         }
         
         .level-section {
@@ -235,23 +327,17 @@ if ($pre_test_row > 0 || $survey_row > 0) {
             font-size: 1.5rem;
         }
         
-        .quiz-section {
-            background: var(--modul-warning);
-            border-radius: 20px;
-            padding: 3rem 2rem;
-            text-align: center;
-            margin-top: 3rem;
+        .subtopik-info {
+            background: var(--modul-info);
             color: white;
+            border-radius: 15px;
+            padding: 2rem;
+            margin-bottom: 2rem;
             position: relative;
             overflow: hidden;
         }
         
-        .quiz-section.disabled {
-            background: #cccccc;
-            opacity: 0.7;
-        }
-        
-        .quiz-section::before {
+        .subtopik-info::before {
             content: '';
             position: absolute;
             top: -50%;
@@ -259,51 +345,36 @@ if ($pre_test_row > 0 || $survey_row > 0) {
             width: 200%;
             height: 200%;
             background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
-            animation: quizPulse 6s ease-in-out infinite;
+            animation: infoFloat 8s ease-in-out infinite;
         }
         
-        @keyframes quizPulse {
-            0%, 100% { opacity: 0.1; transform: scale(1); }
-            50% { opacity: 0.3; transform: scale(1.05); }
+        @keyframes infoFloat {
+            0%, 100% { opacity: 0.1; transform: scale(1) rotate(0deg); }
+            50% { opacity: 0.3; transform: scale(1.05) rotate(5deg); }
         }
         
-        .btn-quiz {
-            background: white;
-            color: #FF8800;
-            border: none;
-            padding: 1.2rem 4rem;
-            font-size: 1.4rem;
-            font-weight: bold;
-            border-radius: 50px;
-            transition: all 0.4s ease;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .btn-quiz:hover:not(:disabled) {
-            transform: translateY(-3px);
-            box-shadow: 0 12px 35px rgba(0,0,0,0.3);
-            color: #FF8800;
-        }
-        
-        .btn-quiz:disabled {
-            background: #f5f5f5;
-            color: #999;
-            cursor: not-allowed;
-        }
-        
-        .alert-custom {
-            border-radius: 15px;
-            border: none;
-            padding: 1.5rem;
-            margin-bottom: 2rem;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
-        }
-        
-        .alert-danger-custom {
-            background: var(--modul-danger);
+        .back-button {
+            background: rgba(255,255,255,0.2);
             color: white;
+            border: 2px solid rgba(255,255,255,0.3);
+            padding: 0.8rem 1.8rem;
+            border-radius: 30px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            font-weight: 600;
+            font-size: 0.95rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .back-button:hover {
+            background: rgba(255,255,255,0.3);
+            border-color: rgba(255,255,255,0.5);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.2);
         }
         
         .floating-icons {
@@ -336,39 +407,6 @@ if ($pre_test_row > 0 || $survey_row > 0) {
             50% { transform: translateY(-20px) rotate(10deg); opacity: 0.15; }
         }
         
-        .progress-info {
-            background: var(--modul-info);
-            color: white;
-            border-radius: 15px;
-            padding: 1.5rem;
-            margin-bottom: 2rem;
-            text-align: center;
-        }
-        
-        .progress-stats {
-            display: flex;
-            justify-content: space-around;
-            margin-top: 1rem;
-        }
-        
-        .progress-stat {
-            text-align: center;
-        }
-        
-        .progress-number {
-            font-size: 2rem;
-            font-weight: bold;
-            display: block;
-        }
-        
-        .waiting-section {
-            background: var(--modul-info);
-            color: white;
-            border-radius: 20px;
-            padding: 4rem 2rem;
-            text-align: center;
-        }
-        
         @media (max-width: 768px) {
             .modul-header {
                 padding: 2rem 1rem;
@@ -385,15 +423,6 @@ if ($pre_test_row > 0 || $survey_row > 0) {
             
             .floating-icons {
                 display: none;
-            }
-            
-            .quiz-section {
-                padding: 2rem 1rem;
-            }
-            
-            .btn-quiz {
-                padding: 1rem 2rem;
-                font-size: 1.2rem;
             }
         }
     </style>
@@ -447,22 +476,91 @@ if ($pre_test_row > 0 || $survey_row > 0) {
                             <div class="floating-icons icon3">
                                 <i class="fas fa-seedling"></i>
                             </div>
+                            
+                            <!-- ✅ BREADCRUMB NAVIGATION -->
+                            <div class="breadcrumb-nav">
+                                <i class="fas fa-home me-2"></i>
+                                <a href="index.php">Dashboard</a>
+                                <i class="fas fa-chevron-right mx-2"></i>
+                                <?php if ($use_subtopik && $subtopik_data): ?>
+                                    <a href="subtopik.php?topic_id=<?php echo $subtopik_data['topic_id']; ?>">Subtopik</a>
+                                    <i class="fas fa-chevron-right mx-2"></i>
+                                    <span><?php echo htmlspecialchars($subtopik_data['sub_topic_desc']); ?></span>
+                                <?php elseif ($use_topik && $topik_data): ?>
+                                    <span><?php echo htmlspecialchars($topik_data['topic_desc']); ?></span>
+                                <?php else: ?>
+                                    <span>Modul Adaptif</span>
+                                <?php endif; ?>
+                            </div>
+                            
+                            <!-- ✅ BACK BUTTON -->
+                            <div class="mb-3">
+                                <?php if ($use_subtopik && $subtopik_data): ?>
+                                    <a href="subtopik.php?topic_id=<?php echo $subtopik_data['topic_id']; ?>" class="back-button">
+                                        <i class="fas fa-arrow-left me-2"></i>Kembali ke Subtopik
+                                    </a>
+                                <?php elseif ($use_topik && $topik_data): ?>
+                                    <a href="index.php" class="back-button">
+                                        <i class="fas fa-arrow-left me-2"></i>Kembali ke Dashboard
+                                    </a>
+                                <?php else: ?>
+                                    <a href="index.php" class="back-button">
+                                        <i class="fas fa-arrow-left me-2"></i>Kembali ke Dashboard
+                                    </a>
+                                <?php endif; ?>
+                            </div>
+                            
                             <div class="row align-items-center">
                                 <div class="col-lg-8">
                                     <h1 class="display-5 fw-bold mb-3">
-                                        <i class="fas fa-books me-3"></i>Rekomendasi Modul Biologi
+                                        <i class="fas fa-books me-3"></i>
+                                        <?php 
+                                        if ($use_subtopik && $subtopik_data) {
+                                            echo "Modul " . htmlspecialchars($subtopik_data['sub_topic_desc']);
+                                        } elseif ($use_topik && $topik_data) {
+                                            echo "Modul " . htmlspecialchars($topik_data['topic_desc']);
+                                        } else {
+                                            echo "Rekomendasi Modul Biologi";
+                                        }
+                                        ?>
                                     </h1>
-                                    <p class="lead mb-3">Pembelajaran adaptif disesuaikan dengan tingkat kemampuan dan gaya belajar Anda</p>
+                                    <p class="lead mb-3">
+                                        <?php 
+                                        if ($use_subtopik && $subtopik_data) {
+                                            echo "Pelajari modul-modul dalam subtopik " . htmlspecialchars($subtopik_data['sub_topic_desc']);
+                                        } elseif ($use_topik && $topik_data) {
+                                            echo "Pelajari semua modul dalam topik " . htmlspecialchars($topik_data['topic_desc']);
+                                        } else {
+                                            echo "Pembelajaran adaptif disesuaikan dengan tingkat kemampuan dan gaya belajar Anda";
+                                        }
+                                        ?>
+                                    </p>
                                     <div class="d-flex flex-wrap gap-3">
-                                        <span class="badge bg-light text-dark p-2">
-                                            <i class="fas fa-brain me-1"></i>Pembelajaran Adaptif
-                                        </span>
-                                        <span class="badge bg-light text-dark p-2">
-                                            <i class="fas fa-chart-line me-1"></i>Progress Tracking
-                                        </span>
-                                        <span class="badge bg-light text-dark p-2">
-                                            <i class="fas fa-award me-1"></i>Level Based
-                                        </span>
+                                        <?php if ($use_subtopik && $subtopik_data): ?>
+                                            <span class="badge bg-light text-dark p-2">
+                                                <i class="fas fa-bookmark me-1"></i><?php echo htmlspecialchars($subtopik_data['topic_desc']); ?>
+                                            </span>
+                                            <span class="badge bg-light text-dark p-2">
+                                                <i class="fas fa-layer-group me-1"></i>Subtopik Focused
+                                            </span>
+                                        <?php elseif ($use_topik && $topik_data): ?>
+                                            <span class="badge bg-light text-dark p-2">
+                                                <i class="fas fa-book me-1"></i><?php echo htmlspecialchars($topik_data['topic_desc']); ?>
+                                            </span>
+                                            <span class="badge bg-light text-dark p-2">
+                                                <i class="fas fa-sitemap me-1"></i>Topik Focused
+                                            </span>
+                                        <?php else: ?>
+                                            <span class="badge bg-light text-dark p-2">
+                                                <i class="fas fa-brain me-1"></i>Pembelajaran Adaptif
+                                            </span>
+                                            <span class="badge bg-light text-dark p-2">
+                                                <i class="fas fa-chart-line me-1"></i>Progress Tracking
+                                            </span>
+                                            <span class="badge bg-light text-dark p-2">
+                                                <i class="fas fa-award me-1"></i>Level Based
+                                            </span>
+                                        <?php endif; ?>
                                     </div>
                                 </div>
                                 <div class="col-lg-4 text-center">
@@ -477,36 +575,226 @@ if ($pre_test_row > 0 || $survey_row > 0) {
             <!-- Content Section -->
             <div class="row">
                 <div class="col-12">
-                    <?php
-                    // Error Messages
-                    if (isset($_SESSION['gagal_post_test'])) { ?>
-                        <div class="alert alert-danger-custom alert-custom" role="alert">
-                            <i class="fas fa-exclamation-triangle me-2"></i>
-                            <strong>Gagal Lulus Post Test!</strong> Silakan ulangi kembali untuk melanjutkan pembelajaran.
-                            <button type="button" class="btn-close btn-close-white float-end" data-bs-dismiss="alert" aria-label="Close"></button>
+                    <?php if ($use_subtopik && $subtopik_data){ ?>
+                        <!-- ✅ SUBTOPIK INFO SECTION -->
+                        <div class="subtopik-info">
+                            <div class="row align-items-center">
+                                <div class="col-lg-8">
+                                    <h3 class="mb-2">
+                                        <i class="fas fa-info-circle me-2"></i>
+                                        Tentang Subtopik Ini
+                                    </h3>
+                                    <p class="mb-2">
+                                        <strong>Topik:</strong> <?php echo htmlspecialchars($subtopik_data['topic_desc']); ?>
+                                    </p>
+                                    <p class="mb-0">
+                                        <strong>Subtopik:</strong> <?php echo htmlspecialchars($subtopik_data['sub_topic_desc']); ?>
+                                    </p>
+                                </div>
+                                <div class="col-lg-4 text-center">
+                                    <i class="fas fa-book-reader fa-4x" style="opacity: 0.3;"></i>
+                                </div>
+                            </div>
                         </div>
-                    <?php }
-                    unset($_SESSION['gagal_post_test']);
-                    
-                    if (isset($_SESSION['turun_level'])) { ?>
-                        <div class="alert alert-danger-custom alert-custom" role="alert">
-                            <i class="fas fa-level-down-alt me-2"></i>
-                            <strong>Level Turun!</strong> Anda gagal mengerjakan post test sebanyak 3x. Level Anda otomatis turun 1 tingkat.
-                            <button type="button" class="btn-close btn-close-white float-end" data-bs-dismiss="alert" aria-label="Close"></button>
-                        </div>
-                    <?php }
-                    unset($_SESSION['turun_level']);
-                    
-                    if ($_SESSION['survey_taken']) {
-                        if (isset($level_modul)) {
-                            // Progress Info
-                            $sql = "SELECT * FROM module_learned WHERE student_id = '{$_SESSION['student_id']}'";
-                            $query = mysqli_query($conn, $sql);
-                            $learned_module = mysqli_num_rows($query);
-                            $total_modules = 7;
-                            ?>
+                        
+                        <!-- ✅ MODUL SECTION UNTUK SUBTOPIK -->
+                        <div class="level-section">
+                            <div class="level-title">
+                                <div class="level-badge">
+                                    <i class="fas fa-layer-group"></i>
+                                </div>
+                                <span>Modul dalam Subtopik Ini</span>
+                            </div>
                             
-                            <div class="progress-info">
+                            <div class="row">
+                                <?php
+                                // ✅ QUERY MODUL BERDASARKAN SUBTOPIK
+                                $sql_modul = "SELECT * FROM module WHERE sub_topic_id = '{$subtopik_id}' ORDER BY number ASC";
+                                $query_modul = mysqli_query($conn, $sql_modul);
+                                
+                                if (mysqli_num_rows($query_modul) > 0) {
+                                    $modules = mysqli_fetch_all($query_modul, MYSQLI_ASSOC);
+                                    
+                                    foreach ($modules as $key => $module) {
+                                        // Cek apakah modul sudah dipelajari (jika user sudah login)
+                                        $module_learned = false;
+                                        if (isset($_SESSION['student_id'])) {
+                                            $sql_learned = "SELECT * FROM module_learned WHERE student_id = '{$_SESSION['student_id']}' AND module_id = '{$module['id']}'";
+                                            $query_learned = mysqli_query($conn, $sql_learned);
+                                            $module_learned = mysqli_num_rows($query_learned) > 0;
+                                        }
+                                        
+                                        $status_class = $module_learned ? 'completed' : 'available';
+                                        $status_icon = $module_learned ? 'fas fa-check-circle' : 'fas fa-play-circle';
+                                ?>
+                                <div class="col-lg-4 col-md-6 mb-3">
+                                    <a href="module.php?module=<?php echo $module['id']; ?>" 
+                                       class="module-item <?php echo $status_class; ?>">
+                                       
+                                        <div class="module-status">
+                                            <i class="<?php echo $status_icon; ?>"></i>
+                                        </div>
+                                        
+                                        <div class="module-number">
+                                            <?php echo $module['number']; ?>
+                                        </div>
+                                        
+                                        <div class="module-title">
+                                            Modul <?php echo $module['number']; ?>
+                                        </div>
+                                        
+                                        <div class="module-description">
+                                            <?php echo htmlspecialchars($module['module_desc']); ?>
+                                        </div>
+                                    </a>
+                                </div>
+                                <?php 
+                                    }
+                                } else {
+                                ?>
+                                <div class="col-12">
+                                    <div class="text-center py-5">
+                                        <i class="fas fa-folder-open fa-5x mb-3" style="opacity: 0.3;"></i>
+                                        <h4>Belum Ada Modul</h4>
+                                        <p class="text-muted">Modul untuk subtopik ini belum tersedia.</p>
+                                    </div>
+                                </div>
+                                <?php } ?>
+                            </div>
+                        </div>
+                        
+                    <?php } elseif ($use_topik && $topik_data) { ?>
+                        <!-- ✅ TOPIK INFO SECTION -->
+                        <div class="subtopik-info">
+                            <div class="row align-items-center">
+                                <div class="col-lg-8">
+                                    <h3 class="mb-2">
+                                        <i class="fas fa-info-circle me-2"></i>
+                                        Tentang Topik Ini
+                                    </h3>
+                                    <p class="mb-2">
+                                        <strong>Topik:</strong> <?php echo htmlspecialchars($topik_data['topic_desc']); ?>
+                                    </p>
+                                    <p class="mb-0">
+                                        <strong>Total Subtopik:</strong> <?php echo count($subtopik_list); ?> subtopik
+                                    </p>
+                                </div>
+                                <div class="col-lg-4 text-center">
+                                    <i class="fas fa-sitemap fa-4x" style="opacity: 0.3;"></i>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- ✅ MODUL SECTION UNTUK TOPIK (GROUPED BY SUBTOPIK) -->
+                        <?php if (count($subtopik_list) > 0): ?>
+                            <?php foreach ($subtopik_list as $subtopik): ?>
+                                <div class="level-section">
+                                    <div class="level-title">
+                                        <div class="level-badge">
+                                            <i class="fas fa-bookmark"></i>
+                                        </div>
+                                        <span><?php echo htmlspecialchars($subtopik['sub_topic_desc']); ?></span>
+                                    </div>
+                                    
+                                    <div class="row">
+                                        <?php
+                                        // ✅ QUERY MODUL BERDASARKAN SUBTOPIK
+                                        $sql_modul = "SELECT * FROM module WHERE sub_topic_id = '{$subtopik['id']}' ORDER BY number ASC";
+                                        $query_modul = mysqli_query($conn, $sql_modul);
+                                        
+                                        if (mysqli_num_rows($query_modul) > 0) {
+                                            $modules = mysqli_fetch_all($query_modul, MYSQLI_ASSOC);
+                                            
+                                            foreach ($modules as $key => $module) {
+                                                // Cek apakah modul sudah dipelajari
+                                                $module_learned = false;
+                                                if (isset($_SESSION['student_id'])) {
+                                                    $sql_learned = "SELECT * FROM module_learned WHERE student_id = '{$_SESSION['student_id']}' AND module_id = '{$module['id']}'";
+                                                    $query_learned = mysqli_query($conn, $sql_learned);
+                                                    $module_learned = mysqli_num_rows($query_learned) > 0;
+                                                }
+                                                
+                                                $status_class = $module_learned ? 'completed' : 'available';
+                                                $status_icon = $module_learned ? 'fas fa-check-circle' : 'fas fa-play-circle';
+                                        ?>
+                                        <div class="col-lg-4 col-md-6 mb-3">
+                                            <a href="module.php?module=<?php echo $module['id']; ?>" 
+                                            class="module-item <?php echo $status_class; ?>">
+                                            
+                                                <div class="module-status">
+                                                    <i class="<?php echo $status_icon; ?>"></i>
+                                                </div>
+                                                
+                                                <div class="module-number">
+                                                    <?php echo $module['number']; ?>
+                                                </div>
+                                                
+                                                <div class="module-title">
+                                                    Modul <?php echo $module['number']; ?>
+                                                </div>
+                                                
+                                                <div class="module-description">
+                                                    <?php echo htmlspecialchars($module['module_desc']); ?>
+                                                </div>
+                                            </a>
+                                        </div>
+                                        <?php 
+                                            }
+                                        } else {
+                                        ?>
+                                        <div class="col-12">
+                                            <div class="text-center py-3">
+                                                <i class="fas fa-folder-open fa-3x mb-3" style="opacity: 0.3;"></i>
+                                                <h6>Belum Ada Modul</h6>
+                                                <p class="text-muted">Modul untuk subtopik ini belum tersedia.</p>
+                                            </div>
+                                        </div>
+                                        <?php } ?>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <div class="col-12">
+                                <div class="text-center py-5">
+                                    <i class="fas fa-folder-open fa-5x mb-3" style="opacity: 0.3;"></i>
+                                    <h4>Belum Ada Subtopik</h4>
+                                    <p class="text-muted">Subtopik untuk topik ini belum tersedia.</p>
+                                </div>
+                            </div>
+                        <?php endif; ?>
+                        
+                    <?php } else { ?>
+                        <!-- ✅ LOGIC LAMA UNTUK PEMBELAJARAN ADAPTIF -->
+                        <?php
+                        // Error Messages (tetap sama seperti sebelumnya)
+                        if (isset($_SESSION['gagal_post_test'])) { ?>
+                            <div class="alert alert-danger-custom alert-custom" role="alert">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                <strong>Gagal Lulus Post Test!</strong> Silakan ulangi kembali untuk melanjutkan pembelajaran.
+                                <button type="button" class="btn-close btn-close-white float-end" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        <?php }
+                        unset($_SESSION['gagal_post_test']);
+                        
+                        if (isset($_SESSION['turun_level'])) { ?>
+                            <div class="alert alert-danger-custom alert-custom" role="alert">
+                                <i class="fas fa-level-down-alt me-2"></i>
+                                <strong>Level Turun!</strong> Anda gagal mengerjakan post test sebanyak 3x. Level Anda otomatis turun 1 tingkat.
+                                <button type="button" class="btn-close btn-close-white float-end" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        <?php }
+                        unset($_SESSION['turun_level']);
+                        
+                        if ($_SESSION['survey_taken']) {
+                            if (isset($level_modul)) {
+                                // Progress Info (sama seperti sebelumnya)
+                                $sql = "SELECT * FROM module_learned WHERE student_id = '{$_SESSION['student_id']}'";
+                                $query = mysqli_query($conn, $sql);
+                                $learned_module = mysqli_num_rows($query);
+                                $total_modules = 7;
+                                ?>
+                                
+                                <div class="progress-info">
                                 <h5 class="mb-2">
                                     <i class="fas fa-chart-bar me-2"></i>Progress Pembelajaran Anda
                                 </h5>
@@ -673,51 +961,47 @@ if ($pre_test_row > 0 || $survey_row > 0) {
                                     </div>
                                 </div>
                             </div>
-                            
-                        <?php } else { ?>
-                            <!-- Waiting Section -->
+                                
+                            <?php } else { ?>
+                                <!-- Waiting Section (sama seperti sebelumnya) -->
+                                <div class="waiting-section">
+                                    <i class="fas fa-hourglass-half fa-5x mb-4"></i>
+                                    <h2 class="mb-3">Proses Penghitungan Pre-Test</h2>
+                                    <p class="lead mb-4">
+                                        Silahkan tunggu hasil pre-test yang masih diproses oleh sistem
+                                    </p>
+                                    <a href="index.php" class="btn btn-light btn-lg">
+                                        <i class="fas fa-home me-2"></i>Kembali ke Dashboard
+                                    </a>
+                                </div>
+                            <?php }
+                        } else { ?>
+                            <!-- No Survey Section (sama seperti sebelumnya) -->
                             <div class="waiting-section">
-                                <i class="fas fa-hourglass-half fa-5x mb-4"></i>
-                                <h2 class="mb-3">Proses Penghitungan Pre-Test</h2>
+                                <i class="fas fa-clipboard-question fa-5x mb-4"></i>
+                                <h2 class="mb-3">Pre-Test Diperlukan</h2>
                                 <p class="lead mb-4">
-                                    Silahkan tunggu hasil pre-test yang masih diproses oleh sistem
+                                    Anda belum melakukan pre-test. Silakan lakukan pre-test terlebih dahulu untuk mendapatkan rekomendasi modul pembelajaran.
                                 </p>
                                 <a href="index.php" class="btn btn-light btn-lg">
                                     <i class="fas fa-home me-2"></i>Kembali ke Dashboard
                                 </a>
                             </div>
-                        <?php }
-                    } else { ?>
-                        <!-- No Survey Section -->
-                        <div class="waiting-section">
-                            <i class="fas fa-clipboard-question fa-5x mb-4"></i>
-                            <h2 class="mb-3">Pre-Test Diperlukan</h2>
-                            <p class="lead mb-4">
-                                Anda belum melakukan pre-test. Silakan lakukan pre-test terlebih dahulu untuk mendapatkan rekomendasi modul pembelajaran.
-                            </p>
-                            <a href="index.php" class="btn btn-light btn-lg">
-                                <i class="fas fa-home me-2"></i>Kembali ke Dashboard
-                            </a>
-                        </div>
+                        <?php } ?>
                     <?php } ?>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Bootstrap JS -->
+    <!-- JavaScript -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <!-- SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     
     <script>
     $(document).ready(function() {
-        // Initialize module interactions
-        initializeModuleInteractions();
-        
-        // Module hover effects
+        // Module interactions
         $('.module-item').hover(
             function() {
                 $(this).find('.module-number').addClass('animate__pulse');
@@ -727,46 +1011,10 @@ if ($pre_test_row > 0 || $survey_row > 0) {
             }
         );
         
-        // Quiz button interactions
-        $('.btn-quiz:not([style*="pointer-events"])').hover(
-            function() {
-                $(this).find('i').addClass('fa-bounce');
-            },
-            function() {
-                $(this).find('i').removeClass('fa-bounce');
-            }
-        );
-        
-        // Locked module click handler
-        $('.module-item.locked').on('click', function(e) {
-            e.preventDefault();
-            
-            Swal.fire({
-                title: 'Modul Terkunci',
-                text: 'Selesaikan modul sebelumnya untuk membuka modul ini.',
-                icon: 'warning',
-                confirmButtonColor: '#FF8800',
-                confirmButtonText: 'Mengerti'
-            });
-            
-            return false;
-        });
-        
-        // Module completion celebration
-        $('.module-item.completed').each(function() {
-            $(this).append('<div class="completion-sparkle"><i class="fas fa-star"></i></div>');
-        });
-        
-        // Progress animation
-        animateProgress();
-    });
-    
-    function initializeModuleInteractions() {
-        // Add click tracking for analytics
-        $('.module-item:not(.locked)').on('click', function() {
+        // Module click tracking
+        $('.module-item').on('click', function() {
             const moduleNumber = $(this).find('.module-number').text();
             
-            // Show loading indication
             const toast = Swal.mixin({
                 toast: true,
                 position: 'top-end',
@@ -781,77 +1029,7 @@ if ($pre_test_row > 0 || $survey_row > 0) {
                 color: 'white'
             });
         });
-    }
-    
-    function animateProgress() {
-        // Animate progress numbers
-        $('.progress-number').each(function() {
-            const $this = $(this);
-            const target = parseInt($this.text().replace(/\D/g, ''));
-            let current = 0;
-            
-            if (target > 0) {
-                const increment = target / 30;
-                const timer = setInterval(() => {
-                    current += increment;
-                    if (current >= target) {
-                        current = target;
-                        clearInterval(timer);
-                        $this.text(target + ($this.text().includes('%') ? '%' : ''));
-                    } else {
-                        $this.text(Math.floor(current) + ($this.text().includes('%') ? '%' : ''));
-                    }
-                }, 50);
-            }
-        });
-    }
-    
-    // Scroll animations
-    $(window).scroll(function() {
-        $('.level-section').each(function() {
-            const elementTop = $(this).offset().top;
-            const elementBottom = elementTop + $(this).outerHeight();
-            const viewportTop = $(window).scrollTop();
-            const viewportBottom = viewportTop + $(window).height();
-            
-            if (elementBottom > viewportTop && elementTop < viewportBottom) {
-                $(this).addClass('animate-in');
-            }
-        });
     });
-    
-    // Add CSS for animations
-    const style = document.createElement('style');
-    style.textContent = `
-        .completion-sparkle {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            color: gold;
-            animation: sparkle 2s ease-in-out infinite;
-        }
-        
-        @keyframes sparkle {
-            0%, 100% { opacity: 0.5; transform: scale(1); }
-            50% { opacity: 1; transform: scale(1.2); }
-        }
-        
-        .animate-in {
-            animation: slideInUp 0.6s ease-out;
-        }
-        
-        @keyframes slideInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-    `;
-    document.head.appendChild(style);
     </script>
 </body>
 

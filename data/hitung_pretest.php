@@ -28,8 +28,15 @@ function mode($armodul)
 // Submit data pre-test
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
+    mysqli_query($conn, "INSERT INTO `pre_test_result`(`student_id`, `level`) VALUES ('91','11')");
+    if (mysqli_error($conn)) {
+        echo "DEBUG INSERT 1 ERROR: " . mysqli_error($conn) . "<br>";
+    } else {
+        echo "DEBUG INSERT 1 SUCCESS<br>";
+    }
+
     // Mengambil data murid sesuai kelas
-    $sql = "SELECT id FROM student where class_id = '{$_POST['id']}'  order by id ASC";
+    $sql = "SELECT user_id FROM student where class_id = '{$_POST['id']}'  order by id ASC"; # id diganti user_id
     $query = mysqli_query($conn, $sql);
     $students = mysqli_fetch_all($query, MYSQLI_ASSOC);
     $murid = [];
@@ -38,23 +45,39 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // perulangan murid untuk mengambil data jawaban pre_test
     foreach ($students as $key => $s) {
         $i++;
-        $sql = "SELECT * FROM pre_test_answer WHERE student_id = '{$s['id']}'";
+        $sql = "SELECT * FROM pre_test_answer WHERE student_id = '{$s['user_id']}'"; # id diganti user_id
         $query = mysqli_query($conn, $sql);
         $answer = mysqli_fetch_array($query, MYSQLI_ASSOC);
-        $murid[$s['id']] = array(
-            'modul_1' => $answer['modul_1'],
-            'modul_2' => $answer['modul_2'],
-            'modul_3' => $answer['modul_3'],
-            'modul_4' => $answer['modul_4'],
-            'modul_5' => $answer['modul_5'],
-            'modul_6' => $answer['modul_6'],
-            'modul_7' => $answer['modul_7'],
-            // 'modul_8' => $answer['modul_8'],
-            // 'modul_9' => $answer['modul_9'],
-            // 'modul_10' => $answer['modul_10'],
-            // 'modul_11' => $answer['modul_11'],
-            // 'modul_12' => $answer['modul_12'],
-        );
+        // $murid[$s['id']] = array(
+        //     'modul_1' => $answer['modul_1'],
+        //     'modul_2' => $answer['modul_2'],
+        //     'modul_3' => $answer['modul_3'],
+        //     'modul_4' => $answer['modul_4'],
+        //     'modul_5' => $answer['modul_5'],
+        //     'modul_6' => $answer['modul_6'],
+        //     'modul_7' => $answer['modul_7'],
+        //     // 'modul_8' => $answer['modul_8'],
+        //     // 'modul_9' => $answer['modul_9'],
+        //     // 'modul_10' => $answer['modul_10'],
+        //     // 'modul_11' => $answer['modul_11'],
+        //     // 'modul_12' => $answer['modul_12'],
+        // );
+        // KARENA NGGA SEMUA SISWA SUDAH MENGERJAKAN TEST, JADI JANGAN DIHITUNG DULU
+        if ($answer) {
+            $murid[$s['user_id']] = array(
+                'modul_1' => $answer['modul_1'],
+                'modul_2' => $answer['modul_2'],
+                'modul_3' => $answer['modul_3'],
+                'modul_4' => $answer['modul_4'],
+                'modul_5' => $answer['modul_5'],
+                'modul_6' => $answer['modul_6'],
+                'modul_7' => $answer['modul_7'],
+            );
+        } else {
+            // Skip siswa yang belum ada data pre_test_answer
+            echo "Siswa ID {$s['user_id']} belum mengisi pre-test<br>";
+            continue;
+        }
     }
 
     // var_dump($murid);
@@ -577,6 +600,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         // $adj_new_difficulty['modul_12'] = $new_difficulty['modul_12'] - $avg_new_difficulty;
     }
 
+
+    mysqli_query($conn, "INSERT INTO `pre_test_result`(`student_id`, `level`) VALUES ('92','12')");
+
+
     foreach ($murid as $key => $m) {
         if($murid[$key]['modul_1'] == '' || $murid[$key]['modul_2'] == '' || $murid[$key]['modul_3'] == '' || $murid[$key]['modul_4'] == '' || $murid[$key]['modul_5'] == '' || $murid[$key]['modul_6'] == '' || $murid[$key]['modul_7'] == ''){
             continue;
@@ -607,7 +634,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }else{
             $level_pre_test = mode($modul_level);
         }
+
+
         
+        mysqli_query($conn, "INSERT INTO `pre_test_result`(`student_id`, `level`) VALUES ('93','13')");
+
 
         // Check apakah murid sudah dihitung pre_test
         $sql = "SELECT * FROM pre_test_result WHERE student_id = '{$key}'";

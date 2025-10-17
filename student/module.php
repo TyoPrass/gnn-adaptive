@@ -359,7 +359,7 @@ $materi = mysqli_fetch_array($query, MYSQLI_ASSOC);
                 <div class="col-12">
                     <div class="content-card">
                         <div class="module-content">
-                            <?php echo $materi['materi_desc'] ?>
+                            <?php echo $materi['materi_desc'] ?? "Materi Belum tersedia"; ?>
                         </div>
                     </div>
                 </div>

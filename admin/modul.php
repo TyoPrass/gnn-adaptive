@@ -6,7 +6,13 @@ session_start();
 if (!isset($_SESSION['name'])) {
     header('location: ../sign-in.php');
 }
-
+if (!isset($_GET['subtopik']) || empty($_GET['subtopik'])) {
+    echo "<script>
+        alert('Parameter subtopik tidak ditemukan!');
+        window.location.href = 'topik.php';
+    </script>";
+    exit();
+}
 // Mengambil id sub topik dari URL
 $id = $_GET['subtopik'];
 

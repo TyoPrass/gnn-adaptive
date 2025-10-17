@@ -84,9 +84,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 if ($result && mysqli_num_rows($result) > 0) {
                     $user_data = mysqli_fetch_array($result, MYSQLI_ASSOC);
                     $_SESSION['name'] = $user_data['student_name'];
-                    $_SESSION['student_id'] = $user_data['id'];
+                    $_SESSION['id'] = $user_data['id'];
+                    $_SESSION['student_id'] = $user_data['user_id'];
                     $_SESSION['login'] = $user_data['nis'];
                     $_SESSION['class_id'] = $user_data['class_id'];
+                    
                     header("location: ../student");
                     exit();
                 } else {

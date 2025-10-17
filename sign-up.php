@@ -52,11 +52,27 @@ if (isset($_SESSION['name'])) {
         .alert-danger {
             border-radius: 10px;
         }
+        input[type="number"]::-webkit-outer-spin-button,
+        input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        
+        /* Firefox */
+        input[type="number"] {
+            -moz-appearance: textfield;
+        }
+        
+        /* Untuk memastikan input tetap berfungsi dengan baik */
+        input[type="number"] {
+            appearance: textfield;
+        }
         @media (max-width: 768px) {
             .card {
                 margin: 1rem;
             }
         }
+        
     </style>
 </head>
 <body class="bg-primary">
@@ -114,25 +130,28 @@ if (isset($_SESSION['name'])) {
                                        	
                                        	<!-- Teacher Credentials -->
 										<div id="teacherCredentials" class="mb-3" style="display: none;">
-											<div class="form-floating" id="nipGroup" style="display: none;">
-                            					<input type="text" class="form-control" id="nip" name="nip" placeholder="NIP">
-                            					<label for="nip">NIP</label>
-                        					</div>
-                        					<div class="form-floating" id="emailGroup" style="display: none;">
-                            					<input type="email" class="form-control" id="email" name="email" placeholder="Email">
-                            					<label for="email">Email</label>
-                        					</div>
+                                            <div class="form-floating" id="nipGroup" style="display: none;">
+                                                <input type="number" class="form-control" id="nip" name="nip" placeholder="NIP" 
+                                                    pattern="[0-9]{8,20}" title="NIP harus berupa angka 8-20 digit">
+                                                <label for="nip">NIP</label>
+                                            </div>
+                                            <div class="form-floating" id="emailGroup" style="display: none;">
+                                                <input type="email" class="form-control" id="email" name="email" placeholder="Email">
+                                                <label for="email">Email</label>
+                                            </div>
                                         </div>
                                         
                                         <!-- Student NIS -->
                                         <div class="row mb-3">
-                                  	    	<div class="col-12">
-                                  	    		<div class="form-floating" id="nisForm" style="display: none;">
-                    								<input type="text" class="form-control" id="nis" name="nis" placeholder="NIS">
-                    								<label for="nis">NIS</label>
-                								</div>
-                							</div>
+                                            <div class="col-12">
+                                                <div class="form-floating" id="nisForm" style="display: none;">
+                                                    <input type="number" class="form-control" id="nis" name="nis" placeholder="NIS" 
+                                                        pattern="[0-9]{4,15}" title="NIS harus berupa angka 4-15 digit">
+                                                    <label for="nis">NIS</label>
+                                                </div>
+                                            </div>
                                         </div>
+
                                         <!-- Name Field -->
                                         <div class="row mb-3">
                                   	    	<div class="col-12">
@@ -155,12 +174,14 @@ if (isset($_SESSION['name'])) {
                                         
                                         <!-- Phone Number Field -->
                                         <div class="row mb-3">
-                                        	<div class="col-12">
-                                  	    		<div class="form-floating">
-                    								<input type="tel" class="form-control" id="phone_number" name="phone_number" placeholder="0812345678" required>
-                    								<label for="phone_number">Nomor Telepon</label>
-                								</div>
-                							</div>
+                                            <div class="col-12">
+                                                <div class="form-floating">
+                                                    <input type="number" class="form-control" id="phone_number" name="phone_number" 
+                                                        placeholder="08123456789" pattern="[0-9]{11,15}" 
+                                                        title="Nomor telepon harus berupa angka minimal 11 digit" required>
+                                                    <label for="phone_number">Nomor Telepon</label>
+                                                </div>
+                                            </div>
                                         </div>
                                         
                                         <!-- Class Selection -->
@@ -220,13 +241,16 @@ if (isset($_SESSION['name'])) {
                                  		
                                  		<!-- Password Field -->
                                  		<div class="row mb-3">
-                                 			<div class="col-12">
-                								<div class="form-floating">
-                    								<input type="password" class="form-control" name="password" id="password" placeholder="Password" required>
-                    								<label for="password">Password</label>
-                								</div>
-                							</div>
-                						</div>
+                                            <div class="col-12">
+                                                <div class="form-floating">
+                                                    <input type="password" class="form-control" name="password" id="password" 
+                                                        placeholder="Password" minlength="8" 
+                                                        title="Password minimal 8 karakter" required>
+                                                    <label for="password">Password</label>
+                                                    <div class="form-text">Password minimal 8 karakter</div>
+                                                </div>
+                                            </div>
+                                        </div>
             						</div>
             						
             						<!-- Submit Button -->
@@ -299,11 +323,13 @@ if (isset($_SESSION['name'])) {
                 $('#emailGroup').hide();
                 $('#nip').prop('required', true);
                 $('#email').prop('required', false);
+                $('#email').val('');
             } else { // Honorer
                 $('#nipGroup').hide();
                 $('#emailGroup').show();
                 $('#nip').prop('required', false);
                 $('#email').prop('required', true);
+                $('#nip').val('');
             }
         });
         

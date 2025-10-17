@@ -135,7 +135,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // $hitung_modul_12 = mode($modul_12);
 
     // $result = mysqli_query($conn, "INSERT INTO pre_test_answer (student_id, modul_1, modul_2, modul_3, modul_4, modul_5, modul_6, modul_7, modul_8, modul_9, modul_10, modul_11, modul_12) VALUES ('{$_SESSION['student_id']}', '{$hitung_modul_1}','{$hitung_modul_2}','{$hitung_modul_3}','{$hitung_modul_4}','{$hitung_modul_5}','{$hitung_modul_6}','{$hitung_modul_7}','{$hitung_modul_8}','{$hitung_modul_9}','{$hitung_modul_10}','{$hitung_modul_11}','{$hitung_modul_12}')");
-    $result = mysqli_query($conn, "INSERT INTO pre_test_answer (student_id, modul_1, modul_2, modul_3, modul_4, modul_5, modul_6, modul_7) VALUES ('{$_SESSION['student_id']}', '{$hitung_modul_1}','{$hitung_modul_2}','{$hitung_modul_3}','{$hitung_modul_4}','{$hitung_modul_5}','{$hitung_modul_6}','{$hitung_modul_7}')");
+    $result = mysqli_query($conn, 
+    "INSERT INTO pre_test_answer (student_id, modul_1, modul_2, modul_3, modul_4, modul_5, modul_6, modul_7) VALUES ('{$_SESSION['student_id']}', '{$hitung_modul_1}','{$hitung_modul_2}','{$hitung_modul_3}','{$hitung_modul_4}','{$hitung_modul_5}','{$hitung_modul_6}','{$hitung_modul_7}')");
     if (!$result) {
         echo mysqli_error($conn);
     } else {

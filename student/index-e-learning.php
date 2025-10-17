@@ -10,6 +10,7 @@ if (!isset($_SESSION['name'])) {
 // mengambil data jawaban pre_test dari murid
 $pre_test = mysqli_query($conn, "SELECT * FROM pre_test_answer where student_id = '{$_SESSION['student_id']}'");
 $pre_test_row = mysqli_num_rows($pre_test);
+// echo $_SESSION['student_id'];
 
 // mengambil data hasil survey dari murid
 $survey = mysqli_query($conn, "SELECT * FROM survey_result where student_id = '{$_SESSION['student_id']}'");
@@ -447,6 +448,7 @@ $level_modul = [1, 2, 3];
                     <li class="nav-item">
                         <a class="nav-link text-white" href="index.php">
                             <i class="fas fa-home me-1"></i>Dashboard
+                            <?php echo $_SESSION['student_id']; ?>
                         </a>
                     </li>
                     <li class="nav-item">
@@ -529,6 +531,8 @@ $level_modul = [1, 2, 3];
             $query_modules = mysqli_query($conn, $sql_modules);
             $module_result = mysqli_fetch_assoc($query_modules);
             $total_modules = $module_result['total'] ?? 7;
+
+
             
             // Cek modul yang sudah dipelajari (jika ada)
             $sql_learned = "SELECT * FROM module_learned WHERE student_id = '{$_SESSION['student_id']}'";
