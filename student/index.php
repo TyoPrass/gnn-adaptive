@@ -263,6 +263,81 @@ if (mysqli_num_rows($query) > 0) {
             align-items: center;
             justify-content: center;
         }
+        
+        .calculating-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+        
+        .calculating-content {
+            background: white;
+            border-radius: 20px;
+            padding: 3rem;
+            text-align: center;
+            max-width: 500px;
+            animation: slideUp 0.5s ease;
+        }
+        
+        @keyframes slideUp {
+            from {
+                transform: translateY(50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        .spinner-custom {
+            width: 60px;
+            height: 60px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1.5rem;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .result-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+        
+        .success-icon {
+            color: #4CAF50;
+            animation: scaleIn 0.5s ease;
+        }
+        
+        .error-icon {
+            color: #f44336;
+            animation: shake 0.5s ease;
+        }
+        
+        @keyframes scaleIn {
+            0% { transform: scale(0); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
     </style>
 </head>
 
@@ -292,6 +367,20 @@ if (mysqli_num_rows($query) > 0) {
             </div>
         </div>
     </nav>
+
+    <!-- Calculating Overlay -->
+    <div class="calculating-overlay" id="calculatingOverlay">
+        <div class="calculating-content">
+            <div id="calculatingSpinner">
+                <div class="spinner-custom"></div>
+                <h4 class="fw-bold mb-2">Menghitung Level Anda...</h4>
+                <p class="text-muted">Mohon tunggu sebentar</p>
+            </div>
+            <div id="calculatingResult" style="display: none;">
+                <!-- Result will be inserted here -->
+            </div>
+        </div>
+    </div>
 
     <div class="container-fluid py-4">
         <div class="container">
@@ -408,7 +497,7 @@ if (mysqli_num_rows($query) > 0) {
                                 </span>
                             <?php } elseif (!$_SESSION['test_processed']) { ?>
                                 <span class="status-badge status-pending">
-                                    <i class="fas fa-hourglass-half me-1"></i>Tes Sedang Diproses
+                                    <i class="fas fa-calculator me-1"></i>Siap Dihitung
                                 </span>
                             <?php } else { ?>
                                 <span class="status-badge status-completed">
@@ -431,8 +520,8 @@ if (mysqli_num_rows($query) > 0) {
                                     <i class="fas fa-edit me-2"></i>Ambil Pre-test Dulu
                                 </a>
                             <?php } else { ?>
-                                <button class="quick-action-btn btn-adaptive" disabled>
-                                    <i class="fas fa-hourglass-half me-2"></i>Menunggu Proses
+                                <button class="quick-action-btn btn-adaptive" id="calculateBtn" onclick="calculateAdaptive()">
+                                    <i class="fas fa-calculator me-2"></i>Hitung Adaptive Learning
                                 </button>
                             <?php } ?>
                         </div>
@@ -600,6 +689,127 @@ if (mysqli_num_rows($query) > 0) {
             }
         `;
         document.head.appendChild(style);
+
+        // Function to calculate adaptive learning
+        function calculateAdaptive() {
+            const overlay = document.getElementById('calculatingOverlay');
+            const spinner = document.getElementById('calculatingSpinner');
+            const result = document.getElementById('calculatingResult');
+            const calculateBtn = document.getElementById('calculateBtn');
+            
+            // Show overlay
+            overlay.style.display = 'flex';
+            spinner.style.display = 'block';
+            result.style.display = 'none';
+            
+            // Disable button
+            if (calculateBtn) {
+                calculateBtn.disabled = true;
+            }
+            
+            // Send AJAX request
+            fetch('calculate-adaptive.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'same-origin' // Untuk mengirim cookie session
+            })
+            .then(response => {
+                // Cek apakah response OK
+                if (!response.ok) {
+                    throw new Error('Network response was not ok: ' + response.status);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Response:', data); // Debug log
+                
+                setTimeout(() => {
+                    spinner.style.display = 'none';
+                    result.style.display = 'block';
+                    
+                    if (data.success) {
+                        result.innerHTML = `
+                            <div class="result-icon success-icon">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                            <h3 class="fw-bold mb-3" style="color: #4CAF50;">Perhitungan Berhasil!</h3>
+                            <div class="mb-3">
+                                <div class="row g-3">
+                                    <div class="col-6">
+                                        <div class="p-3 bg-light rounded">
+                                            <h4 class="fw-bold mb-1">${data.data.level}</h4>
+                                            <small class="text-muted">Level Anda</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="p-3 bg-light rounded">
+                                            <h4 class="fw-bold mb-1">${data.data.percentage}%</h4>
+                                            <small class="text-muted">Skor</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="p-3 bg-light rounded">
+                                            <h4 class="fw-bold mb-1">${data.data.correct_answers}/${data.data.total_questions}</h4>
+                                            <small class="text-muted">Benar</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="p-3 bg-light rounded">
+                                            <h4 class="fw-bold mb-1">${data.data.theta}</h4>
+                                            <small class="text-muted">Theta (θ)</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <button onclick="location.reload()" class="btn btn-primary px-4">
+                                <i class="fas fa-sync-alt me-2"></i>Refresh Halaman
+                            </button>
+                        `;
+                    } else {
+                        result.innerHTML = `
+                            <div class="result-icon error-icon">
+                                <i class="fas fa-times-circle"></i>
+                            </div>
+                            <h3 class="fw-bold mb-3" style="color: #f44336;">Perhitungan Gagal</h3>
+                            <p class="text-muted mb-4">${data.message || 'Terjadi kesalahan yang tidak diketahui'}</p>
+                            <button onclick="closeCalculating()" class="btn btn-secondary px-4">
+                                <i class="fas fa-arrow-left me-2"></i>Kembali
+                            </button>
+                        `;
+                        if (calculateBtn) {
+                            calculateBtn.disabled = false;
+                        }
+                    }
+                }, 1500);
+            })
+            .catch(error => {
+                console.error('Error:', error); // Debug log
+                
+                setTimeout(() => {
+                    spinner.style.display = 'none';
+                    result.style.display = 'block';
+                    result.innerHTML = `
+                        <div class="result-icon error-icon">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <h3 class="fw-bold mb-3" style="color: #f44336;">Terjadi Kesalahan</h3>
+                        <p class="text-muted mb-4">Error: ${error.message}<br>Silakan coba lagi atau hubungi administrator</p>
+                        <button onclick="closeCalculating()" class="btn btn-secondary px-4">
+                            <i class="fas fa-arrow-left me-2"></i>Kembali
+                        </button>
+                    `;
+                    if (calculateBtn) {
+                        calculateBtn.disabled = false;
+                    }
+                }, 1500);
+            });
+        }
+        
+        function closeCalculating() {
+            document.getElementById('calculatingOverlay').style.display = 'none';
+        }
     </script>
 </body>
 </html>

@@ -110,19 +110,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // echo '<br/>';
 
     //Hitung modul1
-    $hitung_modul_1 = mode($modul_1);
+    $hitung_modul_1 = max(1, mode($modul_1));
     //Hitung modul2
-    $hitung_modul_2 = mode($modul_2);
+    $hitung_modul_2 = max(1, mode($modul_2));
     //Hitung modul3
-    $hitung_modul_3 = mode($modul_3);
+    $hitung_modul_3 = max(1, mode($modul_3));
     //Hitung modul4
-    $hitung_modul_4 = mode($modul_4);
+    $hitung_modul_4 = max(1, mode($modul_4));
     // //Hitung modul5
-    $hitung_modul_5 = mode($modul_5);
+    $hitung_modul_5 = max(1, mode($modul_5));
     // //Hitung modul6
-    $hitung_modul_6 = mode($modul_6);
+    $hitung_modul_6 = max(1, mode($modul_6));
     // //Hitung modul7
-    $hitung_modul_7 = mode($modul_7);
+    $hitung_modul_7 = max(1, mode($modul_7));
     // //Hitung modul8
     // $hitung_modul_8 = mode($modul_8);
     // //Hitung modul9
@@ -146,12 +146,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 function mode($armodul)
 {
-    $total = 0;
+    // Jika array kosong, return 1 (modul minimum)
+    if (empty($armodul)) {
+        return 1;
+    }
+    
+    $total = 1; // Default ke modul 1
     $v = array_count_values($armodul);
     arsort($v);
     foreach ($v as $k => $v) {
         $total = $k;
         break;
     }
-    return $total;
+    
+    // Pastikan tidak kurang dari 1
+    return max(1, $total);
 }
