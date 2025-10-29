@@ -6,6 +6,11 @@ session_start();
 if (!isset($_SESSION['name'])) {
     header('location: ../sign-in.php');
 }
+
+// Only admin can access this page
+if ($_SESSION['level_user'] != 1) {
+    header('location: index.php');
+}
 ?>
 
 <!doctype html>
@@ -16,7 +21,7 @@ if (!isset($_SESSION['name'])) {
     <meta http-equiv="X-UA-Compatible" content="IE=Edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-    <title>Kelola Topik - MyIRT Adaptive Learning</title>
+    <title>Kelola Mata Pelajaran - MyIRT Adaptive Learning</title>
     <link rel="icon" href="../favicon.ico" type="image/x-icon">
     
     <!-- Bootstrap 5.2.3 -->
@@ -36,10 +41,7 @@ if (!isset($_SESSION['name'])) {
             --biology-gradient: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
             --warm-gradient: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
             --ocean-gradient: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
-            --royal-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            --nature-gradient: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
-            --admin-gradient: linear-gradient(135deg, #667eea 0%, #43e97b 100%);
-            --topic-gradient: linear-gradient(135deg, #667eea 0%, #84fab0 100%);
+            --mapel-gradient: linear-gradient(135deg, #FF6B6B 0%, #4ECDC4 100%);
         }
         
         body {
@@ -59,7 +61,7 @@ if (!isset($_SESSION['name'])) {
         }
         
         .page-header {
-            background: var(--topic-gradient);
+            background: var(--mapel-gradient);
             color: white;
             padding: 2rem;
             margin: 0;
@@ -160,7 +162,7 @@ if (!isset($_SESSION['name'])) {
         }
         
         .table thead th {
-            background: var(--topic-gradient);
+            background: var(--mapel-gradient);
             color: white;
             border: none;
             padding: 15px;
@@ -189,7 +191,7 @@ if (!isset($_SESSION['name'])) {
         }
         
         .modal-header {
-            background: var(--topic-gradient);
+            background: var(--mapel-gradient);
             color: white;
             border-radius: 15px 15px 0 0;
             border: none;
@@ -207,8 +209,8 @@ if (!isset($_SESSION['name'])) {
         }
         
         .form-control:focus {
-            border-color: #667eea;
-            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+            border-color: #FF6B6B;
+            box-shadow: 0 0 0 0.2rem rgba(255, 107, 107, 0.25);
         }
         
         .btn-info {
@@ -227,75 +229,36 @@ if (!isset($_SESSION['name'])) {
             font-weight: 600;
         }
         
-        .dataTables_wrapper {
-            padding: 0;
+        .badge {
+            font-weight: 500;
+            font-size: 0.8rem;
+            padding: 6px 12px;
         }
         
-        .dataTables_length select,
-        .dataTables_filter input {
-            border-radius: 8px;
-            border: 2px solid #e9ecef;
-            padding: 8px 12px;
+        .stat-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
         }
         
-        .page-link {
-            border-radius: 8px;
-            margin: 0 2px;
-            border: none;
-            background: var(--topic-gradient);
-            color: white;
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
         }
         
-        .page-link:hover {
-            background: var(--primary-gradient);
-            color: white;
+        .stat-card .icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
         }
         
-        .page-item.active .page-link {
-            background: var(--secondary-gradient);
-            border-color: transparent;
-        }
-        
-        /* Loading Animation */
-        .dataTables_processing {
-            background: rgba(255,255,255,0.9) !important;
-            border: none !important;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1) !important;
-            border-radius: 10px !important;
-            color: #667eea !important;
-            font-weight: 600 !important;
-        }
-        
-        /* Action Button Hover Effects */
-        .btn-edit:hover, .btn-delete:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-        }
-        
-        /* Modern Alert Styling */
-        .swal2-popup {
-            border-radius: 15px !important;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1) !important;
-        }
-        
-        .swal2-title {
-            color: #333 !important;
-            font-weight: 600 !important;
-        }
-        
-        .swal2-confirm {
-            border-radius: 10px !important;
-            padding: 10px 20px !important;
-            font-weight: 600 !important;
-        }
-        
-        .swal2-cancel {
-            border-radius: 10px !important;
-            padding: 10px 20px !important;
-            font-weight: 600 !important;
-        }
-        
-        /* Navbar Styling */
         .navbar {
             transition: all 0.3s ease;
         }
@@ -322,73 +285,29 @@ if (!isset($_SESSION['name'])) {
             background-color: rgba(255,255,255,0.2);
             font-weight: 600;
         }
-        
-        .dropdown-menu {
-            border-radius: 12px;
-            border: none;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-            padding: 0.5rem 0;
-        }
-        
-        .dropdown-item {
-            padding: 8px 20px;
-            transition: all 0.3s ease;
-        }
-        
-        .dropdown-item:hover {
-            background: var(--topic-gradient);
-            color: white;
-            transform: translateX(5px);
-        }
-        
-        .dropdown-header {
-            font-weight: 600;
-            color: #667eea;
-            font-size: 0.9rem;
-        }
-        
-        .badge {
-            font-weight: 500;
-            font-size: 0.8rem;
-        }
     </style>
 </head>
 
 <body>
     <?php
-    // Level user handling
-    if (!isset($_SESSION['level_user'])) {
-        header('location: ../sign-in.php');
-        exit();
-    }
-    
     $level_user = $_SESSION['level_user'];
     $user_name = $_SESSION['name'] ?? 'Guest';
     $user_login = $_SESSION['login'] ?? 'User';
     
-    // Get topic statistics
-    $total_topics = 0;
-    $total_subtopics = 0;
+    // Get statistics
+    $total_pelajaran = 0;
+    $total_topik = 0;
+    
+    $result = mysqli_query($conn, "SELECT COUNT(*) as count FROM pelajaran");
+    if ($result) {
+        $row = mysqli_fetch_assoc($result);
+        $total_pelajaran = $row['count'];
+    }
     
     $result = mysqli_query($conn, "SELECT COUNT(*) as count FROM topic");
     if ($result) {
         $row = mysqli_fetch_assoc($result);
-        $total_topics = $row['count'];
-    }
-    
-    $result = mysqli_query($conn, "SELECT COUNT(*) as count FROM sub_topic");
-    if ($result) {
-        $row = mysqli_fetch_assoc($result);
-        $total_subtopics = $row['count'];
-    }
-    
-    // Get list of pelajaran
-    $pelajaran_list = [];
-    $result_pelajaran = mysqli_query($conn, "SELECT * FROM pelajaran ORDER BY id_mapel");
-    if ($result_pelajaran) {
-        while ($row = mysqli_fetch_assoc($result_pelajaran)) {
-            $pelajaran_list[] = $row;
-        }
+        $total_topik = $row['count'];
     }
     ?>
     
@@ -409,44 +328,33 @@ if (!isset($_SESSION['name'])) {
                         </a>
                     </li>
                     
-                    <?php if ($level_user == 1 || $level_user == 2) { ?>
-                        <li class="nav-item">
-                            <a class="nav-link text-white" href="murid.php">
-                                <i class="fas fa-user-graduate me-1"></i>Murid
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-white active" href="topik.php">
-                                <i class="fas fa-book-open me-1"></i>Materi
-                            </a>
-                        </li>
-                    <?php } ?>
-                    
-                    <?php if ($level_user == 1) { ?>
-                        <li class="nav-item">
-                            <a class="nav-link text-white" href="kelas.php">
-                                <i class="fas fa-school me-1"></i>Kelas
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-white" href="guru.php">
-                                <i class="fas fa-chalkboard-teacher me-1"></i>Guru
-                            </a>
-                        </li>
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown">
-                                <i class="fas fa-cogs me-1"></i>Pengaturan
-                            </a>
-                            <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="pre-test.php"><i class="fas fa-tasks me-2"></i>Pre-Test</a></li>
-                                <li><a class="dropdown-item" href="modul.php"><i class="fas fa-book me-2"></i>Modul</a></li>
-                            </ul>
-                        </li>
-                    <?php } ?>
+                    <li class="nav-item">
+                        <a class="nav-link text-white" href="topik.php">
+                            <i class="fas fa-book-open me-1"></i>Topik
+                        </a>
+                    </li>
                     
                     <li class="nav-item">
-                        <a class="nav-link text-white" href="hasil-pre-test.php">
-                            <i class="fas fa-chart-bar me-1"></i>Hasil Level
+                        <a class="nav-link text-white active" href="pelajaran.php">
+                            <i class="fas fa-graduation-cap me-1"></i>Mata Pelajaran
+                        </a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link text-white" href="murid.php">
+                            <i class="fas fa-user-graduate me-1"></i>Murid
+                        </a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link text-white" href="kelas.php">
+                            <i class="fas fa-school me-1"></i>Kelas
+                        </a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link text-white" href="guru.php">
+                            <i class="fas fa-chalkboard-teacher me-1"></i>Guru
                         </a>
                     </li>
                 </ul>
@@ -471,12 +379,12 @@ if (!isset($_SESSION['name'])) {
         <!-- Modern Page Header -->
         <div class="page-header">
             <h1>
-                <i class="fas fa-list-ul"></i>
-                Kelola Topik
+                <i class="fas fa-graduation-cap"></i>
+                Kelola Mata Pelajaran
             </h1>
             <div class="subtitle">
-                <i class="fas fa-bookmark me-2"></i>
-                Manajemen topik pembelajaran untuk sistem adaptif
+                <i class="fas fa-book me-2"></i>
+                Manajemen mata pelajaran untuk sistem pembelajaran adaptif
                 <span class="badge bg-light text-dark ms-3">
                     <i class="fas fa-calendar me-1"></i>
                     <?php echo date('d F Y'); ?>
@@ -487,22 +395,22 @@ if (!isset($_SESSION['name'])) {
                     <div class="col-md-6">
                         <div class="d-flex align-items-center">
                             <div class="bg-white bg-opacity-20 rounded-circle p-3 me-3">
-                                <i class="fas fa-bookmark fa-lg"></i>
+                                <i class="fas fa-graduation-cap fa-lg"></i>
                             </div>
                             <div>
-                                <h4 class="mb-0"><?php echo $total_topics; ?></h4>
-                                <small class="opacity-75">Total Topik</small>
+                                <h4 class="mb-0"><?php echo $total_pelajaran; ?></h4>
+                                <small class="opacity-75">Total Mata Pelajaran</small>
                             </div>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="d-flex align-items-center">
                             <div class="bg-white bg-opacity-20 rounded-circle p-3 me-3">
-                                <i class="fas fa-list fa-lg"></i>
+                                <i class="fas fa-book fa-lg"></i>
                             </div>
                             <div>
-                                <h4 class="mb-0"><?php echo $total_subtopics; ?></h4>
-                                <small class="opacity-75">Total Subtopik</small>
+                                <h4 class="mb-0"><?php echo $total_topik; ?></h4>
+                                <small class="opacity-75">Total Topik</small>
                             </div>
                         </div>
                     </div>
@@ -512,63 +420,23 @@ if (!isset($_SESSION['name'])) {
 
         <!-- Content Card -->
         <div class="content-card">
-            <!-- Quick Actions -->
-            <div class="row mb-4">
-                <div class="col-md-12">
-                    <div class="card border-0 shadow-sm" style="background: var(--ocean-gradient); border-radius: 15px;">
-                        <div class="card-body p-4">
-                            <h5 class="text-white mb-3">
-                                <i class="fas fa-filter me-2"></i>Aksi Cepat
-                            </h5>
-                            <div class="row g-3">
-                                <div class="col-md-3">
-                                    <label class="text-white fw-bold mb-2">
-                                        <i class="fas fa-book me-2"></i>Filter Pelajaran
-                                    </label>
-                                    <select class="form-select" id="filterPelajaran" style="border-radius: 10px; border: 2px solid white;">
-                                        <option value="">Semua Pelajaran</option>
-                                        <?php foreach ($pelajaran_list as $pel): ?>
-                                            <option value="<?php echo $pel['id_mapel']; ?>">
-                                                <?php echo htmlspecialchars($pel['mapel']); ?>
-                                            </option>
-                                        <?php endforeach; ?>
-                                    </select>
-                                </div>
-                                <div class="col-md-3 d-flex align-items-end">
-                                    <a href="pelajaran.php" class="btn btn-warning w-100 text-white" style="border-radius: 10px; font-weight: 600;">
-                                        <i class="fas fa-graduation-cap me-2"></i>Kelola Mapel
-                                    </a>
-                                </div>
-                                <div class="col-md-3 d-flex align-items-end">
-                                    <button class="btn btn-light w-100" onclick="table.ajax.reload();" style="border-radius: 10px; font-weight: 600;">
-                                        <i class="fas fa-sync-alt me-2"></i>Refresh Data
-                                    </button>
-                                </div>
-                                <div class="col-md-3 d-flex align-items-end">
-                                    <button class="btn btn-add w-100" data-bs-toggle="modal" data-bs-target="#modalTambahTopik">
-                                        <i class="fas fa-plus me-2"></i>Tambah Topik
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h3 class="mb-0">
-                    <i class="fas fa-book text-primary me-2"></i>
-                    Daftar Topik
+                    <i class="fas fa-list text-primary me-2"></i>
+                    Daftar Mata Pelajaran
                 </h3>
+                <button class="btn btn-add" data-bs-toggle="modal" data-bs-target="#modalTambahPelajaran">
+                    <i class="fas fa-plus me-2"></i>Tambah Mata Pelajaran
+                </button>
             </div>
 
             <div class="table-responsive">
-                <table id="topikTable" class="table table-hover" style="width:100%">
+                <table id="pelajaranTable" class="table table-hover" style="width:100%">
                     <thead>
                         <tr>
                             <th><i class="fas fa-hashtag me-2"></i>No</th>
-                            <th><i class="fas fa-graduation-cap me-2"></i>Pelajaran</th>
-                            <th><i class="fas fa-bookmark me-2"></i>Topik</th>
+                            <th><i class="fas fa-graduation-cap me-2"></i>Nama Mata Pelajaran</th>
+                            <th><i class="fas fa-book me-2"></i>Jumlah Topik</th>
                             <th><i class="fas fa-cogs me-2"></i>Aksi</th>
                         </tr>
                     </thead>
@@ -577,40 +445,25 @@ if (!isset($_SESSION['name'])) {
         </div>
     </div>
 
-    <!-- Modal Tambah Topik -->
-    <div class="modal fade" id="modalTambahTopik" tabindex="-1" aria-labelledby="modalTambahTopikLabel"
+    <!-- Modal Tambah Pelajaran -->
+    <div class="modal fade" id="modalTambahPelajaran" tabindex="-1" aria-labelledby="modalTambahPelajaranLabel"
         aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
-                <form action="../data/materi.php?action=tambahTopik" method="POST" id="formTambahTopik">
+                <form id="formTambahPelajaran">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="modalTambahTopikLabel">
-                            <i class="fas fa-plus-circle me-2"></i>Tambah Topik Baru
+                        <h5 class="modal-title" id="modalTambahPelajaranLabel">
+                            <i class="fas fa-plus-circle me-2"></i>Tambah Mata Pelajaran Baru
                         </h5>
                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body p-4">
-                        <input type="hidden" name="id" id="idTopik" value="" />
                         <div class="mb-4">
-                            <label for="pelajaran" class="form-label fw-bold">
-                                <i class="fas fa-graduation-cap text-primary me-2"></i>Pelajaran
+                            <label for="mapel" class="form-label fw-bold">
+                                <i class="fas fa-graduation-cap text-primary me-2"></i>Nama Mata Pelajaran
                             </label>
-                            <select class="form-select" name="pelajaran" id="pelajaran" required>
-                                <option value="">-- Pilih Pelajaran --</option>
-                                <?php foreach ($pelajaran_list as $pel): ?>
-                                    <option value="<?php echo $pel['id_mapel']; ?>">
-                                        <?php echo htmlspecialchars($pel['mapel']); ?>
-                                    </option>
-                                <?php endforeach; ?>
-                            </select>
-                            <div class="form-text">Pilih mata pelajaran untuk topik ini.</div>
-                        </div>
-                        <div class="mb-4">
-                            <label for="topik" class="form-label fw-bold">
-                                <i class="fas fa-bookmark text-primary me-2"></i>Nama Topik
-                            </label>
-                            <input type="text" class="form-control" name="topik" placeholder="Masukkan nama topik pembelajaran..." required>
-                            <div class="form-text">Contoh: Biologi Sel, Genetika, Ekosistem, dll.</div>
+                            <input type="text" class="form-control" name="mapel" id="mapel" placeholder="Contoh: Fisika, Kimia, Matematika..." required>
+                            <div class="form-text">Masukkan nama mata pelajaran yang akan ditambahkan ke sistem.</div>
                         </div>
                     </div>
                     <div class="modal-footer border-0 p-4">
@@ -618,7 +471,7 @@ if (!isset($_SESSION['name'])) {
                             <i class="fas fa-times me-2"></i>Batal
                         </button>
                         <button type="submit" class="btn btn-info text-white">
-                            <i class="fas fa-save me-2"></i>Simpan Topik
+                            <i class="fas fa-save me-2"></i>Simpan
                         </button>
                     </div>
                 </form>
@@ -626,39 +479,25 @@ if (!isset($_SESSION['name'])) {
         </div>
     </div>
 
-    <!-- Modal Edit Topik -->
-    <div class="modal fade" id="modalEditTopik" tabindex="-1" aria-labelledby="modalEditTopikLabel" aria-hidden="true">
+    <!-- Modal Edit Pelajaran -->
+    <div class="modal fade" id="modalEditPelajaran" tabindex="-1" aria-labelledby="modalEditPelajaranLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
-                <form action="../data/materi.php?action=editTopik" method="POST" id="formEditTopik">
+                <form id="formEditPelajaran">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="modalEditTopikLabel">
-                            <i class="fas fa-edit me-2"></i>Edit Topik
+                        <h5 class="modal-title" id="modalEditPelajaranLabel">
+                            <i class="fas fa-edit me-2"></i>Edit Mata Pelajaran
                         </h5>
                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body p-4">
-                        <input type="hidden" name="id" id="idTopik" value="" />
+                        <input type="hidden" name="id_mapel" id="idMapelEdit" value="" />
                         <div class="mb-4">
-                            <label for="pelajaranEdit" class="form-label fw-bold">
-                                <i class="fas fa-graduation-cap text-primary me-2"></i>Pelajaran
+                            <label for="mapelEdit" class="form-label fw-bold">
+                                <i class="fas fa-graduation-cap text-primary me-2"></i>Nama Mata Pelajaran
                             </label>
-                            <select class="form-select" name="pelajaran" id="pelajaranEdit" required>
-                                <option value="">-- Pilih Pelajaran --</option>
-                                <?php foreach ($pelajaran_list as $pel): ?>
-                                    <option value="<?php echo $pel['id_mapel']; ?>">
-                                        <?php echo htmlspecialchars($pel['mapel']); ?>
-                                    </option>
-                                <?php endforeach; ?>
-                            </select>
-                            <div class="form-text">Pilih mata pelajaran untuk topik ini.</div>
-                        </div>
-                        <div class="mb-4">
-                            <label for="topik" class="form-label fw-bold">
-                                <i class="fas fa-bookmark text-primary me-2"></i>Nama Topik
-                            </label>
-                            <input type="text" class="form-control" id="topik" name="topik" placeholder="Masukkan nama topik pembelajaran..." required>
-                            <div class="form-text">Ubah nama topik sesuai kebutuhan pembelajaran.</div>
+                            <input type="text" class="form-control" name="mapel" id="mapelEdit" placeholder="Masukkan nama mata pelajaran..." required>
+                            <div class="form-text">Ubah nama mata pelajaran sesuai kebutuhan.</div>
                         </div>
                     </div>
                     <div class="modal-footer border-0 p-4">
@@ -666,7 +505,7 @@ if (!isset($_SESSION['name'])) {
                             <i class="fas fa-times me-2"></i>Batal
                         </button>
                         <button type="submit" class="btn btn-info text-white">
-                            <i class="fas fa-save me-2"></i>Update Topik
+                            <i class="fas fa-save me-2"></i>Update
                         </button>
                     </div>
                 </form>
@@ -684,16 +523,13 @@ if (!isset($_SESSION['name'])) {
     <script>
     var table;
     $(document).ready(function() {
-        table = $('#topikTable').DataTable({
+        table = $('#pelajaranTable').DataTable({
             "processing": true,
             "serverSide": true,
             "ajax": {
-                "url": "../data/materi.php?action=getTopik",
+                "url": "../data/pelajaran.php?action=getPelajaran",
                 "dataType": "json",
                 "type": "POST",
-                "data": function(d) {
-                    d.id_mapel = $('#filterPelajaran').val();
-                }
             },
             "columnDefs": [
                 {
@@ -706,12 +542,12 @@ if (!isset($_SESSION['name'])) {
                     name: "no"
                 },
                 {
-                    data: "pelajaran",
-                    name: "pelajaran"
+                    data: "mapel",
+                    name: "mapel"
                 },
                 {
-                    data: "topic_desc",
-                    name: "topic_desc"
+                    data: "jumlah_topik",
+                    name: "jumlah_topik"
                 },
                 {
                     data: "action",
@@ -734,139 +570,119 @@ if (!isset($_SESSION['name'])) {
             }
         });
 
-        // Filter berdasarkan pelajaran
-        $('#filterPelajaran').on('change', function() {
-            table.ajax.reload();
-        });
-
-        // Submit tambah topik
-        $('#formTambahTopik').submit(function() {
+        // Submit tambah pelajaran
+        $('#formTambahPelajaran').submit(function(e) {
+            e.preventDefault();
             $.ajax({
-                url: "../data/materi.php?action=tambahTopik",
+                url: "../data/pelajaran.php?action=tambahPelajaran",
                 method: "POST",
-                data: $('#formTambahTopik').serialize(),
+                data: $(this).serialize(),
                 success: function(data) {
                     Swal.fire({
                         icon: 'success',
                         title: 'Berhasil!',
-                        text: 'Topik baru berhasil ditambahkan',
+                        text: 'Mata pelajaran baru berhasil ditambahkan',
                         timer: 2000,
-                        showConfirmButton: false,
-                        background: '#fff',
-                        color: '#333'
+                        showConfirmButton: false
                     });
                     table.ajax.reload();
-                    $('#modalTambahTopik').modal('hide');
+                    $('#modalTambahPelajaran').modal('hide');
+                    $('#formTambahPelajaran')[0].reset();
                 },
                 error: function(e) {
                     Swal.fire({
                         icon: 'error',
                         title: 'Gagal!',
-                        text: 'Terjadi kesalahan saat menambah topik'
+                        text: 'Terjadi kesalahan saat menambah mata pelajaran'
                     });
                     console.log(e)
                 }
-            })
-            $('#formTambahTopik')[0].reset();
-            return false;
-        })
+            });
+        });
 
-        // Tampilkan modal edit topik
-        $('#topikTable').on('click', '#btn-edit', function() {
+        // Tampilkan modal edit pelajaran
+        $('#pelajaranTable').on('click', '#btn-edit', function() {
+            var id = $(this).attr('data');
             $.ajax({
-                url: "../data/materi.php?action=getTopikById",
+                url: "../data/pelajaran.php?action=getPelajaranById",
                 method: "post",
-                type: "ajax",
                 data: {
-                    id: $(this).attr('data'),
+                    id: id
                 },
                 dataType: "json",
                 success: function(data) {
-                    $('#topik').val(data['topik']);
-                    $('#idTopik').val(data['id']);
-                    $('#pelajaranEdit').val(data['id_mapel']);
+                    $('#mapelEdit').val(data['mapel']);
+                    $('#idMapelEdit').val(data['id']);
+                    $('#modalEditPelajaran').modal('show');
                 },
                 error: function(e) {
                     Swal.fire({
                         icon: 'error',
                         title: 'Gagal!',
-                        text: 'Tidak dapat mengambil data topik'
-                    });
-                    console.log(e);
-                }
-            })
-            $('#modalEditTopik').modal('show');
-        })
-
-        // Submit edit topik
-        $('#formEditTopik').submit(function() {
-            $.ajax({
-                url: '../data/materi.php?action=editTopik',
-                method: "post",
-                type: "ajax",
-                data: {
-                    id: $('#idTopik').val(),
-                    topik: $('#topik').val(),
-                    pelajaran: $('#pelajaranEdit').val()
-                },
-                success: function(data) {
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Berhasil!',
-                        text: 'Topik berhasil diperbarui',
-                        timer: 2000,
-                        showConfirmButton: false,
-                        background: '#fff',
-                        color: '#333'
-                    });
-                    table.ajax.reload();
-                    $('#modalEditTopik').modal('hide');
-                },
-                error: function(e) {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Gagal!',
-                        text: 'Terjadi kesalahan saat memperbarui topik'
+                        text: 'Tidak dapat mengambil data mata pelajaran'
                     });
                     console.log(e);
                 }
             });
-            return false;
-        })
+        });
 
-        // Konfirmasi hapus topik
-        $('#topikTable').on('click', '#btn-delete', function() {
-            const topikId = $(this).attr('data');
+        // Submit edit pelajaran
+        $('#formEditPelajaran').submit(function(e) {
+            e.preventDefault();
+            $.ajax({
+                url: '../data/pelajaran.php?action=editPelajaran',
+                method: "post",
+                data: $(this).serialize(),
+                success: function(data) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Berhasil!',
+                        text: 'Mata pelajaran berhasil diperbarui',
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+                    table.ajax.reload();
+                    $('#modalEditPelajaran').modal('hide');
+                },
+                error: function(e) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Gagal!',
+                        text: 'Terjadi kesalahan saat memperbarui mata pelajaran'
+                    });
+                    console.log(e);
+                }
+            });
+        });
+
+        // Konfirmasi hapus pelajaran
+        $('#pelajaranTable').on('click', '#btn-delete', function() {
+            const id = $(this).attr('data');
             
             Swal.fire({
                 title: 'Konfirmasi Hapus',
-                text: 'Apakah Anda yakin ingin menghapus topik ini?',
+                text: 'Apakah Anda yakin ingin menghapus mata pelajaran ini? Semua topik terkait akan kehilangan referensi pelajaran!',
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#d33',
                 cancelButtonColor: '#6c757d',
                 confirmButtonText: '<i class="fas fa-trash me-2"></i>Ya, Hapus!',
-                cancelButtonText: '<i class="fas fa-times me-2"></i>Batal',
-                background: '#fff',
-                color: '#333'
+                cancelButtonText: '<i class="fas fa-times me-2"></i>Batal'
             }).then((result) => {
                 if (result.isConfirmed) {
                     $.ajax({
-                        url: '../data/materi.php?action=hapusTopik',
+                        url: '../data/pelajaran.php?action=hapusPelajaran',
                         method: 'post',
-                        type: 'ajax',
                         data: {
-                            id: topikId
+                            id: id
                         },
                         success: function(data) {
                             Swal.fire({
                                 icon: 'success',
                                 title: 'Terhapus!',
-                                text: 'Topik berhasil dihapus',
+                                text: 'Mata pelajaran berhasil dihapus',
                                 timer: 2000,
-                                showConfirmButton: false,
-                                background: '#fff',
-                                color: '#333'
+                                showConfirmButton: false
                             });
                             table.ajax.reload();
                         },
@@ -874,14 +690,14 @@ if (!isset($_SESSION['name'])) {
                             Swal.fire({
                                 icon: 'error',
                                 title: 'Gagal!',
-                                text: 'Terjadi kesalahan saat menghapus topik'
+                                text: 'Terjadi kesalahan saat menghapus mata pelajaran'
                             });
                             console.log(e);
                         }
-                    })
+                    });
                 }
-            })
-        })
+            });
+        });
     });
     </script>
 </body>

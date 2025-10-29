@@ -6,6 +6,233 @@ if (!isset($_SESSION['name'])) {
     header('location: ../sign-in.php');
 }
 
+// ✅ VALIDASI PRE-TEST - Cek apakah siswa sudah mengerjakan pre-test dan hasilnya sudah keluar
+$student_id = $_SESSION['student_id'];
+
+// Cek apakah siswa sudah mengerjakan pre-test
+$check_pretest_answer = mysqli_query($conn, "SELECT * FROM pre_test_answer WHERE student_id = '{$student_id}'");
+$has_done_pretest = mysqli_num_rows($check_pretest_answer) > 0;
+
+// Cek apakah hasil pre-test sudah diproses (ada di tabel level_student)
+$check_pretest_result = mysqli_query($conn, "SELECT * FROM level_student WHERE student_id = '{$student_id}'");
+$pretest_result_ready = mysqli_num_rows($check_pretest_result) > 0;
+
+// Jika belum mengerjakan pre-test ATAU hasil belum keluar, redirect ke halaman info
+if (!$has_done_pretest || !$pretest_result_ready) {
+    ?>
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Akses Ditolak - Pre-Test Diperlukan</title>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css">
+        <style>
+            body {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                min-height: 100vh;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 20px;
+            }
+            .error-container {
+                background: white;
+                border-radius: 20px;
+                box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+                padding: 3rem;
+                max-width: 650px;
+                width: 100%;
+                text-align: center;
+                animation: slideUp 0.5s ease-out;
+            }
+            @keyframes slideUp {
+                from { opacity: 0; transform: translateY(30px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+            .error-icon {
+                font-size: 80px;
+                margin-bottom: 20px;
+                animation: pulse 2s infinite;
+            }
+            @keyframes pulse {
+                0%, 100% { transform: scale(1); }
+                50% { transform: scale(1.1); }
+            }
+            .error-title {
+                font-size: 1.8rem;
+                font-weight: 700;
+                margin-bottom: 15px;
+                color: #333;
+            }
+            .error-message {
+                font-size: 1.1rem;
+                color: #666;
+                margin-bottom: 25px;
+                line-height: 1.6;
+            }
+            .info-box {
+                background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
+                border-left: 4px solid #667eea;
+                padding: 20px;
+                border-radius: 10px;
+                margin: 25px 0;
+                text-align: left;
+            }
+            .info-box h5 {
+                color: #667eea;
+                font-weight: 600;
+                margin-bottom: 12px;
+            }
+            .info-box ul {
+                margin: 0;
+                padding-left: 20px;
+                color: #555;
+            }
+            .info-box li {
+                margin-bottom: 8px;
+            }
+            .btn-action {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                border: none;
+                color: white;
+                padding: 12px 30px;
+                border-radius: 10px;
+                font-weight: 600;
+                text-decoration: none;
+                display: inline-block;
+                margin: 5px;
+                transition: all 0.3s ease;
+                box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+            }
+            .btn-action:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+                color: white;
+            }
+            .status-badge {
+                background: linear-gradient(135deg, #ffeaa7 0%, #fdcb6e 100%);
+                color: #2d3436;
+                padding: 8px 20px;
+                border-radius: 20px;
+                font-size: 0.9rem;
+                font-weight: 600;
+                display: inline-block;
+                margin: 15px 0;
+            }
+            .user-info {
+                background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+                padding: 15px;
+                border-radius: 10px;
+                margin-bottom: 20px;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="error-container">
+            <div class="user-info">
+                <i class="fas fa-user-circle me-2"></i>
+                Hai, <strong><?php echo htmlspecialchars($_SESSION['name']); ?></strong>
+            </div>
+            
+            <div class="error-icon">
+                <?php if (!$has_done_pretest) { ?>
+                    <i class="fas fa-exclamation-triangle" style="color: #e74c3c;"></i>
+                <?php } else { ?>
+                    <i class="fas fa-hourglass-half" style="color: #f39c12;"></i>
+                <?php } ?>
+            </div>
+            
+            <?php if (!$has_done_pretest) { ?>
+                <!-- Siswa belum mengerjakan pre-test -->
+                <h2 class="error-title">
+                    <i class="fas fa-clipboard-check me-2" style="color: #e74c3c;"></i>
+                    Pre-Test Belum Dikerjakan
+                </h2>
+                
+                <p class="error-message">
+                    Anda <strong>belum mengerjakan pre-test</strong> yang diperlukan untuk mengakses modul pembelajaran.
+                </p>
+                
+                <div class="status-badge" style="background: linear-gradient(135deg, #ff7675 0%, #d63031 100%); color: white;">
+                    <i class="fas fa-times-circle me-2"></i>Pre-Test: Belum Dikerjakan
+                </div>
+                
+                <div class="info-box">
+                    <h5><i class="fas fa-info-circle me-2"></i>Mengapa Pre-Test Penting?</h5>
+                    <ul>
+                        <li><strong>Menentukan level pembelajaran</strong> yang sesuai dengan kemampuan Anda</li>
+                        <li>Membantu sistem memberikan <strong>materi yang tepat</strong></li>
+                        <li>Pre-test hanya dilakukan <strong>satu kali</strong> di awal</li>
+                        <li>Setelah selesai, Anda bisa langsung mengakses semua modul</li>
+                    </ul>
+                </div>
+                
+                <div class="mt-4">
+                    <a href="pre-test.php" class="btn-action">
+                        <i class="fas fa-clipboard-check me-2"></i>Kerjakan Pre-Test Sekarang
+                    </a>
+                    <a href="index.php" class="btn-action" style="background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);">
+                        <i class="fas fa-home me-2"></i>Kembali ke Dashboard
+                    </a>
+                </div>
+                
+            <?php } else { ?>
+                <!-- Siswa sudah mengerjakan pre-test tapi hasilnya belum keluar -->
+                <h2 class="error-title">
+                    <i class="fas fa-clock me-2" style="color: #f39c12;"></i>
+                    Hasil Pre-Test Sedang Diproses
+                </h2>
+                
+                <p class="error-message">
+                    Anda sudah mengerjakan pre-test, namun <strong>hasilnya sedang dalam proses perhitungan</strong> oleh sistem.
+                </p>
+                
+                <div class="status-badge">
+                    <i class="fas fa-spinner fa-spin me-2"></i>Status: Menunggu Hasil
+                </div>
+                
+                <div class="info-box">
+                    <h5><i class="fas fa-lightbulb me-2"></i>Informasi Penting:</h5>
+                    <ul>
+                        <li>Pre-test Anda <strong>sudah diterima</strong> oleh sistem</li>
+                        <li>Sistem sedang <strong>menghitung level pembelajaran</strong> Anda</li>
+                        <li>Proses ini biasanya memakan waktu <strong>beberapa saat</strong></li>
+                        <li>Anda <strong>belum dapat mengakses modul</strong> sampai hasil pre-test keluar</li>
+                        <li>Hasil akan otomatis tersedia di dashboard Anda</li>
+                    </ul>
+                </div>
+                
+                <p style="color: #888; margin-top: 20px;">
+                    <i class="fas fa-info-circle me-2" style="color: #17a2b8;"></i>
+                    <strong>Catatan:</strong> Jika hasil tidak keluar dalam waktu lama, silakan hubungi administrator
+                </p>
+                
+                <div class="mt-4">
+                    <a href="index.php" class="btn-action">
+                        <i class="fas fa-home me-2"></i>Kembali ke Dashboard
+                    </a>
+                    <a href="../sign-out.php" class="btn-action" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);">
+                        <i class="fas fa-sign-out-alt me-2"></i>Logout
+                    </a>
+                </div>
+            <?php } ?>
+            
+            <hr style="margin: 30px 0; opacity: 0.3;">
+            
+            <p style="color: #999; font-size: 0.9rem; margin-top: 20px;">
+                <i class="fas fa-phone-alt me-2"></i>
+                Butuh bantuan? Hubungi administrator atau guru Anda
+            </p>
+        </div>
+    </body>
+    </html>
+    <?php
+    exit(); // Stop eksekusi script
+}
+
 // ✅ PENANGANAN PARAMETER SUBTOPIK
 $subtopik_id = null;
 $subtopik_data = null;

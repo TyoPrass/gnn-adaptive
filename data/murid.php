@@ -231,22 +231,22 @@ if ($_GET['action'] == 'getHasilPretest') {
             $nis = mysqli_fetch_array($query);
 
             //TAMBAHAN BARU SAYA - Survey Result
-            $query = mysqli_query($conn, "SELECT * FROM survey_result WHERE student_id = '{$r['id']}'");
-            if (mysqli_num_rows($query) > 0) {
-                $result = mysqli_fetch_array($query, MYSQLI_ASSOC);
-                $hasilsurvei = 'Level ' . $result['level_result'];
+            $querySurvey = mysqli_query($conn, "SELECT * FROM survey_result WHERE student_id = '{$r['id']}'");
+            if (mysqli_num_rows($querySurvey) > 0) {
+                $surveyData = mysqli_fetch_array($querySurvey, MYSQLI_ASSOC);
+                $hasilsurvei = 'Level ' . $surveyData['level_result'];
             } else {
                 $hasilsurvei = 'Belum ambil survei';
             }
 
             //tambahan baru - Pre Test Result
-            $query = mysqli_query($conn, "SELECT * FROM pre_test_result WHERE student_id = '{$r['id']}'");
-            if (mysqli_num_rows($query) > 0) {
-                $result = mysqli_fetch_array($query, MYSQLI_ASSOC);
-                $hasilirt = 'Level ' . $result['level'];
+            $queryPreTest = mysqli_query($conn, "SELECT * FROM pre_test_result WHERE student_id = '{$r['id']}'");
+            if (mysqli_num_rows($queryPreTest) > 0) {
+                $preTestData = mysqli_fetch_array($queryPreTest, MYSQLI_ASSOC);
+                $hasilirt = 'Level ' . $preTestData['level'];
             } else {
-                $query = mysqli_query($conn, "SELECT * FROM pre_test_answer WHERE student_id = '{$r['id']}'");
-                if (mysqli_num_rows($query) > 0) {
+                $queryAnswer = mysqli_query($conn, "SELECT * FROM pre_test_answer WHERE student_id = '{$r['id']}'");
+                if (mysqli_num_rows($queryAnswer) > 0) {
                     $hasilirt = 'Level belum dihitung';
                 } else {
                     $hasilirt = 'Belum ambil Pre Test';
@@ -254,19 +254,19 @@ if ($_GET['action'] == 'getHasilPretest') {
             }
 
             // Final Level Determination
-            $query = mysqli_query($conn, "SELECT * FROM level_student WHERE student_id = '{$r['id']}'");
-            if (mysqli_num_rows($query) > 0) {
-                $result = mysqli_fetch_array($query, MYSQLI_ASSOC);
-                $hasilPreTest = 'Level ' . $result['level'];
+            $queryLevel = mysqli_query($conn, "SELECT * FROM level_student WHERE student_id = '{$r['id']}'");
+            if (mysqli_num_rows($queryLevel) > 0) {
+                $levelData = mysqli_fetch_array($queryLevel, MYSQLI_ASSOC);
+                $hasilPreTest = 'Level ' . $levelData['level'];
             } else {
                 // Use pre_test_result if available
-                $query = mysqli_query($conn, "SELECT * FROM pre_test_result WHERE student_id = '{$r['id']}'");
-                if (mysqli_num_rows($query) > 0) {
-                    $result = mysqli_fetch_array($query, MYSQLI_ASSOC);
-                    $hasilPreTest = 'Level ' . $result['level'];
+                $queryPreTestFinal = mysqli_query($conn, "SELECT * FROM pre_test_result WHERE student_id = '{$r['id']}'");
+                if (mysqli_num_rows($queryPreTestFinal) > 0) {
+                    $preTestFinalData = mysqli_fetch_array($queryPreTestFinal, MYSQLI_ASSOC);
+                    $hasilPreTest = 'Level ' . $preTestFinalData['level'];
                 } else {
-                    $query = mysqli_query($conn, "SELECT * FROM pre_test_answer WHERE student_id = '{$r['id']}'");
-                    if (mysqli_num_rows($query) > 0) {
+                    $queryAnswerFinal = mysqli_query($conn, "SELECT * FROM pre_test_answer WHERE student_id = '{$r['id']}'");
+                    if (mysqli_num_rows($queryAnswerFinal) > 0) {
                         $hasilPreTest = 'Level belum dihitung';
                     } else {
                         $hasilPreTest = 'Belum ambil Pre Test';
@@ -277,8 +277,8 @@ if ($_GET['action'] == 'getHasilPretest') {
             
             $nestedData['no'] = $no;
             $nestedData['murid'] = $r["student_name"];
-            $nestedData['nis'] = $nis['login'];
-            $nestedData['kelas'] = $kelas['class_name'];
+            $nestedData['nis'] = $nis['login'] ?? '-';
+            $nestedData['kelas'] = $kelas['class_name'] ?? '-';
             $nestedData['hasilSurvei'] = $hasilsurvei;
             $nestedData['hasilIrt'] = $hasilirt;
             $nestedData['hasilPreTest'] = $hasilPreTest;

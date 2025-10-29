@@ -496,7 +496,7 @@ $modul = mysqli_fetch_array($query, MYSQLI_ASSOC);
                                                     <div class="form-check">
                                                         <input class="form-check-input" type="radio" 
                                                                name="question<?php echo $r['id'] ?>" 
-                                                               value="<?php echo $a['id'] ?>" 
+                                                               value="<?php echo $key ?>" 
                                                                id="q<?php echo $r['id'] ?>_a<?php echo $a['id'] ?>" 
                                                                required>
                                                         <label class="form-check-label" 

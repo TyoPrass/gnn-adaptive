@@ -11,11 +11,22 @@ session_start();
 if ($_GET['action'] == 'getTopik') {
     $columns = array(
         0 => 'number',
-        1 => 'topic_desc',
-        2 => 'action'
+        1 => 'pelajaran',
+        2 => 'topic_desc',
+        3 => 'action'
     );
 
-    $sql = "SELECT * FROM topic";
+    $id_mapel_filter = isset($_POST['id_mapel']) && $_POST['id_mapel'] != '' ? $_POST['id_mapel'] : '';
+
+    if ($id_mapel_filter != '') {
+        $sql = "SELECT t.*, p.mapel as pelajaran_name FROM topic t 
+                LEFT JOIN pelajaran p ON t.id_mapel = p.id_mapel 
+                WHERE t.id_mapel = '{$id_mapel_filter}'";
+    } else {
+        $sql = "SELECT t.*, p.mapel as pelajaran_name FROM topic t 
+                LEFT JOIN pelajaran p ON t.id_mapel = p.id_mapel";
+    }
+    
     $query = mysqli_query($conn, $sql);
     $count = mysqli_num_rows($query);
 
@@ -29,11 +40,30 @@ if ($_GET['action'] == 'getTopik') {
 
 
     if (empty($_POST['search']['value'])) {
-        $result = mysqli_query($conn, "SELECT * FROM topic order by {$order} {$dir} LIMIT {$limit} OFFSET {$start}");
-        // $result = mysqli_query($conn, "SELECT * FROM topic");
+        if ($id_mapel_filter != '') {
+            $result = mysqli_query($conn, "SELECT t.*, p.mapel as pelajaran_name FROM topic t 
+                LEFT JOIN pelajaran p ON t.id_mapel = p.id_mapel 
+                WHERE t.id_mapel = '{$id_mapel_filter}' 
+                ORDER BY {$order} {$dir} LIMIT {$limit} OFFSET {$start}");
+        } else {
+            $result = mysqli_query($conn, "SELECT t.*, p.mapel as pelajaran_name FROM topic t 
+                LEFT JOIN pelajaran p ON t.id_mapel = p.id_mapel 
+                ORDER BY {$order} {$dir} LIMIT {$limit} OFFSET {$start}");
+        }
     } else {
         $search = $_POST['search']['value'];
-        $result = mysqli_query($conn, "SELECT * FROM topic WHERE topic_desc like '%{$search}%' order by {$order} {$dir} LIMIT {$limit} OFFSET {$start}");
+        if ($id_mapel_filter != '') {
+            $result = mysqli_query($conn, "SELECT t.*, p.mapel as pelajaran_name FROM topic t 
+                LEFT JOIN pelajaran p ON t.id_mapel = p.id_mapel 
+                WHERE t.id_mapel = '{$id_mapel_filter}' 
+                AND (t.topic_desc LIKE '%{$search}%' OR p.mapel LIKE '%{$search}%') 
+                ORDER BY {$order} {$dir} LIMIT {$limit} OFFSET {$start}");
+        } else {
+            $result = mysqli_query($conn, "SELECT t.*, p.mapel as pelajaran_name FROM topic t 
+                LEFT JOIN pelajaran p ON t.id_mapel = p.id_mapel 
+                WHERE t.topic_desc LIKE '%{$search}%' OR p.mapel LIKE '%{$search}%' 
+                ORDER BY {$order} {$dir} LIMIT {$limit} OFFSET {$start}");
+        }
 
         $count = mysqli_num_rows($result);
         $totalData = $count;
@@ -45,8 +75,13 @@ if ($_GET['action'] == 'getTopik') {
         $no = $start + 1;
         $row = mysqli_fetch_all($result, MYSQLI_ASSOC);
         foreach ($row as $r) {
+            $pelajaran_badge = $r['pelajaran_name'] ? 
+                "<span class='badge bg-primary'>{$r['pelajaran_name']}</span>" : 
+                "<span class='badge bg-secondary'>Tidak ada</span>";
+            
             $nestedData['id'] = $r['id'];
             $nestedData['no'] = $no;
+            $nestedData['pelajaran'] = $pelajaran_badge;
             $nestedData['topic_desc'] = "<a href='subtopik.php?topik={$r['id']}' class='text-decoration-none fw-bold text-primary'><i class='fas fa-folder-open me-2'></i>{$r["topic_desc"]}</a>";
             $nestedData['action'] = "<div class='d-flex gap-2'>
                 <button class='btn btn-edit btn-sm' id='btn-edit' data='{$r['id']}'>
@@ -83,9 +118,16 @@ function getTopicLastNumber($conn)
 // fungsi tambah topik
 if ($_GET['action'] == 'tambahTopik') {
     $topik = $_POST['topik'];
+    $id_mapel = isset($_POST['pelajaran']) ? $_POST['pelajaran'] : null;
     $number = getTopicLastNumber($conn);
     $number = $number['number'] + 1;
-    $sql = "INSERT INTO topic (topic_desc, number) VALUES('{$topik}', '{$number}')";
+    
+    if ($id_mapel) {
+        $sql = "INSERT INTO topic (topic_desc, number, id_mapel) VALUES('{$topik}', '{$number}', '{$id_mapel}')";
+    } else {
+        $sql = "INSERT INTO topic (topic_desc, number) VALUES('{$topik}', '{$number}')";
+    }
+    
     $result = mysqli_query($conn, $sql);
     if (!$result) {
         echo mysqli_error($conn);
@@ -105,7 +147,8 @@ if ($_GET['action'] == 'getTopikById') {
     $data = array(
         'id' => $result['id'],
         'topik' => $result['topic_desc'],
-        'no' => $result['number']
+        'no' => $result['number'],
+        'id_mapel' => isset($result['id_mapel']) ? $result['id_mapel'] : ''
     );
     echo json_encode($data);
 }
@@ -114,8 +157,14 @@ if ($_GET['action'] == 'getTopikById') {
 if ($_GET['action'] == 'editTopik') {
     $id = $_POST['id'];
     $topic_desc = $_POST['topik'];
-    // var_dump($id);
-    $sql = "UPDATE topic set topic_desc = '{$topic_desc}' WHERE id = '{$id}'";
+    $id_mapel = isset($_POST['pelajaran']) ? $_POST['pelajaran'] : null;
+    
+    if ($id_mapel) {
+        $sql = "UPDATE topic SET topic_desc = '{$topic_desc}', id_mapel = '{$id_mapel}' WHERE id = '{$id}'";
+    } else {
+        $sql = "UPDATE topic SET topic_desc = '{$topic_desc}' WHERE id = '{$id}'";
+    }
+    
     $query = mysqli_query($conn, $sql);
     if (!$query) {
         echo mysqli_error($conn);

@@ -181,11 +181,17 @@ function getSoalDetail() {
     
     $question = mysqli_fetch_assoc($question_result);
     
-    // Get choices for this question
+    // Konversi correct_answer ke integer jika berupa angka
+    // Jika berupa text, biarkan saja (akan dicocokkan di frontend)
+    if (is_numeric($question['correct_answer'])) {
+        $question['correct_answer'] = intval($question['correct_answer']);
+    }
+    
+    // Get choices for this question, HARUS ORDER BY id untuk konsistensi index
     $choices_query = "SELECT mm.answer_desc, mm.question_id, mm.id as choice_id
                       FROM module_question_choice AS mm 
-                      WHERE mm.question_id = '" . $id . "' 
-                      ORDER BY mm.id";
+                      WHERE mm.question_id = '" . mysqli_real_escape_string($conn, $id) . "' 
+                      ORDER BY mm.id ASC";
     $choices_result = mysqli_query($conn, $choices_query);
     $choices = [];
     

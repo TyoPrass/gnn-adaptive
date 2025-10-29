@@ -706,6 +706,24 @@ $user_name = $_SESSION['name'] ?? 'Guest';
                     var question = response.data.question;
                     var choices = response.data.choices;
                     
+                    // Konversi correct_answer ke integer untuk memastikan index benar
+                    var correctAnswerIndex = parseInt(question.correct_answer);
+                    
+                    // Validasi dan ambil jawaban benar
+                    var correctAnswerText = 'Index tidak valid';
+                    if (!isNaN(correctAnswerIndex) && choices[correctAnswerIndex]) {
+                        correctAnswerText = choices[correctAnswerIndex].answer_desc;
+                    } else {
+                        // Coba cari berdasarkan answer_desc yang match dengan question.answer
+                        for (var i = 0; i < choices.length; i++) {
+                            if (choices[i].answer_desc === question.correct_answer) {
+                                correctAnswerText = choices[i].answer_desc;
+                                correctAnswerIndex = i;
+                                break;
+                            }
+                        }
+                    }
+                    
                     var content = `
                         <div class="row">
                             <div class="col-md-12">
@@ -721,7 +739,7 @@ $user_name = $_SESSION['name'] ?? 'Guest';
                                 
                                 <h6><strong>Jawaban Benar:</strong></h6>
                                 <div class="alert alert-success">
-                                    <i class="fas fa-check-circle me-2"></i><strong>${choices[question.correct_answer] ? choices[question.correct_answer].answer_desc : 'Index tidak valid'}</strong>
+                                    <i class="fas fa-check-circle me-2"></i><strong>${correctAnswerText}</strong>
                                 </div>
                                 
                                 <h6><strong>Pilihan Jawaban:</strong></h6>
@@ -729,8 +747,8 @@ $user_name = $_SESSION['name'] ?? 'Guest';
                     `;
                     
                     choices.forEach(function(choice, index) {
-                        var isCorrect = index == question.correct_answer ? ' list-group-item-success' : '';
-                        var icon = index == question.correct_answer ? '<i class="fas fa-check-circle text-success me-2"></i>' : '<i class="fas fa-circle text-muted me-2"></i>';
+                        var isCorrect = index == correctAnswerIndex ? ' list-group-item-success' : '';
+                        var icon = index == correctAnswerIndex ? '<i class="fas fa-check-circle text-success me-2"></i>' : '<i class="fas fa-circle text-muted me-2"></i>';
                         content += `<div class="list-group-item${isCorrect}">${icon}${String.fromCharCode(65 + index)}. ${choice.answer_desc}</div>`;
                     });
                     

@@ -554,14 +554,17 @@ if (!isset($_SESSION['name'])) {
                     { 
                         data: "nis", 
                         name: "nis",
-                        width: "15%"
+                        width: "15%",
+                        render: function(data, type, row) {
+                            return `<span class="badge bg-secondary">${data || '-'}</span>`;
+                        }
                     },
                     { 
                         data: "kelas", 
                         name: "kelas",
                         width: "10%",
                         render: function(data, type, row) {
-                            return `<span class="badge bg-primary">${data}</span>`;
+                            return `<span class="badge bg-primary">${data || '-'}</span>`;
                         }
                     },
                     { 
@@ -569,13 +572,13 @@ if (!isset($_SESSION['name'])) {
                         name: "hasilSurvei",
                         width: "15%",
                         render: function(data, type, row) {
-                            if (data && data !== '-') {
+                            if (data && data.includes('Level')) {
                                 return `<span class="status-badge status-completed">
-                                            <i class="fas fa-check me-1"></i>Selesai
+                                            <i class="fas fa-check me-1"></i>${data}
                                         </span>`;
                             } else {
                                 return `<span class="status-badge status-pending">
-                                            <i class="fas fa-clock me-1"></i>Belum
+                                            <i class="fas fa-clock me-1"></i>${data || 'Belum'}
                                         </span>`;
                             }
                         }
@@ -585,13 +588,17 @@ if (!isset($_SESSION['name'])) {
                         name: "hasilIrt",
                         width: "15%",
                         render: function(data, type, row) {
-                            if (data && data !== '-') {
+                            if (data && data.includes('Level ') && !data.includes('belum')) {
                                 return `<span class="status-badge status-completed">
-                                            <i class="fas fa-check me-1"></i>Selesai
+                                            <i class="fas fa-check me-1"></i>${data}
+                                        </span>`;
+                            } else if (data && data.includes('belum')) {
+                                return `<span class="status-badge status-pending">
+                                            <i class="fas fa-hourglass me-1"></i>${data}
                                         </span>`;
                             } else {
-                                return `<span class="status-badge status-pending">
-                                            <i class="fas fa-clock me-1"></i>Belum
+                                return `<span class="status-badge status-not-started">
+                                            <i class="fas fa-clock me-1"></i>${data || 'Belum'}
                                         </span>`;
                             }
                         }
@@ -601,35 +608,41 @@ if (!isset($_SESSION['name'])) {
                         name: "hasilPreTest",
                         width: "20%",
                         render: function(data, type, row) {
-                            if (data && data !== '-') {
-                                // Determine level based on score
+                            if (data && data.includes('Level ') && !data.includes('belum')) {
+                                // Extract level number from string like "Level 1", "Level 2", etc.
+                                const levelMatch = data.match(/Level\s+(\d+)/i);
                                 let levelClass = 'level-beginner';
                                 let levelText = 'Pemula';
                                 let levelIcon = 'fa-seedling';
                                 
-                                const score = parseFloat(data);
-                                if (score >= 85) {
-                                    levelClass = 'level-expert';
-                                    levelText = 'Ahli';
-                                    levelIcon = 'fa-crown';
-                                } else if (score >= 70) {
-                                    levelClass = 'level-advanced';
-                                    levelText = 'Mahir';
-                                    levelIcon = 'fa-star';
-                                } else if (score >= 55) {
-                                    levelClass = 'level-intermediate';
-                                    levelText = 'Menengah';
-                                    levelIcon = 'fa-leaf';
+                                if (levelMatch) {
+                                    const levelNum = parseInt(levelMatch[1]);
+                                    if (levelNum >= 3) {
+                                        levelClass = 'level-expert';
+                                        levelText = 'Ahli';
+                                        levelIcon = 'fa-crown';
+                                    } else if (levelNum >= 2) {
+                                        levelClass = 'level-advanced';
+                                        levelText = 'Mahir';
+                                        levelIcon = 'fa-star';
+                                    } else {
+                                        levelClass = 'level-intermediate';
+                                        levelText = 'Menengah';
+                                        levelIcon = 'fa-leaf';
+                                    }
                                 }
                                 
                                 return `<div class="level-badge ${levelClass}">
                                             <i class="fas ${levelIcon} me-1"></i>
-                                            ${levelText}
-                                            <div class="text-xs mt-1">Skor: ${data}</div>
+                                            ${data}
                                         </div>`;
+                            } else if (data && data.includes('belum')) {
+                                return `<span class="status-badge status-pending">
+                                            <i class="fas fa-hourglass me-1"></i>${data}
+                                        </span>`;
                             } else {
                                 return `<span class="status-badge status-not-started">
-                                            <i class="fas fa-hourglass me-1"></i>Belum Dimulai
+                                            <i class="fas fa-clock me-1"></i>${data || 'Belum Dimulai'}
                                         </span>`;
                             }
                         }

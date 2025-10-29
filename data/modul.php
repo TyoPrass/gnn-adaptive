@@ -40,8 +40,12 @@ if ($_GET['action'] == 'submitPostTest') {
             $sql = "SELECT * FROM module_question WHERE id = '{$question_id}'";
             $query = mysqli_query($conn, $sql);
             $question = mysqli_fetch_array($query, MYSQLI_ASSOC);
-            // menghitung jumlah jawaban benar
-            if ($question['answer'] == $p) {
+            
+            // Konversi ke string dan gunakan strict comparison
+            $correct_answer = (string)$question['answer']; // Cast ke string
+            $user_answer = (string)$p; // Cast ke string
+
+            if ($correct_answer === $user_answer) {
                 $jawaban_benar++;
             }
             $total_soal++;
@@ -51,12 +55,16 @@ if ($_GET['action'] == 'submitPostTest') {
     $presentasi = $jawaban_benar / $total_soal;
     $s_id = mysqli_real_escape_string($conn, $_SESSION['student_id']);
     $m_id = mysqli_real_escape_string($conn, $_POST['module']);
+    
     if ($presentasi > 0.75) {
-        // echo "LULUS POST TEST";
+        // LULUS POST TEST - Simpan ke database
         $sql = "INSERT INTO module_learned (module_id, student_id) VALUES('{$m_id}', '{$s_id}')";
         $query = mysqli_query($conn, $sql);
+        
         if ($query) {
-            header("location: ../student/modul.php");
+            // Redirect ke halaman sukses dengan parameter
+            header("location: ../student/berhasil-post-test.php?module_id={$m_id}");
+            exit();
         } else {
             echo mysqli_error($conn);
         }

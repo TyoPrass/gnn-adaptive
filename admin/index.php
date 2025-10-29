@@ -634,6 +634,14 @@ if (!isset($_SESSION['name'])) {
                 <?php } ?>
                 
                 <?php if ($level_user == 1) { ?>
+                    <a href="pelajaran.php" class="action-btn" style="background: var(--ocean-gradient);">
+                        <i class="fas fa-graduation-cap"></i>
+                        Kelola Pelajaran
+                    </a>
+                    <a href="survey.php" class="action-btn" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                        <i class="fas fa-poll"></i>
+                        Kelola Survey
+                    </a>
                     <a href="guru.php" class="action-btn warning">
                         <i class="fas fa-chalkboard-teacher"></i>
                         Kelola Guru

@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Oct 16, 2025 at 12:56 PM
+-- Generation Time: Oct 27, 2025 at 02:39 PM
 -- Server version: 8.0.30
 -- PHP Version: 8.1.10
 
@@ -29,8 +29,8 @@ SET time_zone = "+00:00";
 
 CREATE TABLE `admin` (
   `id` int NOT NULL,
-  `admin_name` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `email` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `admin_name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `email` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `user_id` int NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -49,7 +49,7 @@ INSERT INTO `admin` (`id`, `admin_name`, `email`, `user_id`) VALUES
 
 CREATE TABLE `class` (
   `id` int NOT NULL,
-  `class_name` varchar(10) COLLATE utf8mb4_unicode_ci NOT NULL
+  `class_name` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
@@ -107,7 +107,10 @@ CREATE TABLE `gagal_post_test` (
 --
 
 INSERT INTO `gagal_post_test` (`id`, `student_id`, `level`, `total`) VALUES
-(4, 411, 2, 1);
+(4, 411, 2, 1),
+(5, 421, 2, 2),
+(6, 424, 2, 2),
+(7, 425, 2, 2);
 
 -- --------------------------------------------------------
 
@@ -185,7 +188,14 @@ INSERT INTO `level_student` (`id`, `student_id`, `level`) VALUES
 (91, 411, 1),
 (92, 411, 1),
 (93, 412, 2),
-(94, 418, 2);
+(94, 418, 2),
+(95, 420, 0),
+(96, 420, 2),
+(97, 421, 1),
+(98, 148, 1),
+(99, 423, 0),
+(100, 424, 1),
+(101, 425, 1);
 
 -- --------------------------------------------------------
 
@@ -195,7 +205,7 @@ INSERT INTO `level_student` (`id`, `student_id`, `level`) VALUES
 
 CREATE TABLE `materi` (
   `id` int NOT NULL,
-  `materi_desc` mediumtext COLLATE utf8mb4_unicode_ci NOT NULL,
+  `materi_desc` mediumtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `module_id` int NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -210,8 +220,7 @@ INSERT INTO `materi` (`id`, `materi_desc`, `module_id`) VALUES
 (5, '<p>2. Perbedaan Sel Hewan dengan Sel Tumbuhan<br />\nSel hewan dan sel tumbuhan termasuk sel eukariotik. Meskipun sama-sama sel eukariotik, kedua sel tersebut memiliki beberapa perbedaan pada organel-organel selnya secara spesifik.&nbsp;<br />\nBerdasarkan hasil pengamatan sel menggunakan mikroskop elektron dapat diketahui perbedaan antara sel hewan dengan sel tumbuhan. Sel hewan memiliki sentriol yang tidak dimiliki oleh sel tumbuhan. Adapun sel tumbuhan memiliki dinding sel, plastida, dan vakuola yang tidak dimiliki oleh sel hewan.<br />\na. Struktur Sel Tumbuhan<br />\nBagian-bagian sel yang hanya dimiliki oleh sel tumbuhan yaitu dinding sel, vakuola, dan plastida.<br />\n1) Dinding Sel<br />\nDinding sel merupakan lapisan terluar yang tersusun dari selulosa, hemiselulosa, dan pektin. Dinding sel berfungsi sebagai penyokong dan pelindung selaput plasma serta memelihara keseimbangan sel dari tekanan. Adanya dinding sel mengakibatkan bentuk sel tumbuhan relatif tetap.<br />\n2) Vakuola<br />\nVakuola atau rongga sel adalah organel sitoplasmik yang berisi cairan yang dibatasi membran tonoplas.<br />\nVakuola mempunyai beberapa fungsi sebagai berikut.<br />\na) Tempat menyimpan zat makanan seperti amilum dan gula.<br />\nb) Memasukkan air melalui tonoplast untuk membangun turgiditas sel bersama dinding sel.<br />\nc) Menyimpan pigmen.<br />\nd) Menyimpan minyak asiri.<br />\ne) Tempat penimbunan sisa metabolisme dan metabolit sekunder seperti Ca-oksalat, tanin, getah karet, dan alkaloid.<br />\n3) Plastida<br />\nBerdasarkan kandungan pigmen di dalamnya, plastida dibedakan menjadi tiga tipe yaitu kloroplas, kromoplas, dan leukoplas.<br />\na) Kloroplas</p>\n\n<p><img alt=\"\" src=\"../assets/images/materi/kloroplas.png\" style=\"height:354px; width:559px\" /><br />\nKloroplas yaitu plastida yang mengandung klorofil dan pigmen fotosintetik lainnya. Kloroplas tersusun dari membran luar dan membran dalam. Membran luar berfungsi mengatur keluar masuknya zat. Membran dalam membungkus cairan kloroplas yang disebut stroma. Membran dalam melipat ke arah dalam dan membentuk lembaran-lembaran yang disebut tilakoid. Pada tempat-tempat tertentu, tilakoid bertumpuk-tumpuk membentuk grana. Kloroplas berfungsi sebagai tempat berlangsungnya fotosintesis.<br />\nb) Kromoplas<br />\nKromoplas yaitu plastida yang mengandung pigmen nonfotosintetik. Beberapa pigmen yang terdapat dalam kromoplas yaitu xantofil dan karoten.<br />\nc) Leukoplas<br />\nLeukoplas adalah plastida yang tidak berwarna. Biasanya terdapat pada organ penyimpan makanan<br />\ncadangan seperti biji dan umbi. Ada tiga macam leukoplas yaitu amiloplas untuk menyimpan amilum, elaioplas (lipidoplas) untuk membentuk dan menyimpan lemak, serta proteoplas untuk menyimpan protein.<br />\nb. Struktur Sel Hewan<br />\nSel hewan memiliki dua sentriol di dalam sentrosom. Sentriol berperan dalam proses pembelahan sel. Saat pembelahan sel, tiap-tiap sentriol memisahkan diri menuju kutub yang berlawanan dan memancarkan benang-benang gelendong pembelahan yang akan menjerat kromosom.</p>\n', 4),
 (6, '<p>Sel disebut sebagai unit fungsional terkecil dalam kehidupan karena di dalam sel berlangsung proses-proses kehidupan (bioproses).<br />\n1. Mekanisme Transpor Melalui Membran<br />\nPerpindahan molekul atau ion yang melewati membran ada dua macam yaitu transpor pasif dan transpor aktif.<br />\na. Transpor Pasif<br />\nTranspor pasif merupakan perpindahan molekul atau ion tanpa menggunakan energi sel. Perpindahan molekul tersebut terjadi secara spontan mengikuti gradien konsentrasi. Contoh transpor pasif yaitu difusi dan osmosis.<br />\nDifusi adalah perpindahan molekul-molekul zat dari konsentrasi tinggi ke konsentrasi rendah baik melalui membran plasma ataupun tidak. Difusi dibedakan menjadi dua yaitu difusi sederhana dan difusi terbantu. Difusi sederhana terjadi secara spontan, molekul zat akan berdifusi menyebar ke seluruh<br />\nruangan sampai dicapai kesetimbangan. Faktor-faktor yang memengaruhi proses difusi yaitu wujud materi, ukuran molekul, konsentrasi zat, dan suhu.<br />\nDifusi terbantu merupakan proses difusi dengan perantara protein pembawa dari konsentrasi tinggi ke konsentrasi rendah. Contoh mekanisme difusi terbantu yaitu proses molekul glukosa melewati membran.<br />\nOsmosis adalah perpindahan molekul-molekul pelarut (misal air) dari larutan berkonsentrasi rendah (hipotonik) ke larutan berkonsentrasi tinggi (hipertonik) melalui selaput (membran) semipermeabel. Jika pelarut yang digunakan berupa air, osmosis dapat berarti perpindahan molekul air melalui membran semipermeabel dari larutan yang kadar airnya tinggi ke larutan yang kadar airnya rendah.<br />\nAir akan masuk ke dalam sel jika konsentrasi larutan dalam sel tinggi sehingga terjadi endosmosis. Endosmosis pada sel hewan mengakibatkan kehancuran sel karena robeknya membran plasma (lisis). Endosmosis pada sel tumbuhan mengakibatkan sel dalam keadaan turgid. Sementara itu, air di dalam sel akan keluar jika konsentrasi larutan di luar sel tinggi dan terjadi eksosmosis. Eksosmosis pada hewan akan mengakibatkan pengerutan sel (krenasi). Eksosmosis pada tumbuhan akan mengakibatkan terlepasnya membran dari dinding sel yang disebut plasmolisis.<br />\nb. Transpor Aktif<br />\nTranspor aktif adalah transpor yang memerlukan energi untuk melawan gradien konsentrasi. Pada transpor aktif terjadi pemompaan molekul melewati membran dan melawan gradien konsentrasi. Contoh transpor aktif antara lain pompa natrium-kalium, endositosis, dan eksositosis.</p>\n', 5),
 (7, '<p>2. Sintesis Protein dalam Sel<br />\nSelain mekanisme transpor melalui membran, di dalam sel juga terjadi sintesis protein. Sintesis protein berlangsung di ribosom. Bagaimana proses berlangsungnya sintesis protein dalam sel? Lakukan terlebih dahulu kegiatan berikut untuk mengetahui mekanisme sintesis protein dalam sel.<br />\nSintesis protein adalah proses penerjemahan gen menjadi urutan asam amino yang akan disintesis menjadi polipeptida (protein). Sintesis protein secara garis besar dibagi menjadi dua tahapan utama, yaitu proses pembuatan molekul mRNA pada inti sel (transkripsi) dan proses penerjemahan mRNA oleh tRNA serta perangkaian asam amino di ribosom (translasi).<br />\na. Transkripsi<br />\nProses transkripsi diawali dari sintesis RNA dari salah satu rantai DNA sense atau rantai cetakan. Adapun rantai DNA komplemennya disebut rantai antisense. Rentangan DNA yang ditranskripsi menjadi molekul RNA disebut unit transkripsi. Transkripsi terdiri atas tiga tahap yaitu inisiasi, elongasi, dan terminasi.<br />\n1) Inisiasi (Permulaan)<br />\nProses inisiasi dimulai dari promoter, yakni daerah DNA yang merupakan tempat melekatnya RNA polimerase. Promoter mencakup titik awal (start point) transkripsi yaitu nukleotida yang menunjukkan dimulainya sintesis protein (kodon start). Fungsi promoter untuk menentukan tempat dimulainya transkripsi dan menentukan satu rantai DNA yang akan digunakan sebagai cetakan.<br />\n2) Elongasi (Pemanjangan)<br />\nElongasi terjadi saat RNA bergerak di sepanjang pilinan ganda DNA terbuka secara berurutan. Enzim RNA polimerase menambahkan nukleotida dari molekul RNA yang sedang tumbuh di sepanjang rantai DNA. Setelah proses sintesis RNA selesai, rantai DNA terbentuk kembali dan molekul RNA baru terlepas dari cetakannya.<br />\n3) Terminasi (Pengakhiran)<br />\nProses transkripsi akan berhenti setelah sampai pada terminator, yakni urutan DNA yang berfungsi menghentikan transkripsi (kodon terminasi).<br />\nb. Translasi<br />\nTranslasi adalah proses pelekatan antara tRNA dengan asam amino dengan bantuan enzim aminoasil-tRNA sintetase. Ribosom memudahkan pelekatan yang spesifik antara antikodon tRNA dengan kodon mRNA selama sintesis protein.<br />\nTahap translasi terdiri atas inisiasi, elongasi, dan terminasi.<br />\n1) Inisiasi<br />\nRibosom kecil mengikatkan diri pada mRNA dan tRNA inisiator. Ribosom melekat pada salah satu ujung mRNA. Di dekat pelekatan tersebut terdapat kodon start AUG (yang membawa kode untuk membentuk asam amino metionin). Kodon ini memberikan sinyal dimulainya proses translasi.<br />\n2) Elongasi<br />\nTahap ini dimulai dengan terbentuknya asam-asam amino yang berikatan dengan metionin. Molekul rRNA dari ribosom mengatalis pembentukan ikatan peptida antara asam amino yang baru dengan ujung rantai polipeptida yang sebelumnya terbentuk dari asam amino yang dibawa tRNA. Setelah itu, tRNA<br />\nkeluar dari ribosom. Peristiwa ini berlangsung sampai terbentuk polipeptida.<br />\n3) Terminasi<br />\nElongasi akan berhenti setelah ribosom mencapai kodon stop yaitu UAA, UAG, atau UGA. Kodon stop berfungsi sebagai sinyal untuk menghentikan translasi. Selanjutnya, polipeptida yang terbentuk akan lepas dari ribosom menuju ke sitoplasma.<br />\nProses terminasi diakhiri dengan terbentuknya rantai asam amino yang sangat panjang, atau lebih sering dinamakan dengan rantai polipeptida. Rantai polipeptida inilah yang kita sebut dengan protein.<br />\nProtein atau rantai polipeptida dari hasil sintesis protein merupakan rantai protein primer. Protein ini harus mengalami modifikasi agar bisa digunakan dalam tubuh. Proses modifikasi dilakukan di badan Golgi. Hasil modifikasi ini dapat dibedakan menjadi dua yaitu protein struktural dan protein dinamis (fungsional).<br />\na. Protein Struktural<br />\nProtein struktural merupakan protein yang berperan dalam pembentukan struktur sel. Sebagai contoh, protein integral dan protein perifer yang berada pada membran sel. Sementara itu, protein struktural di dalam sel berperan untuk membentuk kerangka sel yang disebut sitoskeleton. Sitoskeleton berupa jaringan protein filamen yang memantapkan membran plasma sehingga menyokong stabilitas bentuk sel. Protein filamen ini terdiri atas mikrofilamen, filamen tengah (filamen intermediet), dan mikrotubulus. Mikrotubulus dibangun dari protein globuler yang disebut tubulin. Filamen intermediat disusun dari keluarga protein yang beragam disebut keratin. Mikrofilamen disusun dari protein globuler yang disebut aktin.</p>\n\n<p><img alt=\"\" src=\"../assets/images/materi/protein struktural.png\" style=\"height:387px; width:672px\" /><br />\nb. Protein Fungsional<br />\nProtein fungsional merupakan protein yang berperan dalam pengaturan aktivitas sel, misalnya enzim dan hormon.<br />\n1) Enzim<br />\nEnzim adalah satu atau beberapa gugus polipeptida (protein) yang berfungsi sebagai katalis dalam suatu reaksi kimia organik. Sebagian besar enzim bekerja di dalam sel (enzim intraseluler), tetapi ada juga enzim yang dibuat di dalam sel kemudian dikeluarkan dari dalam sel untuk menjalankan fungsinya<br />\n(enzim ekstraseluler). Contoh enzim intraseluler adalah enzim katalase. Enzim ini banyak terdapat di organel peroksisom yang berfungsi memecah senyawa H2O2 (hidrogen peroksida) yang bersifat toksik menjadi H2O dan O2. Adapun contoh enzim ekstraseluler adalah enzim-enzim pencernaan, misalnya enzim pepsin yang berfungsi memecah protein menjadi pepton.<br />\n2) Hormon<br />\nHormon terdiri atas tiga jenis berdasarkan struktur kimiawinya yaitu hormon yang terbuat dari protein atau peptida (hormon peptida), hormon yang terbuat dari kolesterol (hormon steroid), dan hormon yang terbuat dari asam amino (hormon tiroid). Jadi, protein merupakan salah satu bahan baku untuk membuat hormon.<br />\nHormon berperan mengatur homeostasis, metabolisme, reproduksi, pertumbuhan, dan perkembangan. Homeostasis adalah pengaturan secara otomatis dalam tubuh agar kelangsungan hidup dapat dipertahankan. Sebagai contoh pengendalian tekanan darah, kerja jantung, dan kadar gula darah.</p>\n', 6),
-(8, '<p>3. Reproduksi Sel<br />\nReproduksi sel merupakan proses penggandaan materi genetik (DNA) yang terdapat di dalam nukleus sehingga menghasilkan sel-sel anakan yang memiliki materi genetik yang identik. Reproduksi sel dapat terjadi karena peristiwa pembelahan sel secara mitosis.<br />\nPembelahan mitosis adalah peristiwa pembelahan sel yang terjadi pada sel-sel somatis serta menghasilkan dua sel anak dengan genotipe sama dan identik dengan induknya. Pembelahan mitosis bertujuan untuk pertumbuhan dan regenerasi sel.</p>\n\n<p><img alt=\"\" src=\"../assets/images/materi/pembelahan mitosis.png\" style=\"height:241px; width:717px\" /></p>\n\n<p>Sel melangsungkan pembelahan mitosis sehingga dapat mengalami perubahan bentuk, ukuran, dan jumlahnya bertambah banyak.<br />\nTanaman mengalami<br />\npertumbuhan karena adanya penambahan jumlah sel sebagai hasil pembelahan mitosis. Pertumbuhan<br />\nadalah suatu proses pertambahan ukuran, baik volume, bobot, dan jumlah sel yang bersifat<br />\nirreversible. Pertumbuhan pada tumbuhan umumnya terjadi pada daerah meristem (titik tumbuh)<br />\ndi antaranya terdapat pada ujung akar dan ujung batang. Adapun tahap-tahap pembelahan mitosis<br />\nmeliputi profase, prometafase, metafase, anafase, dan telofase.</p>\n', 7),
-(9, '<p>Halo Aku kucing lucu miu jangan lupa nekopoi.care</p>\n', 8);
+(8, '<p>3. Reproduksi Sel<br />\nReproduksi sel merupakan proses penggandaan materi genetik (DNA) yang terdapat di dalam nukleus sehingga menghasilkan sel-sel anakan yang memiliki materi genetik yang identik. Reproduksi sel dapat terjadi karena peristiwa pembelahan sel secara mitosis.<br />\nPembelahan mitosis adalah peristiwa pembelahan sel yang terjadi pada sel-sel somatis serta menghasilkan dua sel anak dengan genotipe sama dan identik dengan induknya. Pembelahan mitosis bertujuan untuk pertumbuhan dan regenerasi sel.</p>\n\n<p><img alt=\"\" src=\"../assets/images/materi/pembelahan mitosis.png\" style=\"height:241px; width:717px\" /></p>\n\n<p>Sel melangsungkan pembelahan mitosis sehingga dapat mengalami perubahan bentuk, ukuran, dan jumlahnya bertambah banyak.<br />\nTanaman mengalami<br />\npertumbuhan karena adanya penambahan jumlah sel sebagai hasil pembelahan mitosis. Pertumbuhan<br />\nadalah suatu proses pertambahan ukuran, baik volume, bobot, dan jumlah sel yang bersifat<br />\nirreversible. Pertumbuhan pada tumbuhan umumnya terjadi pada daerah meristem (titik tumbuh)<br />\ndi antaranya terdapat pada ujung akar dan ujung batang. Adapun tahap-tahap pembelahan mitosis<br />\nmeliputi profase, prometafase, metafase, anafase, dan telofase.</p>\n', 7);
 
 -- --------------------------------------------------------
 
@@ -221,10 +230,10 @@ INSERT INTO `materi` (`id`, `materi_desc`, `module_id`) VALUES
 
 CREATE TABLE `module` (
   `id` int NOT NULL,
-  `module_desc` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `module_desc` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `sub_topic_id` int NOT NULL,
   `number` int NOT NULL,
-  `module_level` enum('1','2','3') COLLATE utf8mb4_unicode_ci NOT NULL
+  `module_level` enum('1','2','3') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
@@ -390,7 +399,7 @@ INSERT INTO `module_learned` (`id`, `module_id`, `student_id`) VALUES
 CREATE TABLE `module_question` (
   `id` int NOT NULL,
   `module_id` int NOT NULL,
-  `question` mediumtext COLLATE utf8mb4_unicode_ci NOT NULL,
+  `question` mediumtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `answer` int NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -458,7 +467,7 @@ INSERT INTO `module_question` (`id`, `module_id`, `question`, `answer`) VALUES
 
 CREATE TABLE `module_question_choice` (
   `id` int NOT NULL,
-  `answer_desc` mediumtext COLLATE utf8mb4_unicode_ci NOT NULL,
+  `answer_desc` mediumtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `question_id` int NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -670,6 +679,25 @@ INSERT INTO `module_question_choice` (`id`, `answer_desc`, `question_id`) VALUES
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `pelajaran`
+--
+
+CREATE TABLE `pelajaran` (
+  `id_mapel` int NOT NULL,
+  `mapel` varchar(100) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Dumping data for table `pelajaran`
+--
+
+INSERT INTO `pelajaran` (`id_mapel`, `mapel`) VALUES
+(1, 'Biologi'),
+(2, 'Matematika');
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `pre_test_answer`
 --
 
@@ -756,7 +784,15 @@ INSERT INTO `pre_test_answer` (`id`, `student_id`, `modul_1`, `modul_2`, `modul_
 (249, 411, 0, 0, 0, 0, 0, 0, 0),
 (250, 411, 0, 0, 0, 0, 0, 0, 1),
 (251, 412, 0, 0, 0, 0, 0, 0, 1),
-(252, 418, 0, 0, 0, 1, 0, 0, 0);
+(252, 418, 0, 0, 0, 1, 0, 0, 0),
+(253, 420, 0, 1, 1, 0, 0, 0, 0),
+(254, 421, 1, 1, 0, 0, 0, 1, 0),
+(255, 148, 0, 0, 0, 0, 0, 1, 0),
+(256, 422, 0, 0, 0, 0, 0, 0, 0),
+(257, 423, 0, 0, 0, 0, 0, 0, 0),
+(258, 424, 1, 1, 1, 1, 1, 1, 1),
+(259, 425, 1, 1, 1, 1, 1, 1, 1),
+(260, 425, 1, 1, 1, 1, 1, 1, 1);
 
 -- --------------------------------------------------------
 
@@ -800,7 +836,38 @@ INSERT INTO `pre_test_result` (`id`, `student_id`, `level`) VALUES
 (214, 91, 11),
 (215, 92, 12),
 (216, 93, 13),
-(217, 93, 13);
+(217, 93, 13),
+(218, 91, 11),
+(219, 92, 12),
+(220, 93, 13),
+(221, 93, 13),
+(222, 93, 13),
+(223, 420, 2),
+(224, 93, 13),
+(225, 421, 2),
+(226, 91, 11),
+(227, 92, 12),
+(228, 93, 13),
+(229, 93, 13),
+(230, 93, 13),
+(231, 93, 13),
+(232, 91, 11),
+(233, 92, 12),
+(234, 93, 13),
+(235, 91, 11),
+(236, 92, 12),
+(237, 93, 13),
+(238, 93, 13),
+(239, 93, 13),
+(240, 93, 13),
+(241, 91, 11),
+(242, 92, 12),
+(243, 93, 13),
+(244, 424, 2),
+(245, 91, 11),
+(246, 92, 12),
+(247, 93, 13),
+(248, 425, 3);
 
 -- --------------------------------------------------------
 
@@ -900,10 +967,10 @@ INSERT INTO `quiz_result_e_learning` (`id`, `student_id`, `nilai`) VALUES
 CREATE TABLE `student` (
   `id` int NOT NULL,
   `user_id` int NOT NULL,
-  `nis` varchar(25) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `student_name` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `student_address` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `phone_number` varchar(15) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `nis` varchar(25) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `student_name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `student_address` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `phone_number` varchar(15) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `class_id` int NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -921,8 +988,6 @@ INSERT INTO `student` (`id`, `user_id`, `nis`, `student_name`, `student_address`
 (18, 270, '0058396450', 'Sofi aprilianti ', 'Kalianget timur', '085216590582', 3),
 (19, 271, '10005', 'Adelia Mila Safitri', 'Karanganyar', '087864004334', 3),
 (21, 273, '10193', 'Rani Sahara', 'Perum Trunojoyo regency', '082335977664', 3),
-(23, 275, '10110', 'Atika Raudatul Maulida', 'Kertasada', '08778643681', 3),
-(25, 277, '10021', 'LAYANA AMALIYATUR RAHMA', 'Talango', '085850835564', 3),
 (26, 278, '9999', 'Ramadhani Nur Indah Putri', 'Perumahan Kalimook ', '081908079203', 3),
 (27, 279, '9993', 'MILA ABRILIANTI', 'DUSUN KEBUN KELAPA', '087806487249', 3),
 (30, 284, '10066', 'Rina kurniawati', 'kalianget', '085230794865', 3),
@@ -949,18 +1014,13 @@ INSERT INTO `student` (`id`, `user_id`, `nis`, `student_name`, `student_address`
 (131, 399, '11111', 'Nur Faizah', 'Tuban', '085695507327', 1),
 (132, 400, '22222', 'Ana M', 'Sumenep', '085232316207', 1),
 (133, 401, '324', 'firaz', 'bangkalan', '12345567', 1),
-(134, 402, '12345', 'Zulfa', 'Kamal', '081234567', 1),
 (135, 403, '123', 'faiz', 'tuban', '085678999000', 4),
 (136, 402, '12345', '12345', 'tuban', '085666777888', 4),
 (137, 405, '1234567890', 'Alful Laila S', 'Pamekasan', '0000', 4),
 (138, 406, '123456', 'afra', 'bangkalan', '085232828220', 1),
 (139, 407, '220', 'tes12', 'tes12', '007', 1),
 (140, 408, '11', '11', '11', '11', 1),
-(141, 409, '223', 'Sigma Guntur', 'sigma.top123@gmail.com', '089604191747', 1),
-(142, 410, '44', '44', '44', '44', 1),
-(143, 411, '55', '55', '55', '55', 1),
-(144, 412, '77', 'Sigma Guntur', 'Basuki rahmat street', '089604191747', 2),
-(145, 418, '2201', 'Sigma Guntur', 'Basuki rahmat street', '089604191747', 1);
+(151, 425, '115', 'Sigma ', '12321', '14', 1);
 
 -- --------------------------------------------------------
 
@@ -970,7 +1030,7 @@ INSERT INTO `student` (`id`, `user_id`, `nis`, `student_name`, `student_address`
 
 CREATE TABLE `sub_topic` (
   `id` int NOT NULL,
-  `sub_topic_desc` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `sub_topic_desc` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `topic_id` int NOT NULL,
   `number` int NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -1018,25 +1078,26 @@ INSERT INTO `sub_topic` (`id`, `sub_topic_desc`, `topic_id`, `number`) VALUES
 
 CREATE TABLE `survey_question` (
   `id` int NOT NULL,
-  `question` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `category` enum('1','2') COLLATE utf8mb4_unicode_ci NOT NULL
+  `question` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `category` enum('1','2') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `id_mapel` int NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `survey_question`
 --
 
-INSERT INTO `survey_question` (`id`, `question`, `category`) VALUES
-(1, 'Saya merasa senang mengikuti pelajaran biologi selama pembelajaran daring', '1'),
-(2, 'Saya tidak pernah mengeluh jika ada tugas biologi', '1'),
-(3, 'Saya sering hadir pada saat pelajaran biologi', '1'),
-(4, 'Apabila mengalami kesulitan dalam memahami materi, saya bertanya.', '1'),
-(5, 'Tugas yang diberikan guru membuat saya semakin tertatik dengan biologi.', '1'),
-(6, 'Ketika di rumah saya memilih belajar daripada bermain biologi.', '2'),
-(7, 'Tanpa ada yang menyuruh, saya belajar biologi sendiri di rumah. ', '2'),
-(8, 'Saya tidak merasa kesulitan dalam memahami materi-materi biologi', '2'),
-(9, 'Saat ulangan saya sering mendapat nilai > 75', '2'),
-(10, 'Saya pernah mengikuti olimpiade biologi', '2');
+INSERT INTO `survey_question` (`id`, `question`, `category`, `id_mapel`) VALUES
+(1, 'Saya merasa senang mengikuti pelajaran biologi selama pembelajaran daring', '1', 1),
+(2, 'Saya tidak pernah mengeluh jika ada tugas biologi', '1', 1),
+(3, 'Saya sering hadir pada saat pelajaran biologi', '1', 1),
+(4, 'Apabila mengalami kesulitan dalam memahami materi, saya bertanya.', '1', 1),
+(5, 'Tugas yang diberikan guru membuat saya semakin tertatik dengan biologi.', '1', 1),
+(6, 'Ketika di rumah saya memilih belajar daripada bermain biologi.', '2', 1),
+(7, 'Tanpa ada yang menyuruh, saya belajar biologi sendiri di rumah. ', '2', 1),
+(8, 'Saya tidak merasa kesulitan dalam memahami materi-materi biologi', '2', 1),
+(9, 'Saat ulangan saya sering mendapat nilai > 75', '2', 1),
+(10, 'Saya pernah mengikuti olimpiade biologi', '2', 1);
 
 -- --------------------------------------------------------
 
@@ -1118,7 +1179,14 @@ INSERT INTO `survey_result` (`id`, `level_result`, `student_id`) VALUES
 (230, 2, 411),
 (231, 2, 412),
 (232, 3, 418),
-(233, 3, 411);
+(233, 3, 411),
+(234, 3, 420),
+(235, 3, 421),
+(236, 3, 148),
+(237, 2, 422),
+(238, 2, 423),
+(239, 2, 424),
+(240, 2, 425);
 
 -- --------------------------------------------------------
 
@@ -1129,12 +1197,12 @@ INSERT INTO `survey_result` (`id`, `level_result`, `student_id`) VALUES
 CREATE TABLE `teachers` (
   `id` int NOT NULL,
   `user_id` int NOT NULL,
-  `teacher_name` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `teacher_address` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `nip` varchar(20) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `phone_number` varchar(15) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `email` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `teacher_type` enum('1','2') COLLATE utf8mb4_unicode_ci NOT NULL
+  `teacher_name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `teacher_address` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `nip` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `phone_number` varchar(15) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `email` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `teacher_type` enum('1','2') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
@@ -1158,26 +1226,27 @@ INSERT INTO `teachers` (`id`, `user_id`, `teacher_name`, `teacher_address`, `nip
 
 CREATE TABLE `topic` (
   `id` int NOT NULL,
-  `topic_desc` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `number` int NOT NULL
+  `topic_desc` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `number` int NOT NULL,
+  `id_mapel` int NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `topic`
 --
 
-INSERT INTO `topic` (`id`, `topic_desc`, `number`) VALUES
-(1, 'Sel sebagai Unit Terkecil Kehidupan dan Bioproses pada Sel', 1),
-(2, 'Struktur dan Fungsi Sel Penyusun Jaringan pada Tumbuhan', 2),
-(3, 'Struktur dan Fungsi Sel Penyusun Jaringan Hewan', 3),
-(4, 'Struktur dan Fungsi Sel Penyusun Jaringan pada Sistem Gerak', 4),
-(5, 'Struktur dan Fungsi Sel Penyusun Jaringan pada Sistem Sirkulasi', 5),
-(6, 'Struktur dan Fungsi Sel Penyusun Jaringan pada Sistem Pencernaan', 6),
-(7, 'Struktur dan Fungsi Sel Penyusun Jaringan pada Sistem Pernapasan/Respirasi', 7),
-(8, 'Struktur dan Fungsi Sel Penyusun Jaringan pada Sistem Ekskresi', 8),
-(9, 'Struktur dan Fungsi Sel pada Sistem Koordinasi Manusia', 9),
-(10, 'Struktur dan Fungsi Sel Penyusun Jaringan pada Sistem Reproduksi', 10),
-(11, 'Struktur dan Fungsi Sel-Sel Penyusun Jaringan dalam Sistem Pertahanan Tubuh', 11);
+INSERT INTO `topic` (`id`, `topic_desc`, `number`, `id_mapel`) VALUES
+(1, 'Sel sebagai Unit Terkecil Kehidupan dan Bioproses pada Sel', 1, 1),
+(2, 'Struktur dan Fungsi Sel Penyusun Jaringan pada Tumbuhan', 2, 1),
+(3, 'Struktur dan Fungsi Sel Penyusun Jaringan Hewan', 3, 1),
+(4, 'Struktur dan Fungsi Sel Penyusun Jaringan pada Sistem Gerak', 4, 1),
+(5, 'Struktur dan Fungsi Sel Penyusun Jaringan pada Sistem Sirkulasi', 5, 1),
+(6, 'Struktur dan Fungsi Sel Penyusun Jaringan pada Sistem Pencernaan', 6, 1),
+(7, 'Struktur dan Fungsi Sel Penyusun Jaringan pada Sistem Pernapasan/Respirasi', 7, 1),
+(8, 'Struktur dan Fungsi Sel Penyusun Jaringan pada Sistem Ekskresi', 8, 1),
+(9, 'Struktur dan Fungsi Sel pada Sistem Koordinasi Manusia', 9, 1),
+(10, 'Struktur dan Fungsi Sel Penyusun Jaringan pada Sistem Reproduksi', 10, 1),
+(11, 'Struktur dan Fungsi Sel-Sel Penyusun Jaringan dalam Sistem Pertahanan Tubuh', 11, 1);
 
 -- --------------------------------------------------------
 
@@ -1187,9 +1256,9 @@ INSERT INTO `topic` (`id`, `topic_desc`, `number`) VALUES
 
 CREATE TABLE `users` (
   `id` int NOT NULL,
-  `login` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `password` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `level_user` enum('1','2','3') COLLATE utf8mb4_unicode_ci NOT NULL
+  `login` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `password` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `level_user` enum('1','2','3') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
@@ -1208,8 +1277,6 @@ INSERT INTO `users` (`id`, `login`, `password`, `level_user`) VALUES
 (270, '0058396450', '$2y$10$VigEMVhUhnHJsUhF8zzdCepv5a75KG.ZlNUnbgD58DOsSEBYd0OCG', '3'),
 (271, '10005', '$2y$10$scrnGgOlNLO6Z2rBYZ9T.ugIFv32kAm9Xi5qqD/QSKmijIjflnze6', '3'),
 (273, '10193', '$2y$10$MPFyEfdM/3vvVr459gpfoe7O5JJ6hz9cKPwPH4u6fiEv4f/Mi7/ty', '3'),
-(275, '10110', '$2y$10$.INAf2B59hgahX7j3/hMce0AxL0kDzmouSl2UroRWiR6aDkOQOG4i', '3'),
-(277, '10021', '$2y$10$OxScVjFLH1U.P5JYt52q5.BhiYmIVrjCURxHevpJxT2ApHXZQRgXa', '3'),
 (278, '9999', '$2y$10$ehkLZa5lfGOTpsfwRM07cuNZwbgbi42tdaLgjMM3FZU2MMkH0u/wG', '3'),
 (279, '9993', '$2y$10$EZto5YnirLDOY8MUOtwLd.7fHsRSRV9HQ/wYH.2CQJFHYNtKwy7vu', '3'),
 (284, '10066', '$2y$10$Ywqj4z8gjJoWJfwLH1omwe5Kzmywlg3W167jqBAJ54hG37Xc6OUhe', '3'),
@@ -1237,24 +1304,19 @@ INSERT INTO `users` (`id`, `login`, `password`, `level_user`) VALUES
 (399, '11111', '$2y$10$cUiFu2hogBV4K.dROiybJ.dHX7u6Tk5UaKLdCHcjompezqmWvEFHG', '3'),
 (400, '22222', '$2y$10$yQGz85J0BfKqxTAhCTKsUuMhiD7ypfFkHaDfdwGjOA0y9Ls0EKohy', '3'),
 (401, '324', '$2a$10$QGFZIfjT05AN6pUJzhhicenl0d/49i6aNiz0tUUhbywdfiJGs1khe', '3'),
-(402, '12345', '$2y$10$d49qkJnetfZFftoATI/Zp.pYbYvYqUfT.sXH/FcV4Yaab1OW6Xd0W', '3'),
 (403, '123', '$2y$10$lGs3LyvN4Rhmv5F/n6Rhu.KANminVCBmbWay65Jsr2Zjw/0SM9Ewy', '3'),
 (404, '12345', '$2y$10$DiScLbBr5I.R2wq.wpu5Se1yO0hwQroit1TDoFl2.WMV.ZhQ55996', '3'),
 (405, '1234567890', '$2y$10$qPTSB43WuxcPrcYftvPxR.6gp9UtClHcBjxR0EQayfBVKRlKbangK', '3'),
 (406, '123456', '$2y$10$vKO.j0bdW/lxRQnIlDkIQeTqdmc9wOca9qvg4ieQ1Gkj1gJfpyyW2', '3'),
 (407, '220', '$2y$10$19LSiHJVDaoBoiPebeoKzOeMDEo1ceWwzLPsHL/4YMc7yCDRmKhPS', '3'),
 (408, '11', '$2y$10$RE0/x/Tkm1f4P0WjcQVDpuIxDQuh8fBGfL9tZkJtjF/ZSb8twH6nS', '3'),
-(409, '223', '$2y$10$bVD17bb2rVaDlHa9rWlqF.A4RaeLgHJYN65bkkUHS0MPneuJ5DyWa', '3'),
-(410, '44', '$2y$10$qjT/re9ariTAfFNOTsZ/yuGiMmb0kGck/CHEQgOO/TFtXuOUHsu8e', '3'),
-(411, '55', '$2y$10$dPVyqpfWRFKlOWTdk5mAEu0nPQnbV9GW4ATSutjRXsrT1kmpA4kBi', '3'),
-(412, '77', '$2y$10$q2PkT0Uekgk2IPhGd4G3UenLYuVetdzf3Rh.gm1u8RoOPnDoGAiHu', '3'),
 (413, 'yantooo@gmail.com', '$2y$10$U/mwnAW0Io.aFUQfms9igOo5Tt9C7uYyC/5hjSTISygu8KB.ddz/.', '2'),
 (414, 'yantooo123123@gmail.com', '$2y$10$DxAQ9Q/kSkrZpRJge4I9Y.0iwwNFcwvd98QqUfvLwz7.sl4nmza0.', '2'),
 (415, '123123', '$2y$10$SxcNmuCPFkIU.KxdIl17yOvgQKaTyuD7vJzk0njEvifdT9.SwEUGe', '2'),
 (416, 'azrel@gmail.com', '$2y$10$LWFrxL275lQYbx36aKaDVOu0iVaWu3aeJ5YKoX8sae5SoASyBRJpy', '2'),
 (417, '234', '$2y$10$fPuAPPMAa/cte9DzT26MMe3U/rU9Nf7R6cAHOpH2rjpkISyQOHLgC', '2'),
-(418, '2201', '$2y$10$kQftrlH4rl/QmYwbDK3TAO0zg.T/pP8789LqKp1sYrF0OSb3rnfeq', '3'),
-(419, '333', '$2y$10$CvleSWYQJpr9YBF5sqI1y.T86Fw4dwIkmCUHwskc5D28IGUzq3dhS', '2');
+(419, '333', '$2y$10$CvleSWYQJpr9YBF5sqI1y.T86Fw4dwIkmCUHwskc5D28IGUzq3dhS', '2'),
+(425, '115', '$2y$10$ohQL/DvHRHEcdWJp5yKLUONFDp7co/bFgdDRGj7kDTVBdUHb50lj.', '3');
 
 --
 -- Indexes for dumped tables
@@ -1321,6 +1383,12 @@ ALTER TABLE `module_question_choice`
   ADD PRIMARY KEY (`id`);
 
 --
+-- Indexes for table `pelajaran`
+--
+ALTER TABLE `pelajaran`
+  ADD PRIMARY KEY (`id_mapel`);
+
+--
 -- Indexes for table `pre_test_answer`
 --
 ALTER TABLE `pre_test_answer`
@@ -1360,7 +1428,8 @@ ALTER TABLE `sub_topic`
 -- Indexes for table `survey_question`
 --
 ALTER TABLE `survey_question`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `id_mapel` (`id_mapel`);
 
 --
 -- Indexes for table `survey_result`
@@ -1378,7 +1447,8 @@ ALTER TABLE `teachers`
 -- Indexes for table `topic`
 --
 ALTER TABLE `topic`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `id_mapel` (`id_mapel`);
 
 --
 -- Indexes for table `users`
@@ -1412,13 +1482,13 @@ ALTER TABLE `class_attendance`
 -- AUTO_INCREMENT for table `gagal_post_test`
 --
 ALTER TABLE `gagal_post_test`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT for table `level_student`
 --
 ALTER TABLE `level_student`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=95;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=102;
 
 --
 -- AUTO_INCREMENT for table `materi`
@@ -1451,16 +1521,22 @@ ALTER TABLE `module_question_choice`
   MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=200;
 
 --
+-- AUTO_INCREMENT for table `pelajaran`
+--
+ALTER TABLE `pelajaran`
+  MODIFY `id_mapel` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
 -- AUTO_INCREMENT for table `pre_test_answer`
 --
 ALTER TABLE `pre_test_answer`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=253;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=261;
 
 --
 -- AUTO_INCREMENT for table `pre_test_result`
 --
 ALTER TABLE `pre_test_result`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=218;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=249;
 
 --
 -- AUTO_INCREMENT for table `quiz_result`
@@ -1478,7 +1554,7 @@ ALTER TABLE `quiz_result_e_learning`
 -- AUTO_INCREMENT for table `student`
 --
 ALTER TABLE `student`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=146;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=152;
 
 --
 -- AUTO_INCREMENT for table `sub_topic`
@@ -1496,7 +1572,7 @@ ALTER TABLE `survey_question`
 -- AUTO_INCREMENT for table `survey_result`
 --
 ALTER TABLE `survey_result`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=234;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=241;
 
 --
 -- AUTO_INCREMENT for table `teachers`
@@ -1514,7 +1590,23 @@ ALTER TABLE `topic`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=420;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=426;
+
+--
+-- Constraints for dumped tables
+--
+
+--
+-- Constraints for table `survey_question`
+--
+ALTER TABLE `survey_question`
+  ADD CONSTRAINT `survey_question_ibfk_1` FOREIGN KEY (`id_mapel`) REFERENCES `pelajaran` (`id_mapel`) ON DELETE RESTRICT ON UPDATE RESTRICT;
+
+--
+-- Constraints for table `topic`
+--
+ALTER TABLE `topic`
+  ADD CONSTRAINT `topic_ibfk_1` FOREIGN KEY (`id_mapel`) REFERENCES `pelajaran` (`id_mapel`) ON DELETE RESTRICT ON UPDATE RESTRICT;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
