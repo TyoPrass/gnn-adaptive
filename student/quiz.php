@@ -689,7 +689,7 @@ if(mysqli_num_rows($query) > 0){
                                                 <input type="radio" 
                                                        id="quiz_q<?php echo $q['id']; ?>_a<?php echo $a['id']; ?>"
                                                        name="question<?php echo $q['id']; ?>"
-                                                       value="<?php echo $a['id']; ?>" 
+                                                       value="<?php echo $key ?>" 
                                                        required>
                                                 <label for="quiz_q<?php echo $q['id']; ?>_a<?php echo $a['id']; ?>">
                                                     <?php echo $a['answer_desc']; ?>

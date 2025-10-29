@@ -365,6 +365,118 @@ if (!isset($_SESSION['name'])) {
                         </div>
                     </div>
                     
+                    <?php if ($_SESSION['level_user'] == 2) { ?>
+                    <!-- ✅ CARD BARU: Murid yang Diampu Guru -->
+                    <div class="col-lg-3 col-md-6 mb-3">
+                        <div class="stats-card">
+                            <div class="stat-icon" style="background: linear-gradient(135deg, #4A90E2 0%, #357ABD 100%);">
+                                <i class="fas fa-users"></i>
+                            </div>
+                            <h4 class="mb-2">
+                                <?php
+                                // Ambil class_id yang diampu guru
+                                $teacher_id = $_SESSION['teacher_id'];
+                                $class_query = mysqli_query($conn, "SELECT DISTINCT c.id, c.class_name 
+                                                                    FROM class_attendance ca 
+                                                                    JOIN class c ON ca.class_id = c.id 
+                                                                    WHERE ca.teacher_id = '{$teacher_id}' 
+                                                                    ORDER BY c.class_name ASC");
+                                
+                                $class_names = array();
+                                $class_ids = array();
+                                
+                                if (mysqli_num_rows($class_query) > 0) {
+                                    while ($class_row = mysqli_fetch_assoc($class_query)) {
+                                        $class_ids[] = $class_row['id'];
+                                        $class_names[] = $class_row['class_name'];
+                                    }
+                                    
+                                    if (!empty($class_ids)) {
+                                        $class_id_list = implode(',', $class_ids);
+                                        $my_students_query = mysqli_query($conn, "SELECT COUNT(*) as total FROM student WHERE class_id IN ({$class_id_list})");
+                                        $my_students_count = mysqli_fetch_array($my_students_query)['total'];
+                                        echo $my_students_count;
+                                    } else {
+                                        echo "0";
+                                    }
+                                } else {
+                                    echo "0";
+                                }
+                                ?>
+                            </h4>
+                            <p class="text-muted mb-0">Murid yang Anda Ampu</p>
+                            <?php if (!empty($class_names)) { ?>
+                            <div class="mt-2">
+                                <small class="text-muted d-block mb-1">
+                                    <i class="fas fa-chalkboard me-1"></i>Kelas:
+                                </small>
+                                <div class="d-flex flex-wrap gap-1">
+                                    <?php foreach ($class_names as $class_name) { ?>
+                                    <span class="badge bg-primary" style="font-size: 0.75rem;">
+                                        <?php echo htmlspecialchars($class_name); ?>
+                                    </span>
+                                    <?php } ?>
+                                </div>
+                            </div>
+                            <?php } else { ?>
+                            <div class="mt-2">
+                                <span class="badge bg-secondary" style="font-size: 0.75rem;">
+                                    <i class="fas fa-info-circle me-1"></i>Belum mengampu kelas
+                                </span>
+                            </div>
+                            <?php } ?>
+                        </div>
+                    </div>
+                    
+                    <!-- ✅ CARD BARU: Kelas yang Diampu -->
+                    <div class="col-lg-3 col-md-6 mb-3">
+                        <div class="stats-card">
+                            <div class="stat-icon classes">
+                                <i class="fas fa-chalkboard"></i>
+                            </div>
+                            <h4 class="mb-2">
+                                <?php
+                                $teacher_id = $_SESSION['teacher_id'];
+                                $my_classes_query = mysqli_query($conn, "SELECT COUNT(DISTINCT class_id) as total FROM class_attendance WHERE teacher_id = '{$teacher_id}'");
+                                $my_classes_count = mysqli_fetch_array($my_classes_query)['total'];
+                                echo $my_classes_count;
+                                ?>
+                            </h4>
+                            <p class="text-muted mb-0">Kelas yang Anda Ampu</p>
+                            <?php if (!empty($class_names) && !empty($class_ids)) { ?>
+                            <div class="mt-2">
+                                <small class="text-muted d-block mb-1">
+                                    <i class="fas fa-info-circle me-1"></i>Detail:
+                                </small>
+                                <div class="d-flex flex-column gap-1">
+                                    <?php 
+                                    foreach ($class_ids as $index => $class_id) { 
+                                        // Hitung jumlah murid per kelas
+                                        $students_per_class = mysqli_query($conn, "SELECT COUNT(*) as total FROM student WHERE class_id = '{$class_id}'");
+                                        $students_count = mysqli_fetch_array($students_per_class)['total'];
+                                    ?>
+                                    <small class="d-flex justify-content-between align-items-center">
+                                        <span class="badge bg-success" style="font-size: 0.7rem; min-width: 60px;">
+                                            <?php echo htmlspecialchars($class_names[$index]); ?>
+                                        </span>
+                                        <span class="text-muted" style="font-size: 0.7rem;">
+                                            <i class="fas fa-user-friends me-1"></i><?php echo $students_count; ?> murid
+                                        </span>
+                                    </small>
+                                    <?php } ?>
+                                </div>
+                            </div>
+                            <?php } else { ?>
+                            <div class="mt-2">
+                                <span class="badge bg-secondary" style="font-size: 0.75rem;">
+                                    <i class="fas fa-info-circle me-1"></i>Belum mengampu kelas
+                                </span>
+                            </div>
+                            <?php } ?>
+                        </div>
+                    </div>
+                    <?php } ?>
+                    
                     <div class="col-lg-3 col-md-6 mb-3">
                         <div class="stats-card">
                             <div class="stat-icon materials">

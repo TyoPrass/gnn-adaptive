@@ -4,7 +4,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET' && realpath(__FILE__) == realpath($_SERV
     die(header('location: ../index.php'));
 }
 
-
 include('../config/db.php');
 session_start();
 
@@ -19,7 +18,33 @@ if ($_GET['action'] == 'getMurid') {
         5 => 'action'
     );
 
-    $sql = "SELECT * FROM student";
+    // ✅ FILTER BERDASARKAN KELAS YANG DIAMPU GURU
+    $class_filter = "";
+    if (isset($_SESSION['level_user']) && $_SESSION['level_user'] == 2) {
+        // Guru - hanya lihat murid dari kelas yang diampu
+        $teacher_id = $_SESSION['teacher_id'];
+        
+        // Ambil semua class_id yang diampu guru ini
+        $class_query = mysqli_query($conn, "SELECT DISTINCT class_id FROM class_attendance WHERE teacher_id = '{$teacher_id}'");
+        
+        if (mysqli_num_rows($class_query) > 0) {
+            $class_ids = array();
+            while ($class_row = mysqli_fetch_assoc($class_query)) {
+                $class_ids[] = $class_row['class_id'];
+            }
+            
+            if (!empty($class_ids)) {
+                $class_id_list = implode(',', $class_ids);
+                $class_filter = " AND student.class_id IN ({$class_id_list})";
+            } else {
+                $class_filter = " AND 1=0";
+            }
+        } else {
+            $class_filter = " AND 1=0";
+        }
+    }
+
+    $sql = "SELECT * FROM student WHERE 1=1 {$class_filter}";
     $query = mysqli_query($conn, $sql);
     $count = mysqli_num_rows($query);
 
@@ -31,59 +56,100 @@ if ($_GET['action'] == 'getMurid') {
     $order = $columns[$_POST['order']['0']['column']];
     $dir = $_POST['order']['0']['dir'];
 
-    // var_dump($start);
     if (empty($_POST['search']['value'])) {
-        $sql = "SELECT student.*, quiz_result.nilai as quiz_adaptive, quiz_result_e_learning.nilai as quiz_e_learning FROM student
-            LEFT JOIN quiz_result ON quiz_result.student_id = student.id
-            LEFT JOIN quiz_result_e_learning ON quiz_result_e_learning.student_id = student.id
-            ORDER BY {$order} {$dir} LIMIT {$limit} OFFSET {$start}
-        ";
+        // ✅ Query dengan JOIN ke quiz_result dan quiz_result_e_learning
+        $sql = "SELECT student.*, 
+                       COALESCE(qr.nilai, '-') as quiz_adaptive, 
+                       COALESCE(qre.nilai, '-') as quiz_e_learning 
+                FROM student
+                LEFT JOIN quiz_result qr ON qr.student_id = student.id
+                LEFT JOIN quiz_result_e_learning qre ON qre.student_id = student.id
+                WHERE 1=1 {$class_filter}
+                ORDER BY {$order} {$dir} 
+                LIMIT {$limit} OFFSET {$start}";
         $result = mysqli_query($conn, $sql);
-        // $result = mysqli_query($conn, "SELECT * FROM student order by {$order} {$dir}");
-        // var_dump($result);
+        
         if (!$result) {
-            echo mysqli_error($conn);
+            echo json_encode(['error' => mysqli_error($conn)]);
+            exit;
         }
     } else {
-        $search = $_POST['search']['value'];
-        $sql = "
-            SELECT student.*, quiz_result.nilai as quiz_adaptive, quiz_result_e_learning.nilai as quiz_e_learning FROM student
-            LEFT JOIN quiz_result ON quiz_result.student_id = student.id
-            LEFT JOIN quiz_result_e_learning ON quiz_result_e_learning.student_id = student.id
-            WHERE student_name like '%{$search}%'
-            ORDER BY {$order} {$dir} LIMIT {$limit} OFFSET {$start}
-        ";
-        $result = mysqli_query($conn, "SELECT * FROM student WHERE student_name like '%{$search}%' order by {$order} {$dir} LIMIT {$limit} OFFSET {$start}");
+        // ✅ Query pencarian dengan filter kelas
+        $search = mysqli_real_escape_string($conn, $_POST['search']['value']);
+        
+        $sql = "SELECT student.*, 
+                       COALESCE(qr.nilai, '-') as quiz_adaptive, 
+                       COALESCE(qre.nilai, '-') as quiz_e_learning 
+                FROM student
+                LEFT JOIN quiz_result qr ON qr.student_id = student.id
+                LEFT JOIN quiz_result_e_learning qre ON qre.student_id = student.id
+                WHERE student.student_name LIKE '%{$search}%' {$class_filter}
+                ORDER BY {$order} {$dir} 
+                LIMIT {$limit} OFFSET {$start}";
+        $result = mysqli_query($conn, $sql);
+        
+        if (!$result) {
+            echo json_encode(['error' => mysqli_error($conn)]);
+            exit;
+        }
 
-        $count = mysqli_num_rows($result);
-        $totalData = $count;
-        $totalFiltered = $totalData;
+        // ✅ Hitung ulang filtered
+        $count_sql = "SELECT COUNT(*) as total 
+                      FROM student
+                      WHERE student_name LIKE '%{$search}%' {$class_filter}";
+        $count_result = mysqli_query($conn, $count_sql);
+        $count_data = mysqli_fetch_assoc($count_result);
+        $totalFiltered = $count_data['total'];
     }
 
-    
     $data = array();
     if (!empty($result)) {
         $no = $start + 1;
         $row = mysqli_fetch_all($result, MYSQLI_ASSOC);
         foreach ($row as $r) {
-            $query = mysqli_query($conn, "SELECT * FROM class where id = '{$r['class_id']}'");
+            // ✅ Ambil data kelas
+            $query = mysqli_query($conn, "SELECT class_name FROM class WHERE id = '{$r['class_id']}'");
             $kelas = mysqli_fetch_array($query, MYSQLI_ASSOC);
 
-            $query = mysqli_query($conn, "SELECT login FROM users WHERE id = '{$r['user_id']}'");
-            $nis = mysqli_fetch_array($query);
-            $nestedData['no'] = $no;
-            $nestedData['murid'] = $r["student_name"];
-            $nestedData['nis'] = $nis['login'];
-            $nestedData['alamat'] = $r['student_address'];
-            $nestedData['quiz_adaptive'] = $r['quiz_adaptive'];
-            $nestedData['quiz_e_learning'] = $r['quiz_e_learning'];
-            $nestedData['kelas'] = $kelas['class_name'];
-            if ($_SESSION['level_user'] == 1) {
-                $nestedData['action'] = "<a href='javascript:void(0)' id='btn-edit' data='{$r['id']}' class='btn btn-warning text-white'><i class='bi bi-pencil-fill'></i></a>
-                &emsp;<a href='javascript:void(0)' data='{$r['id']}' id='btn-delete' class='btn btn-danger text-white'><i class='bi bi-trash'></i></a>";
+            // ✅ Ambil NIS dari tabel users (jika ada relasi)
+            if (isset($r['user_id']) && !empty($r['user_id'])) {
+                $query = mysqli_query($conn, "SELECT login FROM users WHERE id = '{$r['user_id']}'");
+                $nis_data = mysqli_fetch_array($query);
+                $nis = $nis_data['login'] ?? $r['nis'] ?? '-';
             } else {
-                $nestedData['action'] = '';
+                $nis = $r['nis'] ?? '-';
             }
+            
+            $nestedData['no'] = $no;
+            $nestedData['murid'] = htmlspecialchars($r["student_name"]);
+            $nestedData['nis'] = htmlspecialchars($nis);
+            $nestedData['alamat'] = htmlspecialchars($r['student_address'] ?? '-');
+            $nestedData['kelas'] = htmlspecialchars($kelas['class_name'] ?? '-');
+            
+            // ✅ Tampilkan nilai quiz
+            $nestedData['quiz_adaptive'] = $r['quiz_adaptive'] != '-' 
+                ? '<span class="badge bg-success">' . number_format($r['quiz_adaptive'], 2) . '</span>' 
+                : '<span class="badge bg-secondary">Belum</span>';
+                
+            $nestedData['quiz_e_learning'] = $r['quiz_e_learning'] != '-' 
+                ? '<span class="badge bg-info">' . number_format($r['quiz_e_learning'], 2) . '</span>' 
+                : '<span class="badge bg-secondary">Belum</span>';
+            
+            // ✅ Tombol aksi
+            if (isset($_SESSION['level_user']) && $_SESSION['level_user'] == 1) {
+                // Admin bisa edit/hapus
+                $nestedData['action'] = "
+                    <a href='javascript:void(0)' id='btn-edit' data='{$r['id']}' class='btn btn-action btn-edit'>
+                        <i class='fas fa-edit'></i>
+                    </a>
+                    <a href='javascript:void(0)' data='{$r['id']}' id='btn-delete' class='btn btn-action btn-delete'>
+                        <i class='fas fa-trash'></i>
+                    </a>";
+            } else {
+                // Guru hanya lihat
+                $nestedData['action'] = '<span class="badge bg-secondary"><i class="fas fa-eye me-1"></i>Lihat Saja</span>';
+            }
+            
             $data[] = $nestedData;
             $no++;
         }
@@ -97,6 +163,48 @@ if ($_GET['action'] == 'getMurid') {
     );
 
     echo json_encode($json_data);
+    exit;
+}
+
+if ($_GET['action'] == 'getStats') {
+    $class_filter = "";
+    
+    if (isset($_SESSION['level_user']) && $_SESSION['level_user'] == 2) {
+        $teacher_id = $_SESSION['teacher_id'];
+        
+        $class_query = mysqli_query($conn, "SELECT DISTINCT class_id FROM class_attendance WHERE teacher_id = '{$teacher_id}'");
+        
+        if (mysqli_num_rows($class_query) > 0) {
+            $class_ids = array();
+            while ($class_row = mysqli_fetch_assoc($class_query)) {
+                $class_ids[] = $class_row['class_id'];
+            }
+            
+            if (!empty($class_ids)) {
+                $class_id_list = implode(',', $class_ids);
+                $class_filter = " WHERE class_id IN ({$class_id_list})";
+            }
+        }
+    }
+    
+    $total_murid_query = "SELECT COUNT(*) as total FROM student {$class_filter}";
+    $total_murid_result = mysqli_query($conn, $total_murid_query);
+    $total_murid = mysqli_fetch_assoc($total_murid_result)['total'];
+    
+    if (isset($_SESSION['level_user']) && $_SESSION['level_user'] == 2) {
+        $teacher_id = $_SESSION['teacher_id'];
+        $total_kelas_query = "SELECT COUNT(DISTINCT class_id) as total FROM class_attendance WHERE teacher_id = '{$teacher_id}'";
+    } else {
+        $total_kelas_query = "SELECT COUNT(*) as total FROM class";
+    }
+    $total_kelas_result = mysqli_query($conn, $total_kelas_query);
+    $total_kelas = mysqli_fetch_assoc($total_kelas_result)['total'];
+    
+    echo json_encode([
+        'totalMurid' => $total_murid,
+        'totalKelas' => $total_kelas
+    ]);
+    exit;
 }
 
 

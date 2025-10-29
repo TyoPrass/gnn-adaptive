@@ -575,7 +575,7 @@ if(mysqli_num_rows($query) > 0){
                                                         <input type="radio" 
                                                                id="question_<?php echo $q['id']; ?>_<?php echo $a['id']; ?>"
                                                                name="question<?php echo $q['id']; ?>" 
-                                                               value="<?php echo $a['id']; ?>" 
+                                                               value="<?php echo $key ?>" 
                                                                required
                                                                onchange="updateProgress(); selectAnswer(this);">
                                                         <span class="answer-text"><?php echo $a['answer_desc']; ?></span>

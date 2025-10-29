@@ -459,15 +459,24 @@ if (!isset($_SESSION['name'])) {
                         <i class="fas fa-table text-primary me-2"></i>
                         Data Siswa
                     </h3>
-                    <p class="text-muted mb-0">Daftar lengkap siswa yang terdaftar dalam sistem</p>
+                    <p class="text-muted mb-0">
+                        <?php if ($_SESSION['level_user'] == 1) { ?>
+                            Daftar lengkap siswa yang terdaftar dalam sistem
+                        <?php } else { ?>
+                            Daftar siswa dari kelas yang Anda ampu
+                        <?php } ?>
+                    </p>
                 </div>
                 <div class="d-flex gap-2">
                     <button class="btn btn-primary" id="btnRefresh">
                         <i class="fas fa-sync-alt me-2"></i>Refresh
                     </button>
+                    <?php if ($_SESSION['level_user'] == 1) { ?>
+                    <!-- ✅ Hanya Admin yang bisa tambah murid -->
                     <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalTambahMurid">
                         <i class="fas fa-plus me-2"></i>Tambah Murid
                     </button>
+                    <?php } ?>
                 </div>
             </div>
 

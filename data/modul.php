@@ -69,53 +69,70 @@ if ($_GET['action'] == 'submitPostTest') {
             echo mysqli_error($conn);
         }
     } else {
-        if ($_SESSION['level'] > 1) {
-            $sql = "SELECT * FROM gagal_post_test WHERE student_id = '{$s_id}' AND level='{$_SESSION['level']}'";
-            $query = mysqli_query($conn, $sql);
-            if (mysqli_num_rows($query) > 0) {
-                $count_gagal = mysqli_fetch_array($query);
-                if ($count_gagal['total'] == 2) {
-                    /*
-                        TODO: Mulai turun level
-                    */
+        $sql = "SELECT * FROM gagal_post_test WHERE student_id = '{$s_id}' AND level='{$_SESSION['level']}'";
+        $query = mysqli_query($conn, $sql);
+        
+        if (mysqli_num_rows($query) > 0) {
+            $count_gagal = mysqli_fetch_array($query);
+            
+            if ($count_gagal['total'] >= 2) {
+                // GAGAL 3X ATAU LEBIH (total sudah 2, sekarang jadi 3)
+                
+                if ($_SESSION['level'] > 1) {
+                    // ⬇️ TURUN LEVEL (jika bukan level terendah)
                     $level = $_SESSION['level'] - 1;
-                    $sql = "UPDATE level_student set level = '{$level}' where student_id = '{$s_id}'";
+                    $sql = "UPDATE level_student SET level = '{$level}' WHERE student_id = '{$s_id}'";
                     $query = mysqli_query($conn, $sql);
+                    
                     if ($query) {
-                        $sql = "DELETE FROM gagal_post_test WHERE student_id = '{$s_id}'";
-                        $query = mysqli_query($conn, $sql);
-                        if ($query) {
-                            $_SESSION['level'] = $level;
-                            $_SESSION['turun_level'] = true;
-                            $_SESSION['cek_level']=true;
-                            if ($level==2) {
-                                header("location: ../student/gagal-post-test.php");
-                            }else{
-                            // $_SESSION['gagal_post_test'] = true;
-                            header("location: ../student/modul.php");
-                        }
-                        }
+                        // Hapus riwayat gagal level lama, mulai fresh di level baru
+                        $sql = "DELETE FROM gagal_post_test WHERE student_id = '{$s_id}' AND level = '{$_SESSION['level']}'";
+                        mysqli_query($conn, $sql);
+                        
+                        $_SESSION['level'] = $level;
+                        $_SESSION['turun_level'] = true;
+                        $_SESSION['cek_level'] = true;
+                        
+                        header("location: ../student/gagal-post-test.php?action=turun_level");
+                        exit();
                     }
                 } else {
-                    $_SESSION['cek_level']=false;
+                    // ⚠️ SUDAH DI LEVEL TERENDAH (Level 1)
+                    // Tetap simpan riwayat gagal, tapi TIDAK bisa turun lagi
                     $total = $count_gagal['total'] + 1;
-                    $sql = "UPDATE gagal_post_test set total = '{$total}' WHERE student_id = '{$s_id}'";
-                    $query = mysqli_query($conn, $sql);
+                    $sql = "UPDATE gagal_post_test SET total = '{$total}' WHERE student_id = '{$s_id}' AND level = '{$_SESSION['level']}'";
+                    mysqli_query($conn, $sql);
+                    
                     $_SESSION['gagal_post_test'] = true;
-                    header("location: ../student/gagal-post-test.php");
+                    $_SESSION['level_terendah'] = true;
+                    
+                    header("location: ../student/gagal-post-test.php?action=level_terendah");
+                    exit();
                 }
             } else {
-                $_SESSION['cek_level']=false;
-                $sql = "INSERT INTO gagal_post_test (student_id, level, total) VALUES('{$s_id}', '{$_SESSION['level']}', 1)";
+                // GAGAL 2X (update total menjadi 2)
+                $total = $count_gagal['total'] + 1;
+                $sql = "UPDATE gagal_post_test SET total = '{$total}' WHERE student_id = '{$s_id}' AND level = '{$_SESSION['level']}'";
                 $query = mysqli_query($conn, $sql);
-                if ($query) {
-                    $_SESSION['gagal_post_test'] = true;
-                    header("location: ../student/gagal-post-test.php");
-                }
+                
+                $_SESSION['cek_level'] = false;
+                $_SESSION['gagal_post_test'] = true;
+                
+                header("location: ../student/gagal-post-test.php");
+                exit();
             }
-            // var_dump($count_gagal);
+        } else {
+            // ✅ PERTAMA KALI GAGAL di level ini (untuk SEMUA level termasuk level 1)
+            $sql = "INSERT INTO gagal_post_test (student_id, level, total) VALUES('{$s_id}', '{$_SESSION['level']}', 1)";
+            $query = mysqli_query($conn, $sql);
+            
+            if ($query) {
+                $_SESSION['cek_level'] = false;
+                $_SESSION['gagal_post_test'] = true;
+                
+                header("location: ../student/gagal-post-test.php");
+                exit();
+            }
         }
-        $_SESSION['gagal_post_test'] = true;        
-        header("location: ../student/gagal-post-test.php");
     }
 }
