@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Oct 27, 2025 at 02:39 PM
+-- Generation Time: Nov 19, 2025 at 01:59 PM
 -- Server version: 8.0.30
 -- PHP Version: 8.1.10
 
@@ -87,7 +87,9 @@ INSERT INTO `class_attendance` (`id`, `class_id`, `teacher_id`) VALUES
 (14, 2, 57),
 (15, 2, 58),
 (16, 2, 59),
-(17, 1, 60);
+(17, 1, 60),
+(18, 1, 61),
+(19, 3, 61);
 
 -- --------------------------------------------------------
 
@@ -107,10 +109,7 @@ CREATE TABLE `gagal_post_test` (
 --
 
 INSERT INTO `gagal_post_test` (`id`, `student_id`, `level`, `total`) VALUES
-(4, 411, 2, 1),
-(5, 421, 2, 2),
-(6, 424, 2, 2),
-(7, 425, 2, 2);
+(9, 431, 1, 1);
 
 -- --------------------------------------------------------
 
@@ -129,73 +128,10 @@ CREATE TABLE `level_student` (
 --
 
 INSERT INTO `level_student` (`id`, `student_id`, `level`) VALUES
-(34, 11, 2),
-(35, 16, 2),
-(36, 17, 2),
-(37, 19, 2),
-(38, 23, 2),
-(39, 24, 2),
-(40, 25, 2),
-(41, 34, 2),
-(42, 38, 2),
-(43, 48, 2),
-(44, 49, 2),
-(45, 50, 2),
-(46, 51, 2),
-(47, 57, 2),
-(48, 59, 2),
-(49, 75, 2),
-(50, 88, 2),
-(51, 91, 2),
-(52, 94, 1),
-(53, 95, 1),
-(54, 97, 2),
-(55, 98, 3),
-(56, 99, 1),
-(57, 100, 2),
-(58, 101, 2),
-(59, 102, 1),
-(60, 103, 2),
-(61, 104, 2),
-(62, 105, 2),
-(63, 107, 3),
-(64, 108, 1),
-(65, 109, 3),
-(66, 110, 3),
-(67, 111, 1),
-(68, 112, 2),
-(69, 113, 2),
-(70, 114, 1),
-(71, 116, 1),
-(72, 118, 1),
-(73, 119, 2),
-(74, 120, 2),
-(75, 121, 1),
-(76, 123, 2),
-(77, 122, 1),
-(78, 124, 1),
-(79, 125, 2),
-(80, 126, 1),
-(81, 127, 1),
-(82, 128, 1),
-(83, 129, 1),
-(84, 130, 1),
-(85, 131, 1),
-(86, 132, 2),
-(87, 133, 1),
-(89, 140, 2),
-(90, 142, 2),
-(91, 411, 1),
-(92, 411, 1),
-(93, 412, 2),
-(94, 418, 2),
-(95, 420, 0),
-(96, 420, 2),
-(97, 421, 1),
-(98, 148, 1),
-(99, 423, 0),
-(100, 424, 1),
-(101, 425, 1);
+(103, 425, 1),
+(104, 429, 2),
+(105, 430, 3),
+(106, 431, 1);
 
 -- --------------------------------------------------------
 
@@ -247,8 +183,7 @@ INSERT INTO `module` (`id`, `module_desc`, `sub_topic_id`, `number`, `module_lev
 (4, 'Perbedaan Sel Hewan dengan Sel Tumbuhan', 2, 4, '1'),
 (5, 'Mekanisme Transpor Melalui Membran', 3, 5, '2'),
 (6, 'Sintesis Protein', 3, 6, '3'),
-(7, 'Reproduksi Sel', 3, 7, '2'),
-(9, 'Tes', 4, 1, '1');
+(7, 'Reproduksi Sel', 3, 7, '2');
 
 -- --------------------------------------------------------
 
@@ -267,128 +202,10 @@ CREATE TABLE `module_learned` (
 --
 
 INSERT INTO `module_learned` (`id`, `module_id`, `student_id`) VALUES
-(10, 2, 91),
-(11, 2, 57),
-(12, 1, 57),
-(13, 2, 24),
-(14, 3, 57),
-(15, 3, 24),
-(16, 4, 57),
-(17, 5, 24),
-(18, 7, 24),
-(19, 6, 24),
-(20, 5, 57),
-(21, 1, 24),
-(22, 4, 24),
-(23, 7, 57),
-(24, 6, 57),
-(25, 1, 94),
-(26, 4, 94),
-(27, 2, 94),
-(28, 3, 94),
-(29, 2, 97),
-(30, 1, 97),
-(31, 3, 97),
-(32, 4, 97),
-(33, 5, 97),
-(34, 7, 97),
-(35, 6, 97),
-(36, 1, 99),
-(37, 2, 101),
-(38, 2, 19),
-(39, 3, 19),
-(40, 5, 19),
-(41, 7, 19),
-(42, 6, 19),
-(43, 1, 19),
-(44, 4, 19),
-(45, 2, 23),
-(46, 3, 23),
-(47, 5, 23),
-(48, 7, 23),
-(49, 6, 23),
-(50, 2, 113),
-(51, 3, 113),
-(52, 5, 113),
-(53, 1, 114),
-(54, 4, 114),
-(55, 2, 114),
-(56, 3, 114),
-(57, 5, 114),
-(58, 1, 111),
-(59, 4, 111),
-(60, 2, 11),
-(61, 3, 11),
-(62, 5, 11),
-(63, 7, 11),
-(64, 6, 11),
-(65, 2, 34),
-(66, 3, 34),
-(67, 5, 34),
-(68, 7, 34),
-(69, 6, 34),
-(70, 2, 16),
-(71, 3, 16),
-(72, 5, 16),
-(73, 7, 16),
-(74, 6, 16),
-(75, 1, 16),
-(76, 4, 16),
-(77, 6, 109),
-(78, 1, 109),
-(79, 4, 109),
-(80, 2, 109),
-(81, 3, 109),
-(82, 5, 109),
-(83, 7, 109),
-(84, 6, 110),
-(85, 1, 110),
-(86, 4, 110),
-(87, 2, 110),
-(88, 3, 110),
-(89, 5, 110),
-(90, 7, 110),
-(91, 2, 17),
-(92, 3, 17),
-(93, 5, 17),
-(94, 7, 17),
-(95, 6, 17),
-(96, 1, 17),
-(97, 4, 17),
-(98, 2, 112),
-(99, 3, 112),
-(100, 5, 112),
-(101, 2, 50),
-(102, 3, 50),
-(103, 5, 50),
-(104, 7, 50),
-(105, 1, 50),
-(106, 2, 51),
-(107, 3, 51),
-(108, 5, 51),
-(109, 7, 51),
-(110, 6, 51),
-(111, 1, 51),
-(112, 4, 51),
-(113, 2, 25),
-(114, 3, 25),
-(115, 5, 25),
-(116, 1, 25),
-(117, 4, 25),
-(118, 1, 118),
-(119, 4, 118),
-(120, 2, 118),
-(121, 3, 118),
-(122, 5, 118),
-(123, 7, 118),
-(124, 1, 116),
-(125, 4, 116),
-(126, 2, 116),
-(127, 3, 116),
-(128, 5, 116),
-(129, 7, 116),
-(130, 6, 116),
-(131, 2, 123);
+(132, 2, 425),
+(133, 2, 429),
+(134, 1, 431),
+(135, 4, 431);
 
 -- --------------------------------------------------------
 
@@ -408,56 +225,55 @@ CREATE TABLE `module_question` (
 --
 
 INSERT INTO `module_question` (`id`, `module_id`, `question`, `answer`) VALUES
-(1, 1, 'Menurut Campbell, Reece, & Mitchel sel merupakan . . .', 3),
-(2, 1, 'Unit struktural dan fungsional terkecil makhluk hidup adalah pengertian dari ...', 5),
-(3, 1, 'Sel disebut sebagai unit fungsional terkecil dalam kehidupan karena . . .', 12),
-(4, 1, 'Sel dapat melakukan berbagai proses kehidupan misalnya . . .\n<br/>1.	respirasi\n<br/>2.	transportasi\n<br/>3.	reproduksi\n<br/>4.	ekskresi\n<br/>5.	sekresi\n<br/>6.	sintesis\n<br/>Jawaban yang benar dari pilihan diatas adalah . . .\n', 16),
-(5, 1, 'Istilah sel pertama kali dinyatakan oleh . . .', 18),
-(6, 1, 'Sel juga merupakan unit . . . makhluk hidup yang menurunkan sifat genetis dari satu generasi kepada generasi berikutnya.', 22),
-(7, 1, 'Sel merupakan ruangan-ruangan kecil yang dibatasi oleh dinding adalah pengertian sel menurut . . .', 25),
-(8, 2, 'Senyawa kimia penyusun sel disebut . . .', 29),
-(9, 2, 'komponen kimia sebuah sel terdiri atas . . .', 35),
-(10, 2, 'unsur makro adalah . . .', 38),
-(11, 2, 'Senyawa organik terdiri atas . . .', 44),
-(12, 2, 'Air merupakan senyawa penyusun sel terbesar. Berapa banyak kontribusi air terhadap sel?', 47),
-(13, 2, 'Gas yang terlibat dalam aktivitas sel adalah . . ', 49),
-(14, 2, 'penyimpan informasi genetis dalam sel dan bersama-sama dengan protein histon membentuk kromosom adalah . . .', 54),
-(15, 3, 'berdasarkan strukturnya, sel dapat dibedakan menjadi . . . jenis.', 57),
-(16, 3, 'Makhluk hidup yang termasuk prokariotik adalah . . .', 63),
-(17, 3, 'Dinding sel berfungsi sebagai . . .', 68),
-(18, 3, 'Membran plasma tersusun dari . . .', 69),
-(19, 3, 'Struktur sel eukariotik terdiri atas tiga komponen utama yaitu . . .', 73),
-(20, 3, 'Macam-macam organel penyusun sel adalah . . .', 80),
-(21, 3, '1) Tempat sintesis polisakarida seperti mukus, selulosa, dan hemiselulosa. \n<br/>2) Menetralkan racun (detoksifikasi)\n<br/>3) Menyintesis lemak dan kolesterol\n<br/>4) Membentuk akrosom pada sperma, kuning telur pada sel telur, dan lisosom.\n<br/>Fungsi dari kompleks golgi adalah . . .\n', 82),
-(22, 4, 'Bagian sel yang hanya dimiliki oleh sel tumbuhan yaitu . . .', 85),
-(23, 4, 'Sel hewan dan sel tumbuhan termasuk . . .', 90),
-(24, 4, 'Sel hewan memiliki . . . yang tidak dimiliki oleh sel tumbuhan.', 96),
-(25, 4, 'lapisan terluar yang tersusun dari selulosa, hemiselulosa, dan pektin adalah . . .', 97),
-(26, 4, 'Vakuola mempunyai beberapa fungsi sebagai berikut, kecuali . . .', 102),
-(27, 4, 'Kromoplas yaitu . . .', 106),
-(28, 4, 'Sel hewan memiliki . . . sentriol di dalam sentrosom', 109),
-(29, 5, 'Perpindahan molekul atau ion yang melewati membran ada dua macam yaitu . . .', 115),
-(30, 5, 'Difusi adalah . . .', 117),
-(31, 5, 'Contoh transpor pasif yaitu . . .', 124),
-(32, 5, 'Transpor pasif merupakan . . .', 128),
-(33, 5, 'Contoh transpor aktif antara lain :\n<br/>1. pompa natrium-kalium, \n<br/>2.endositosis\n<br/>3.eksositosis\n<br/>Contoh transpor aktif yang benar pada soal diatas adalah . . .', 134),
-(34, 5, 'Air akan masuk ke dalam sel jika konsentrasi larutan dalam sel tinggi sehingga terjadi . . .', 134),
-(35, 5, 'Eksosmosis pada tumbuhan akan mengakibatkan . . .', 139),
-(36, 6, 'Sintesis protein berlangsung di  . . .', 143),
-(37, 6, 'Sintesis protein adalah  . . .', 145),
-(38, 6, 'Translasi adalah . . .', 150),
-(39, 6, 'Proses transkripsi akan berhenti setelah sampai pada terminator, yakni urutan DNA yang berfungsi menghentikan transkripsi. Proses ini terjadi pada tahapan . . .', 156),
-(40, 6, 'Translasi terdiri atas berapa tahapan?', 158),
-(41, 6, 'kodon start AUG bertugas untuk  . . .', 163),
-(42, 6, 'Yang berperan mengatur homeostasis, metabolisme, reproduksi, pertumbuhan, dan perkembangan adalah . . .', 165),
-(43, 7, 'Reproduksi sel merupakan proses penggandaan materi genetik (DNA) yang terdapat di dalam nukleus sehingga . . .', 169),
-(44, 7, 'peristiwa pembelahan sel yang terjadi pada sel-sel somatis serta menghasilkan dua sel anak dengan genotipe sama dan identik dengan induknya. Pengertian dari . . .', 174),
-(45, 7, 'Pembelahan mitosis bertujuan . . .', 180),
-(46, 7, 'Adapun tahap-tahap pembelahan mitosis meliputi :\n<br/>1.profase \n<br/>2.prometafase, \n<br/>3.metafase, \n<br/>4. anafase \n<br/>5.telofase\n<br/>tahap-tahap pembelahan yang benar adalah . . .\n', 184),
-(47, 7, 'Tanaman mengalami pertumbuhan karena . . .', 185),
-(48, 7, 'Sel melangsungkan pembelahan mitosis sehingga . . .', 191),
-(49, 7, 'Pertumbuhan adalah . . .', 196),
-(50, 7, 'Halo Ini tes', 198);
+(1, 1, 'Menurut Campbell, Reece, & Mitchel sel merupakan . . .', 0),
+(2, 1, 'Unit struktural dan fungsional terkecil makhluk hidup adalah pengertian dari ...', 0),
+(3, 1, 'Sel disebut sebagai unit fungsional terkecil dalam kehidupan karena . . .', 0),
+(4, 1, 'Sel dapat melakukan berbagai proses kehidupan misalnya . . .\n<br/>1.	respirasi\n<br/>2.	transportasi\n<br/>3.	reproduksi\n<br/>4.	ekskresi\n<br/>5.	sekresi\n<br/>6.	sintesis\n<br/>Jawaban yang benar dari pilihan diatas adalah . . .', 0),
+(5, 1, 'Istilah sel pertama kali dinyatakan oleh . . .', 0),
+(6, 1, 'Sel juga merupakan unit . . . makhluk hidup yang menurunkan sifat genetis dari satu generasi kepada generasi berikutnya.', 0),
+(7, 1, 'Sel merupakan ruangan-ruangan kecil yang dibatasi oleh dinding adalah pengertian sel menurut . . .', 0),
+(8, 2, 'Senyawa kimia penyusun sel disebut . . .', 0),
+(9, 2, 'komponen kimia sebuah sel terdiri atas . . .', 0),
+(10, 2, 'unsur makro adalah . . .', 0),
+(11, 2, 'Senyawa organik terdiri atas . . .', 0),
+(12, 2, 'Air merupakan senyawa penyusun sel terbesar. Berapa banyak kontribusi air terhadap sel?', 0),
+(13, 2, 'Gas yang terlibat dalam aktivitas sel adalah . .', 0),
+(14, 2, 'penyimpan informasi genetis dalam sel dan bersama-sama dengan protein histon membentuk kromosom adalah . . .', 0),
+(15, 3, 'berdasarkan strukturnya, sel dapat dibedakan menjadi . . . jenis.', 0),
+(16, 3, 'Makhluk hidup yang termasuk prokariotik adalah . . .', 0),
+(17, 3, 'Dinding sel berfungsi sebagai . . .', 0),
+(18, 3, 'Membran plasma tersusun dari . . .', 0),
+(19, 3, 'Struktur sel eukariotik terdiri atas tiga komponen utama yaitu . . .', 0),
+(20, 3, 'Macam-macam organel penyusun sel adalah . . .', 0),
+(21, 3, '1) Tempat sintesis polisakarida seperti mukus, selulosa, dan hemiselulosa. \n<br/>2) Menetralkan racun (detoksifikasi)\n<br/>3) Menyintesis lemak dan kolesterol\n<br/>4) Membentuk akrosom pada sperma, kuning telur pada sel telur, dan lisosom.\n<br/>Fungsi dari kompleks golgi adalah . . .', 0),
+(22, 4, 'Bagian sel yang hanya dimiliki oleh sel tumbuhan yaitu . . .', 0),
+(23, 4, 'Sel hewan dan sel tumbuhan termasuk . . .', 0),
+(24, 4, 'Sel hewan memiliki . . . yang tidak dimiliki oleh sel tumbuhan.', 0),
+(25, 4, 'lapisan terluar yang tersusun dari selulosa, hemiselulosa, dan pektin adalah . . .', 0),
+(26, 4, 'Vakuola mempunyai beberapa fungsi sebagai berikut, kecuali . . .', 0),
+(27, 4, 'Kromoplas yaitu . . .', 0),
+(28, 4, 'Sel hewan memiliki . . . sentriol di dalam sentrosom', 0),
+(29, 5, 'Perpindahan molekul atau ion yang melewati membran ada dua macam yaitu . . .', 0),
+(30, 5, 'Difusi adalah . . .', 0),
+(31, 5, 'Contoh transpor pasif yaitu . . .', 0),
+(32, 5, 'Transpor pasif merupakan . . .', 0),
+(33, 5, 'Contoh transpor aktif antara lain :\n<br/>1. pompa natrium-kalium, \n<br/>2.endositosis\n<br/>3.eksositosis\n<br/>Contoh transpor aktif yang benar pada soal diatas adalah . . .', 0),
+(34, 5, 'Air akan masuk ke dalam sel jika konsentrasi larutan dalam sel tinggi sehingga terjadi . . .', 0),
+(35, 5, 'Eksosmosis pada tumbuhan akan mengakibatkan . . .', 0),
+(36, 6, 'Sintesis protein berlangsung di  . . .', 0),
+(37, 6, 'Sintesis protein adalah  . . .', 0),
+(38, 6, 'Translasi adalah . . .', 0),
+(39, 6, 'Proses transkripsi akan berhenti setelah sampai pada terminator, yakni urutan DNA yang berfungsi menghentikan transkripsi. Proses ini terjadi pada tahapan . . .', 0),
+(40, 6, 'Translasi terdiri atas berapa tahapan?', 0),
+(41, 6, 'kodon start AUG bertugas untuk  . . .', 0),
+(42, 6, 'Yang berperan mengatur homeostasis, metabolisme, reproduksi, pertumbuhan, dan perkembangan adalah . . .', 0),
+(43, 7, 'Reproduksi sel merupakan proses penggandaan materi genetik (DNA) yang terdapat di dalam nukleus sehingga . . .', 0),
+(44, 7, 'peristiwa pembelahan sel yang terjadi pada sel-sel somatis serta menghasilkan dua sel anak dengan genotipe sama dan identik dengan induknya. Pengertian dari . . .', 0),
+(45, 7, 'Pembelahan mitosis bertujuan . . .', 0),
+(46, 7, 'Adapun tahap-tahap pembelahan mitosis meliputi :\n<br/>1.profase \n<br/>2.prometafase, \n<br/>3.metafase, \n<br/>4. anafase \n<br/>5.telofase\n<br/>tahap-tahap pembelahan yang benar adalah . . .', 3),
+(47, 7, 'Tanaman mengalami pertumbuhan karena . . .', 0),
+(48, 7, 'Sel melangsungkan pembelahan mitosis sehingga . . .', 0),
+(49, 7, 'Pertumbuhan adalah . . .', 0);
 
 -- --------------------------------------------------------
 
@@ -476,205 +292,202 @@ CREATE TABLE `module_question_choice` (
 --
 
 INSERT INTO `module_question_choice` (`id`, `answer_desc`, `question_id`) VALUES
-(1, 'bagian yang terdiri dari nukelus (inti sel) dan nukleolus (anak inti)', 1),
-(2, 'Sel adalah unit dasar kehidupan makhluk hidup', 1),
-(3, 'kumpulan materi paling sederhana yang dapat hidup', 1),
-(4, 'mata rantai terakhir dalam rantai besar yang membentuk jaringan organ, sistem, dan individu.', 1),
-(5, 'sel', 2),
-(6, 'sel prokariotik', 2),
-(7, 'sel eukariotik', 2),
-(8, 'reproduksi sel', 2),
-(9, 'merupakan penyusun yang mendasar bagi tubuh makhluk hidup ', 3),
-(10, 'di dalam sel terjadi berbagai reaksi-reaksi kimia kehidupan ', 3),
-(11, 'dapat menurunkan sifat genetis dari satu generasi ke generasi berikutnya ', 3),
-(12, 'sel tidak dapat dibagi-bagi lagi menjadi lebih kecil', 3),
-(13, '1,2,3,6', 4),
-(14, '2,4,5,6', 4),
-(15, '1,3,5,6', 4),
-(16, 'semua benar', 4),
-(17, 'Johannes Purkinje', 5),
-(18, 'Robert Hooke', 5),
-(19, 'Theodor Schwann', 5),
-(20, 'Rudolf Virchow', 5),
-(21, 'protoplasma', 6),
-(22, 'hereditas', 6),
-(23, 'ekskresi', 6),
-(24, 'sekresi', 6),
-(25, 'Robert Hooke', 7),
-(26, 'Rene Dutrochet', 7),
-(27, 'Alexander Braun', 7),
-(28, 'Rudolph Vircow', 7),
-(29, 'protoplasma', 8),
-(30, 'hereditas', 8),
-(31, 'ekskresi', 8),
-(32, 'sekresi', 8),
-(33, 'unsur makro, unsur mikro, senyawa organik', 9),
-(34, 'senyawa organik, dan senyawa anorganik.', 9),
-(35, 'unsur makro, unsur mikro, senyawa organik, dan senyawa anorganik.', 9),
-(36, 'unsur mikro, senyawa organik, dan senyawa anorganik.', 9),
-(37, 'unsur yang terdapat dalam jumlah sangat sedikit', 10),
-(38, 'unsur terbesar yang menyusun sebuah sel.', 10),
-(39, 'makromolekul yang sangat penting untuk kelangsungan hidup sel.', 10),
-(40, 'penyimpan informasi genetis dalam sel dan bersama-sama dengan protein histon membentuk kromosom.', 10),
-(41, 'asam nukleat', 11),
-(42, 'asam amino dan nukleotida', 11),
-(43, 'karbohidrat dan protein,', 11),
-(44, 'mikromolekul dan makromolekul.', 11),
-(45, '40-45%', 12),
-(46, '45-50%', 12),
-(47, '50-60%', 12),
-(48, '60-70%', 12),
-(49, 'NH3', 13),
-(50, 'NaCl', 13),
-(51, 'CaSO4', 13),
-(52, 'NaHCO3', 13),
-(53, 'RNA', 14),
-(54, 'DNA', 14),
-(55, 'Lipid', 14),
-(56, 'Enzim', 14),
-(57, '2', 15),
-(58, '3', 15),
-(59, '4', 15),
-(60, '5', 15),
-(61, 'bakteri', 16),
-(62, 'ganggang biru', 16),
-(63, 'a dan b benar', 16),
-(64, 'a dan b salah', 16),
-(65, 'pelindung molekuler sel terhadap lingkungan di sekitarnya.', 17),
-(66, 'untuk mencerna makanan secara intraseluler dan untuk melakukan proses metabolisme sel.', 17),
-(67, 'penghasil energi.', 17),
-(68, 'pelindung dan pemberi bentuk tubuh', 17),
-(69, 'karbohidrat, lemak, dan protein.', 18),
-(70, 'peptidoglikan, lipid, dan protein', 18),
-(71, 'air, protein, lipid, mineral, dan enzim-enzim ', 18),
-(72, 'peptidoglikan, lipid, dan lemak', 18),
-(73, 'membran plasma, sitoplasma, dan Kompleks Golgi', 19),
-(74, 'membran plasma, sitoplasma, dan organel-organel sel.', 19),
-(75, 'sitoplasma, Lisosom, dan organel-organel sel.', 19),
-(76, 'kompleks Golgi, Lisosom, dan organel-organel sel', 19),
-(77, 'Inti Sel (Nukleus)', 20),
-(78, 'Retikulum Endoplasma (RE)', 20),
-(79, 'Ribosom', 20),
-(80, 'Semua jawaban benar', 20),
-(81, '1 dan 2', 21),
-(82, '1 dan 4', 21),
-(83, '2 dan 3', 21),
-(84, '2 dan 4', 21),
-(85, 'plastida', 22),
-(86, 'sentrosom', 22),
-(87, 'mikrotubulus', 22),
-(88, 'mitokondria', 22),
-(89, 'sel prokariotik', 23),
-(90, 'sel eukariotik', 23),
-(91, 'sitoplasma', 23),
-(92, 'membran plasma', 23),
-(93, 'dinding sel', 24),
-(94, 'vakuola', 24),
-(95, 'plastida', 24),
-(96, 'sentriol', 24),
-(97, 'dinding sel', 25),
-(98, 'vakuola', 25),
-(99, 'plastida', 25),
-(100, 'sentriol', 25),
-(101, 'Tempat menyimpan zat makanan seperti amilum dan gula.', 26),
-(102, 'mengatur keluar masuknya zat ', 26),
-(103, 'Menyimpan pigmen.', 26),
-(104, 'Menyimpan minyak asiri.', 26),
-(105, 'plastida yang mengandung klorofil dan pigmen fotosintetik lainnya', 27),
-(106, 'plastida yang mengandung pigmen nonfotosintetik', 27),
-(107, 'plastida yang tidak berwarna', 27),
-(108, 'plastida yang berwarna', 27),
-(109, 'dua', 28),
-(110, 'tiga', 28),
-(111, 'empat', 28),
-(112, 'lima', 28),
-(113, 'transpor pasif dan transpor tidak aktif', 29),
-(114, 'transpor aktif dan transpor aktif', 29),
-(115, 'transpor pasif dan transpor aktif', 29),
-(116, 'semua jawaban salah', 29),
-(117, 'perpindahan molekul-molekul zat dari konsentrasi tinggi ke konsentrasi rendah baik melalui membran plasma ataupun tidak.', 30),
-(118, 'perpindahan molekul-molekul pelarut (misal air) dari larutan berkonsentrasi rendah (hipotonik) ke larutan berkonsentrasi tinggi (hipertonik) melalui selaput (membran) semipermeabel.', 30),
-(119, 'perpindahan molekul air melalui membran semipermeabel dari larutan yang kadar airnya tinggi ke larutan yang kadar airnya rendah', 30),
-(120, 'perpindahan molekul atau ion tanpa menggunakan energi sel.', 30),
-(121, 'difusi dan eksositosis', 31),
-(122, 'endositosis dan eksositosis.', 31),
-(123, 'pompa natrium-kalium', 31),
-(124, 'difusi dan osmosis.', 31),
-(125, 'perpindahan molekul-molekul zat dari konsentrasi tinggi ke konsentrasi rendah baik melalui membran plasma ataupun tidak.', 32),
-(126, 'perpindahan molekul-molekul pelarut (misal air) dari larutan berkonsentrasi rendah (hipotonik) ke larutan berkonsentrasi tinggi (hipertonik) melalui selaput (membran) semipermeabel.', 32),
-(127, 'perpindahan molekul air melalui membran semipermeabel dari larutan yang kadar airnya tinggi ke larutan yang kadar airnya rendah', 32),
-(128, 'perpindahan molekul atau ion tanpa menggunakan energi sel.', 32),
-(129, '1 dan 2', 33),
-(130, '2 dan 3', 33),
-(131, '1 dan 3', 33),
-(132, 'Semua jawaban benar', 33),
-(133, 'eksosmosis', 34),
-(134, 'endosmosis', 34),
-(135, 'plasmolisis', 34),
-(136, 'eksosmosis dan endosmosis', 34),
-(137, 'kehancuran sel karena robeknya membran plasma (lisis).', 35),
-(138, 'kerusakan sel.', 35),
-(139, 'terlepasnya membran dari dinding sel', 35),
-(140, 'pengerutan sel (krenasi).', 35),
-(141, 'membran', 36),
-(142, 'badan golgi', 36),
-(143, 'ribosom', 36),
-(144, 'RNA', 36),
-(145, 'proses penerjemahan gen menjadi urutan asam amino yang akan disintesis menjadi polipeptida (protein)', 37),
-(146, 'proses pelekatan antara tRNA dengan asam amino dengan bantuan enzim aminoasil-tRNA sintetase.', 37),
-(147, 'Proses transkripsi diawali dari sintesis RNA dari salah satu rantai DNA sense atau rantai cetakan. Adapun rantai DNA komplemennya disebut rantai antisense', 37),
-(148, 'menentukan tempat dimulainya transkripsi dan menentukan satu rantai DNA yang akan digunakan sebagai cetakan', 37),
-(149, 'proses penerjemahan gen menjadi urutan asam amino yang akan disintesis menjadi polipeptida (protein)', 38),
-(150, 'proses pelekatan antara tRNA dengan asam amino dengan bantuan enzim aminoasil-tRNA sintetase.', 38),
-(151, 'Proses transkripsi diawali dari sintesis RNA dari salah satu rantai DNA sense atau rantai cetakan. Adapun rantai DNA komplemennya disebut rantai antisense', 38),
-(152, 'menentukan tempat dimulainya transkripsi dan menentukan satu rantai DNA yang akan digunakan sebagai cetakan', 38),
-(153, 'Inisiasi', 39),
-(154, 'Elongasi', 39),
-(155, 'Translasi', 39),
-(156, 'Terminasi', 39),
-(157, '2', 40),
-(158, '3', 40),
-(159, '4', 40),
-(160, '5', 40),
-(161, 'mengatalis pembentukan ikatan peptida antara asam amino yang baru', 41),
-(162, 'memberi sinyal untuk menghentikan translasi', 41),
-(163, 'membawa kode untuk membentuk asam amino metionin', 41),
-(164, 'melepas dari ribosom menuju ke sitoplasma', 41),
-(165, 'Hormon', 42),
-(166, 'Enzim', 42),
-(167, 'Protein', 42),
-(168, 'DNA', 42),
-(169, 'menghasilkan sel-sel anakan yang memiliki materi genetik yang identik', 43),
-(170, 'menghasilkan dua sel anak dengan genotipe sama dan identik dengan induknya', 43),
-(171, 'dapat mengalami perubahan bentuk, ukuran, dan jumlahnya bertambah banyak.', 43),
-(172, 'semua jawaban salah.', 43),
-(173, 'Reproduksi sel', 44),
-(174, 'Pembelahan mitosis', 44),
-(175, 'pembelahan amitosis', 44),
-(176, 'pembelahan meiosis', 44),
-(177, 'dapat mengalami perubahan bentuk, ukuran, dan jumlahnya bertambah banyak.', 45),
-(178, 'untuk menghasilkan sel-sel anakan yang memiliki materi genetik yang identik', 45),
-(179, 'untuk menghasilkan dua sel anak dengan genotipe sama dan identik dengan induknya', 45),
-(180, 'untuk pertumbuhan dan regenerasi sel.', 45),
-(181, '1,2,5', 46),
-(182, '3,2,4', 46),
-(183, '5,4,1', 46),
-(184, '1,2,3,4,5', 46),
-(185, 'adanya penambahan jumlah sel sebagai hasil pembelahan mitosis. ', 47),
-(186, 'Pertumbuhan umumnya terjadi pada daerah meristem (titik tumbuh)', 47),
-(187, 'terdapat pada ujung akar dan ujung batang.', 47),
-(188, 'peristiwa pembelahan sel secara mitosis', 47),
-(189, 'menghasilkan sel-sel anakan yang memiliki materi genetik yang identik', 48),
-(190, 'menghasilkan dua sel anak dengan genotipe sama dan identik dengan induknya', 48),
-(191, 'dapat mengalami perubahan bentuk, ukuran, dan jumlahnya bertambah banyak.', 48),
-(192, 'semua jawaban salah.', 48),
-(193, 'proses penggandaan materi genetik (DNA) yang terdapat di dalam nukleus sehingga menghasilkan sel-sel anakan yang memiliki materi genetik yang identik', 49),
-(194, 'pembelahan mitosis sehingga dapat mengalami perubahan bentuk, ukuran, dan jumlahnya bertambah banyak.', 49),
-(195, 'peristiwa pembelahan sel yang terjadi pada sel-sel somatis serta menghasilkan dua sel anak dengan genotipe sama dan identik dengan induknya', 49),
-(196, 'suatu proses pertambahan ukuran, baik volume, bobot, dan jumlah sel yang bersifat irreversible.', 49),
-(197, 'Ini saya lagi tes', 50),
-(198, 'ini saya lagi tes', 50),
-(199, 'ini saya lagi tes', 50);
+(212, '1,2,5', 46),
+(213, '3,2,4', 46),
+(214, '5,4,1', 46),
+(215, '1,2,3,4,5', 46),
+(260, 'unsur makro, unsur mikro, senyawa organik', 9),
+(261, 'senyawa organik, dan senyawa anorganik.', 9),
+(262, 'unsur makro, unsur mikro, senyawa organik, dan senyawa anorganik.', 9),
+(263, 'unsur mikro, senyawa organik, dan senyawa anorganik.', 9),
+(288, 'proses penggandaan materi genetik (DNA) yang terdapat di dalam nukleus sehingga menghasilkan sel-sel anakan yang memiliki materi genetik yang identik', 49),
+(289, 'pembelahan mitosis sehingga dapat mengalami perubahan bentuk, ukuran, dan jumlahnya bertambah banyak.', 49),
+(290, 'peristiwa pembelahan sel yang terjadi pada sel-sel somatis serta menghasilkan dua sel anak dengan genotipe sama dan identik dengan induknya', 49),
+(291, 'suatu proses pertambahan ukuran, baik volume, bobot, dan jumlah sel yang bersifat irreversible.', 49),
+(292, 'menghasilkan sel-sel anakan yang memiliki materi genetik yang identik', 48),
+(293, 'menghasilkan dua sel anak dengan genotipe sama dan identik dengan induknya', 48),
+(294, 'dapat mengalami perubahan bentuk, ukuran, dan jumlahnya bertambah banyak.', 48),
+(295, 'semua jawaban salah.', 48),
+(296, 'adanya penambahan jumlah sel sebagai hasil pembelahan mitosis.', 47),
+(297, 'Pertumbuhan umumnya terjadi pada daerah meristem (titik tumbuh)', 47),
+(298, 'terdapat pada ujung akar dan ujung batang.', 47),
+(299, 'peristiwa pembelahan sel secara mitosis', 47),
+(300, 'dapat mengalami perubahan bentuk, ukuran, dan jumlahnya bertambah banyak.', 45),
+(301, 'untuk menghasilkan sel-sel anakan yang memiliki materi genetik yang identik', 45),
+(302, 'untuk menghasilkan dua sel anak dengan genotipe sama dan identik dengan induknya', 45),
+(303, 'untuk pertumbuhan dan regenerasi sel.', 45),
+(304, 'Reproduksi sel', 44),
+(305, 'Pembelahan mitosis', 44),
+(306, 'pembelahan amitosis', 44),
+(307, 'pembelahan meiosis', 44),
+(308, 'menghasilkan sel-sel anakan yang memiliki materi genetik yang identik', 43),
+(309, 'menghasilkan dua sel anak dengan genotipe sama dan identik dengan induknya', 43),
+(310, 'dapat mengalami perubahan bentuk, ukuran, dan jumlahnya bertambah banyak.', 43),
+(311, 'semua jawaban salah.', 43),
+(312, 'Hormon', 42),
+(313, 'Enzim', 42),
+(314, 'Protein', 42),
+(315, 'DNA', 42),
+(316, 'mengatalis pembentukan ikatan peptida antara asam amino yang baru', 41),
+(317, 'memberi sinyal untuk menghentikan translasi', 41),
+(318, 'membawa kode untuk membentuk asam amino metionin', 41),
+(319, 'melepas dari ribosom menuju ke sitoplasma', 41),
+(320, '2', 40),
+(321, '3', 40),
+(322, '4', 40),
+(323, '5', 40),
+(324, 'Inisiasi', 39),
+(325, 'Elongasi', 39),
+(326, 'Translasi', 39),
+(327, 'Terminasi', 39),
+(328, 'proses penerjemahan gen menjadi urutan asam amino yang akan disintesis menjadi polipeptida (protein)', 38),
+(329, 'proses pelekatan antara tRNA dengan asam amino dengan bantuan enzim aminoasil-tRNA sintetase.', 38),
+(330, 'Proses transkripsi diawali dari sintesis RNA dari salah satu rantai DNA sense atau rantai cetakan. Adapun rantai DNA komplemennya disebut rantai antisense', 38),
+(331, 'menentukan tempat dimulainya transkripsi dan menentukan satu rantai DNA yang akan digunakan sebagai cetakan', 38),
+(332, 'proses penerjemahan gen menjadi urutan asam amino yang akan disintesis menjadi polipeptida (protein)', 37),
+(333, 'proses pelekatan antara tRNA dengan asam amino dengan bantuan enzim aminoasil-tRNA sintetase.', 37),
+(334, 'Proses transkripsi diawali dari sintesis RNA dari salah satu rantai DNA sense atau rantai cetakan. Adapun rantai DNA komplemennya disebut rantai antisense', 37),
+(335, 'menentukan tempat dimulainya transkripsi dan menentukan satu rantai DNA yang akan digunakan sebagai cetakan', 37),
+(336, 'membran', 36),
+(337, 'badan golgi', 36),
+(338, 'ribosom', 36),
+(339, 'RNA', 36),
+(344, 'kehancuran sel karena robeknya membran plasma (lisis).', 35),
+(345, 'kerusakan sel.', 35),
+(346, 'terlepasnya membran dari dinding sel', 35),
+(347, 'pengerutan sel (krenasi).', 35),
+(348, 'eksosmosis', 34),
+(349, 'endosmosis', 34),
+(350, 'plasmolisis', 34),
+(351, 'eksosmosis dan endosmosis', 34),
+(352, '1 dan 2', 33),
+(353, '2 dan 3', 33),
+(354, '1 dan 3', 33),
+(355, 'Semua jawaban benar', 33),
+(356, 'perpindahan molekul-molekul zat dari konsentrasi tinggi ke konsentrasi rendah baik melalui membran plasma ataupun tidak.', 32),
+(357, 'perpindahan molekul-molekul pelarut (misal air) dari larutan berkonsentrasi rendah (hipotonik) ke larutan berkonsentrasi tinggi (hipertonik) melalui selaput (membran) semipermeabel.', 32),
+(358, 'perpindahan molekul air melalui membran semipermeabel dari larutan yang kadar airnya tinggi ke larutan yang kadar airnya rendah', 32),
+(359, 'perpindahan molekul atau ion tanpa menggunakan energi sel.', 32),
+(368, 'difusi dan eksositosis', 31),
+(369, 'endositosis dan eksositosis.', 31),
+(370, 'pompa natrium-kalium', 31),
+(371, 'difusi dan osmosis.', 31),
+(372, 'perpindahan molekul-molekul zat dari konsentrasi tinggi ke konsentrasi rendah baik melalui membran plasma ataupun tidak.', 30),
+(373, 'perpindahan molekul-molekul pelarut (misal air) dari larutan berkonsentrasi rendah (hipotonik) ke larutan berkonsentrasi tinggi (hipertonik) melalui selaput (membran) semipermeabel.', 30),
+(374, 'perpindahan molekul air melalui membran semipermeabel dari larutan yang kadar airnya tinggi ke larutan yang kadar airnya rendah', 30),
+(375, 'perpindahan molekul atau ion tanpa menggunakan energi sel.', 30),
+(376, 'transpor pasif dan transpor tidak aktif', 29),
+(377, 'transpor aktif dan transpor aktif', 29),
+(378, 'transpor pasif dan transpor aktif', 29),
+(379, 'semua jawaban salah', 29),
+(380, 'dua', 28),
+(381, 'tiga', 28),
+(382, 'empat', 28),
+(383, 'lima', 28),
+(384, 'plastida yang mengandung klorofil dan pigmen fotosintetik lainnya', 27),
+(385, 'plastida yang mengandung pigmen nonfotosintetik', 27),
+(386, 'plastida yang tidak berwarna', 27),
+(387, 'plastida yang berwarna', 27),
+(388, 'Tempat menyimpan zat makanan seperti amilum dan gula.', 26),
+(389, 'mengatur keluar masuknya zat', 26),
+(390, 'Menyimpan pigmen.', 26),
+(391, 'Menyimpan minyak asiri.', 26),
+(392, 'dinding sel', 25),
+(393, 'vakuola', 25),
+(394, 'plastida', 25),
+(395, 'sentriol', 25),
+(396, 'dinding sel', 24),
+(397, 'vakuola', 24),
+(398, 'plastida', 24),
+(399, 'sentriol', 24),
+(400, 'sel prokariotik', 23),
+(401, 'sel eukariotik', 23),
+(402, 'sitoplasma', 23),
+(403, 'membran plasma', 23),
+(404, 'plastida', 22),
+(405, 'sentrosom', 22),
+(406, 'mikrotubulus', 22),
+(407, 'mitokondria', 22),
+(412, '1 dan 2', 21),
+(413, '1 dan 4', 21),
+(414, '2 dan 3', 21),
+(415, '2 dan 4', 21),
+(416, 'Inti Sel (Nukleus)', 20),
+(417, 'Retikulum Endoplasma (RE)', 20),
+(418, 'Ribosom', 20),
+(419, 'Semua jawaban benar', 20),
+(424, 'membran plasma, sitoplasma, dan Kompleks Golgi', 19),
+(425, 'membran plasma, sitoplasma, dan organel-organel sel.', 19),
+(426, 'sitoplasma, Lisosom, dan organel-organel sel.', 19),
+(427, 'kompleks Golgi, Lisosom, dan organel-organel sel', 19),
+(428, 'karbohidrat, lemak, dan protein.', 18),
+(429, 'peptidoglikan, lipid, dan protein', 18),
+(430, 'air, protein, lipid, mineral, dan enzim-enzim', 18),
+(431, 'peptidoglikan, lipid, dan lemak', 18),
+(432, 'pelindung molekuler sel terhadap lingkungan di sekitarnya.', 17),
+(433, 'untuk mencerna makanan secara intraseluler dan untuk melakukan proses metabolisme sel.', 17),
+(434, 'penghasil energi.', 17),
+(435, 'pelindung dan pemberi bentuk tubuh', 17),
+(436, 'bakteri', 16),
+(437, 'ganggang biru', 16),
+(438, 'a dan b benar', 16),
+(439, 'a dan b salah', 16),
+(440, '2', 15),
+(441, '3', 15),
+(442, '4', 15),
+(443, '5', 15),
+(444, 'RNA', 14),
+(445, 'DNA', 14),
+(446, 'Lipid', 14),
+(447, 'Enzim', 14),
+(448, 'NH3', 13),
+(449, 'NaCl', 13),
+(450, 'CaSO4', 13),
+(451, 'NaHCO3', 13),
+(452, '40-45%', 12),
+(453, '45-50%', 12),
+(454, '50-60%', 12),
+(455, '60-70%', 12),
+(456, 'unsur yang terdapat dalam jumlah sangat sedikit', 10),
+(457, 'unsur terbesar yang menyusun sebuah sel.', 10),
+(458, 'makromolekul yang sangat penting untuk kelangsungan hidup sel.', 10),
+(459, 'penyimpan informasi genetis dalam sel dan bersama-sama dengan protein histon membentuk kromosom.', 10),
+(460, 'asam nukleat', 11),
+(461, 'asam amino dan nukleotida', 11),
+(462, 'karbohidrat dan protein,', 11),
+(463, 'mikromolekul dan makromolekul.', 11),
+(468, 'protoplasma', 8),
+(469, 'hereditas', 8),
+(470, 'ekskresi', 8),
+(471, 'sekresi', 8),
+(472, 'Robert Hooke', 7),
+(473, 'Rene Dutrochet', 7),
+(474, 'Alexander Braun', 7),
+(475, 'Rudolph Vircow', 7),
+(480, 'protoplasma', 6),
+(481, 'hereditas', 6),
+(482, 'ekskresi', 6),
+(483, 'sekresi', 6),
+(484, 'Johannes Purkinje', 5),
+(485, 'Robert Hooke', 5),
+(486, 'Theodor Schwann', 5),
+(487, 'Rudolf Virchow', 5),
+(488, '1,2,3,6', 4),
+(489, '2,4,5,6', 4),
+(490, '1,3,5,6', 4),
+(491, 'semua benar', 4),
+(492, 'merupakan penyusun yang mendasar bagi tubuh makhluk hidup', 3),
+(493, 'di dalam sel terjadi berbagai reaksi-reaksi kimia kehidupan', 3),
+(494, 'dapat menurunkan sifat genetis dari satu generasi ke generasi berikutnya', 3),
+(495, 'sel tidak dapat dibagi-bagi lagi menjadi lebih kecil', 3),
+(504, 'bagian yang terdiri dari nukelus (inti sel) dan nukleolus (anak inti)', 1),
+(505, 'Sel adalah unit dasar kehidupan makhluk hidup', 1),
+(506, 'kumpulan materi paling sederhana yang dapat hidup', 1),
+(507, 'mata rantai terakhir dalam rantai besar yang membentuk jaringan organ, sistem, dan individu.', 1),
+(508, 'sel', 2),
+(509, 'sel prokariotik', 2),
+(510, 'sel eukariotik', 2),
+(511, 'reproduksi sel', 2);
 
 -- --------------------------------------------------------
 
@@ -718,81 +531,11 @@ CREATE TABLE `pre_test_answer` (
 --
 
 INSERT INTO `pre_test_answer` (`id`, `student_id`, `modul_1`, `modul_2`, `modul_3`, `modul_4`, `modul_5`, `modul_6`, `modul_7`) VALUES
-(185, 23, 0, 0, 0, 0, 0, 0, 0),
-(186, 25, 0, 0, 0, 0, 0, 1, 0),
-(187, 34, 0, 0, 0, 0, 0, 1, 0),
-(188, 24, 0, 1, 0, 0, 0, 0, 0),
-(189, 38, 0, 0, 0, 0, 0, 0, 0),
-(190, 17, 0, 1, 1, 0, 1, 0, 0),
-(191, 22, 0, 0, 1, 0, 1, 1, 0),
-(192, 11, 1, 1, 0, 1, 0, 1, 1),
-(193, 16, 0, 0, 1, 1, 0, 0, 0),
-(194, 19, 1, 1, 0, 0, 0, 0, 1),
-(195, 48, 0, 1, 0, 0, 0, 0, 0),
-(196, 43, 1, 0, 1, 1, 0, 0, 0),
-(197, 51, 1, 1, 0, 1, 0, 1, 0),
-(198, 59, 0, 0, 1, 0, 0, 0, 1),
-(199, 72, 1, 1, 1, 1, 0, 1, 1),
-(200, 75, 1, 1, 1, 1, 1, 1, 0),
-(201, 57, 0, 0, 0, 1, 0, 1, 0),
-(202, 88, 1, 1, 0, 1, 0, 1, 0),
-(203, 91, 1, 1, 0, 1, 1, 1, 0),
-(204, 49, 1, 1, 1, 1, 1, 1, 1),
-(205, 50, 1, 1, 1, 1, 0, 1, 0),
-(206, 94, 0, 0, 0, 0, 0, 0, 0),
-(207, 95, 0, 0, 0, 0, 0, 0, 0),
-(208, 97, 1, 1, 0, 1, 0, 1, 0),
-(209, 98, 1, 1, 1, 1, 1, 1, 1),
-(210, 99, 1, 0, 0, 1, 0, 0, 1),
-(211, 100, 1, 0, 0, 0, 0, 0, 0),
-(212, 101, 1, 1, 1, 1, 1, 1, 1),
-(213, 102, 0, 0, 0, 0, 0, 0, 0),
-(214, 103, 1, 1, 1, 1, 1, 1, 1),
-(215, 104, 1, 1, 1, 1, 1, 1, 1),
-(216, 105, 0, 1, 1, 1, 1, 1, 1),
-(217, 107, 1, 1, 1, 1, 1, 1, 1),
-(218, 108, 0, 0, 0, 0, 0, 0, 0),
-(219, 109, 1, 1, 1, 1, 1, 1, 1),
-(220, 110, 1, 1, 1, 1, 1, 1, 1),
-(221, 111, 0, 1, 0, 0, 0, 0, 0),
-(222, 112, 0, 0, 1, 0, 0, 0, 0),
-(223, 113, 0, 1, 0, 0, 0, 0, 1),
-(224, 114, 1, 0, 0, 0, 0, 0, 0),
-(225, 116, 0, 0, 0, 0, 1, 0, 1),
-(226, 118, 1, 1, 0, 0, 0, 0, 0),
-(227, 119, 0, 0, 0, 1, 0, 1, 0),
-(228, 120, 1, 0, 0, 1, 0, 0, 0),
-(229, 121, 0, 0, 0, 0, 0, 0, 0),
-(230, 122, 0, 0, 0, 0, 0, 0, 0),
-(231, 123, 0, 0, 0, 0, 0, 0, 0),
-(232, 124, 0, 0, 0, 0, 0, 0, 0),
-(233, 125, 0, 0, 0, 0, 0, 0, 0),
-(234, 126, 0, 0, 0, 0, 0, 0, 0),
-(235, 127, 0, 0, 0, 0, 0, 0, 1),
-(236, 128, 0, 0, 0, 0, 0, 0, 0),
-(237, 129, 1, 1, 1, 1, 1, 1, 1),
-(238, 130, 1, 1, 1, 1, 1, 1, 1),
-(239, 131, 1, 1, 1, 1, 1, 1, 1),
-(240, 132, 1, 1, 1, 1, 1, 1, 1),
-(241, 133, 1, 0, 0, 0, 1, 0, 0),
-(242, 134, 0, 0, 0, 0, 0, 0, 1),
-(243, 140, 0, 0, 0, 0, 0, 0, 0),
-(244, 142, 0, 0, 0, 0, 0, 0, 0),
-(245, 411, 0, 0, 0, 0, 0, 1, 0),
-(247, 411, 0, 0, 1, 0, 0, 0, 0),
-(248, 411, 0, 1, 0, 0, 0, 0, 0),
-(249, 411, 0, 0, 0, 0, 0, 0, 0),
-(250, 411, 0, 0, 0, 0, 0, 0, 1),
-(251, 412, 0, 0, 0, 0, 0, 0, 1),
-(252, 418, 0, 0, 0, 1, 0, 0, 0),
-(253, 420, 0, 1, 1, 0, 0, 0, 0),
-(254, 421, 1, 1, 0, 0, 0, 1, 0),
-(255, 148, 0, 0, 0, 0, 0, 1, 0),
-(256, 422, 0, 0, 0, 0, 0, 0, 0),
-(257, 423, 0, 0, 0, 0, 0, 0, 0),
-(258, 424, 1, 1, 1, 1, 1, 1, 1),
-(259, 425, 1, 1, 1, 1, 1, 1, 1),
-(260, 425, 1, 1, 1, 1, 1, 1, 1);
+(267, 425, 1, 1, 1, 1, 1, 1, 1),
+(268, 429, 1, 1, 1, 1, 1, 1, 1),
+(269, 430, 1, 1, 1, 1, 1, 1, 1),
+(270, 431, 1, 1, 1, 1, 1, 1, 1),
+(271, 431, 1, 1, 1, 1, 1, 1, 1);
 
 -- --------------------------------------------------------
 
@@ -811,63 +554,10 @@ CREATE TABLE `pre_test_result` (
 --
 
 INSERT INTO `pre_test_result` (`id`, `student_id`, `level`) VALUES
-(192, 91, 11),
-(193, 92, 12),
-(194, 93, 13),
-(195, 411, 2),
-(196, 91, 11),
-(197, 92, 12),
-(198, 93, 13),
-(199, 91, 11),
-(200, 92, 12),
-(201, 93, 13),
-(202, 91, 11),
-(203, 92, 12),
-(204, 93, 13),
-(205, 412, 2),
-(206, 91, 11),
-(207, 92, 12),
-(208, 93, 13),
-(209, 91, 11),
-(210, 92, 12),
-(211, 93, 13),
-(212, 93, 13),
-(213, 418, 2),
-(214, 91, 11),
-(215, 92, 12),
-(216, 93, 13),
-(217, 93, 13),
-(218, 91, 11),
-(219, 92, 12),
-(220, 93, 13),
-(221, 93, 13),
-(222, 93, 13),
-(223, 420, 2),
-(224, 93, 13),
-(225, 421, 2),
-(226, 91, 11),
-(227, 92, 12),
-(228, 93, 13),
-(229, 93, 13),
-(230, 93, 13),
-(231, 93, 13),
-(232, 91, 11),
-(233, 92, 12),
-(234, 93, 13),
-(235, 91, 11),
-(236, 92, 12),
-(237, 93, 13),
-(238, 93, 13),
-(239, 93, 13),
-(240, 93, 13),
-(241, 91, 11),
-(242, 92, 12),
-(243, 93, 13),
-(244, 424, 2),
-(245, 91, 11),
-(246, 92, 12),
-(247, 93, 13),
-(248, 425, 3);
+(250, 425, 3),
+(251, 429, 3),
+(252, 430, 3),
+(253, 431, 3);
 
 -- --------------------------------------------------------
 
@@ -886,28 +576,7 @@ CREATE TABLE `quiz_result` (
 --
 
 INSERT INTO `quiz_result` (`id`, `student_id`, `nilai`) VALUES
-(10, 24, 210),
-(11, 57, 195),
-(12, 94, 186),
-(13, 97, 133),
-(14, 99, 80),
-(15, 19, 88),
-(16, 23, 84),
-(17, 113, 76),
-(18, 114, 61),
-(19, 111, 47),
-(20, 11, 69),
-(21, 34, 69),
-(22, 16, 84),
-(23, 109, 90),
-(24, 110, 84),
-(25, 17, 88),
-(26, 112, 73),
-(27, 50, 76),
-(28, 51, 80),
-(29, 25, 71),
-(30, 118, 73),
-(31, 116, 80);
+(34, 431, 98);
 
 -- --------------------------------------------------------
 
@@ -926,37 +595,7 @@ CREATE TABLE `quiz_result_e_learning` (
 --
 
 INSERT INTO `quiz_result_e_learning` (`id`, `student_id`, `nilai`) VALUES
-(3, 26, 33),
-(4, 12, 37),
-(5, 13, 39),
-(6, 32, 43),
-(7, 27, 45),
-(8, 18, 41),
-(9, 15, 37),
-(10, 21, 41),
-(11, 44, 45),
-(12, 30, 59),
-(13, 31, 51),
-(14, 53, 10),
-(15, 52, 53),
-(16, 58, 57),
-(17, 59, 49),
-(18, 67, 43),
-(19, 76, 69),
-(20, 77, 49),
-(21, 78, 86),
-(22, 79, 49),
-(23, 80, 73),
-(24, 81, 57),
-(25, 82, 57),
-(26, 83, 61),
-(27, 84, 69),
-(28, 85, 73),
-(29, 86, 71),
-(30, 87, 82),
-(31, 33, 47),
-(32, 140, 22),
-(33, 411, 31);
+(37, 431, 98);
 
 -- --------------------------------------------------------
 
@@ -1020,7 +659,11 @@ INSERT INTO `student` (`id`, `user_id`, `nis`, `student_name`, `student_address`
 (138, 406, '123456', 'afra', 'bangkalan', '085232828220', 1),
 (139, 407, '220', 'tes12', 'tes12', '007', 1),
 (140, 408, '11', '11', '11', '11', 1),
-(151, 425, '115', 'Sigma ', '12321', '14', 1);
+(151, 425, '115', 'Sigma ', '12321', '14', 1),
+(152, 426, '117', 'Sigma Guntur', 'Basuki rahmat street', '089604191747', 1),
+(155, 429, '55', 'Sigma Guntur', 'Basuki rahmat street', '089604191747', 1),
+(156, 430, '66', 'Sigma Guntur', 'Basuki rahmat street', '089604191747', 1),
+(157, 431, '07', 'Sigma Guntur', 'Basuki rahmat street', '089604191747', 1);
 
 -- --------------------------------------------------------
 
@@ -1116,77 +759,11 @@ CREATE TABLE `survey_result` (
 --
 
 INSERT INTO `survey_result` (`id`, `level_result`, `student_id`) VALUES
-(170, 3, 23),
-(171, 2, 25),
-(172, 3, 34),
-(173, 2, 24),
-(174, 3, 38),
-(175, 3, 22),
-(176, 2, 16),
-(177, 2, 17),
-(178, 3, 11),
-(179, 2, 19),
-(180, 2, 43),
-(181, 3, 48),
-(182, 3, 51),
-(183, 3, 59),
-(184, 3, 72),
-(185, 3, 75),
-(186, 3, 57),
-(187, 3, 91),
-(188, 3, 88),
-(189, 2, 49),
-(190, 3, 50),
-(191, 1, 94),
-(192, 1, 95),
-(193, 3, 97),
-(194, 3, 98),
-(195, 1, 99),
-(196, 3, 100),
-(197, 3, 101),
-(198, 1, 102),
-(199, 3, 103),
-(200, 3, 104),
-(201, 3, 105),
-(202, 3, 107),
-(203, 1, 108),
-(204, 3, 109),
-(205, 3, 110),
-(206, 1, 111),
-(207, 2, 112),
-(208, 2, 113),
-(209, 1, 114),
-(210, 1, 116),
-(211, 1, 118),
-(212, 2, 119),
-(213, 2, 120),
-(214, 1, 121),
-(215, 1, 122),
-(216, 2, 123),
-(217, 1, 124),
-(218, 2, 125),
-(219, 1, 126),
-(220, 1, 127),
-(221, 1, 128),
-(222, 3, 129),
-(223, 3, 130),
-(224, 3, 131),
-(225, 3, 132),
-(226, 1, 133),
-(227, 3, 140),
-(228, 2, 142),
-(229, 2, 411),
-(230, 2, 411),
-(231, 2, 412),
-(232, 3, 418),
-(233, 3, 411),
-(234, 3, 420),
-(235, 3, 421),
-(236, 3, 148),
-(237, 2, 422),
-(238, 2, 423),
-(239, 2, 424),
-(240, 2, 425);
+(240, 2, 425),
+(241, 2, 426),
+(244, 2, 429),
+(245, 3, 430),
+(246, 1, 431);
 
 -- --------------------------------------------------------
 
@@ -1216,7 +793,8 @@ INSERT INTO `teachers` (`id`, `user_id`, `teacher_name`, `teacher_address`, `nip
 (57, 415, 'Muhammad Kurniawan Dwi Hariyadi', 'Jl. Pemuda Gg. Yakup No 8 RT 26 RW 03', '123123', '0895623464379', NULL, '1'),
 (58, 416, 'azrel', 'asdasdas', NULL, '123123123', 'azrel@gmail.com', '2'),
 (59, 417, 'azrel2', 'Jl. Pemuda Gg. Yakup No 8 RT 26 RW 03', '234', '0895623464379', NULL, '1'),
-(60, 419, 'Jono', '123', '333', '081289910359', NULL, '1');
+(60, 419, 'Jono', '123', '333', '081289910359', NULL, '1'),
+(61, 432, 'Sigma Guntur', 'Basuki rahmat street', '555', '089604191747', NULL, '1');
 
 -- --------------------------------------------------------
 
@@ -1316,7 +894,14 @@ INSERT INTO `users` (`id`, `login`, `password`, `level_user`) VALUES
 (416, 'azrel@gmail.com', '$2y$10$LWFrxL275lQYbx36aKaDVOu0iVaWu3aeJ5YKoX8sae5SoASyBRJpy', '2'),
 (417, '234', '$2y$10$fPuAPPMAa/cte9DzT26MMe3U/rU9Nf7R6cAHOpH2rjpkISyQOHLgC', '2'),
 (419, '333', '$2y$10$CvleSWYQJpr9YBF5sqI1y.T86Fw4dwIkmCUHwskc5D28IGUzq3dhS', '2'),
-(425, '115', '$2y$10$ohQL/DvHRHEcdWJp5yKLUONFDp7co/bFgdDRGj7kDTVBdUHb50lj.', '3');
+(425, '115', '$2y$10$ohQL/DvHRHEcdWJp5yKLUONFDp7co/bFgdDRGj7kDTVBdUHb50lj.', '3'),
+(426, '117', '$2y$10$sRe0PKyaYhlTrCKTMps/zO6rrE/yuNUQJfVMhNVr2h1Yby/AIKvT.', '3'),
+(427, '44', '$2y$10$3D9ImwFzBvlHlIzGc7WFj.SGr9kDzt7oTi25wjzvQfRLxR1C8SLQC', '3'),
+(428, '223', '$2y$10$ZzXPPOBUu/nwHXWtLH.TE.Y2qnHM7vIndyjeT8XyKp2L5WIrH4kW.', '3'),
+(429, '55', '$2y$10$/vSnWuSgPp/2B2TOgQ5UFuf5Gz6oXRHScuFgTkpVYE8ded9KQHbkq', '3'),
+(430, '66', '$2y$10$g1ZK8dUCb5.7.Q94B9CUw.7HhTuS39ffk96/AMhl4WrzdR7VMqtkm', '3'),
+(431, '07', '$2y$10$CKfmLSqIgHK3gNbu63LWAeX401YuNh5RFs7BNoQ/VP3WTiALpAsHC', '3'),
+(432, '555', '$2y$10$oUp4osvRIB1TczC0UC3qBelfGZ0JlrW.AYj2qlkwuVRz..LkcT5ZW', '2');
 
 --
 -- Indexes for dumped tables
@@ -1326,7 +911,8 @@ INSERT INTO `users` (`id`, `login`, `password`, `level_user`) VALUES
 -- Indexes for table `admin`
 --
 ALTER TABLE `admin`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `user_id` (`user_id`);
 
 --
 -- Indexes for table `class`
@@ -1338,49 +924,59 @@ ALTER TABLE `class`
 -- Indexes for table `class_attendance`
 --
 ALTER TABLE `class_attendance`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `fk_attendance_class_id` (`class_id`),
+  ADD KEY `fk_attendance_teacher_id` (`teacher_id`);
 
 --
 -- Indexes for table `gagal_post_test`
 --
 ALTER TABLE `gagal_post_test`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `fk_gagal_post_test_user_id` (`student_id`);
 
 --
 -- Indexes for table `level_student`
 --
 ALTER TABLE `level_student`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `fk_levet_student_student_id` (`student_id`);
 
 --
 -- Indexes for table `materi`
 --
 ALTER TABLE `materi`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `fk_materi_module_id` (`module_id`);
 
 --
 -- Indexes for table `module`
 --
 ALTER TABLE `module`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `fk_module_sub_topic_id` (`sub_topic_id`);
 
 --
 -- Indexes for table `module_learned`
 --
 ALTER TABLE `module_learned`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `fk_module_learned_module_id` (`module_id`),
+  ADD KEY `fk_module_learned_users_id` (`student_id`);
 
 --
 -- Indexes for table `module_question`
 --
 ALTER TABLE `module_question`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `fk_module_question_module_id` (`module_id`);
 
 --
 -- Indexes for table `module_question_choice`
 --
 ALTER TABLE `module_question_choice`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `fk_module_question_choice_question_id` (`question_id`);
 
 --
 -- Indexes for table `pelajaran`
@@ -1392,25 +988,29 @@ ALTER TABLE `pelajaran`
 -- Indexes for table `pre_test_answer`
 --
 ALTER TABLE `pre_test_answer`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `fk_pre_test_answer_student_id` (`student_id`);
 
 --
 -- Indexes for table `pre_test_result`
 --
 ALTER TABLE `pre_test_result`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `fk_pre_test_result_users_id` (`student_id`);
 
 --
 -- Indexes for table `quiz_result`
 --
 ALTER TABLE `quiz_result`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `fk_lquiz_result_users_id` (`student_id`);
 
 --
 -- Indexes for table `quiz_result_e_learning`
 --
 ALTER TABLE `quiz_result_e_learning`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `fk_quiz_result_e_learning_users_id` (`student_id`);
 
 --
 -- Indexes for table `student`
@@ -1422,7 +1022,8 @@ ALTER TABLE `student`
 -- Indexes for table `sub_topic`
 --
 ALTER TABLE `sub_topic`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `fk_sub_topic_topic_id` (`topic_id`);
 
 --
 -- Indexes for table `survey_question`
@@ -1435,13 +1036,15 @@ ALTER TABLE `survey_question`
 -- Indexes for table `survey_result`
 --
 ALTER TABLE `survey_result`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `fk_survey_result_users_id` (`student_id`);
 
 --
 -- Indexes for table `teachers`
 --
 ALTER TABLE `teachers`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `user_id` (`user_id`);
 
 --
 -- Indexes for table `topic`
@@ -1476,19 +1079,19 @@ ALTER TABLE `class`
 -- AUTO_INCREMENT for table `class_attendance`
 --
 ALTER TABLE `class_attendance`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
 
 --
 -- AUTO_INCREMENT for table `gagal_post_test`
 --
 ALTER TABLE `gagal_post_test`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT for table `level_student`
 --
 ALTER TABLE `level_student`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=102;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=107;
 
 --
 -- AUTO_INCREMENT for table `materi`
@@ -1506,7 +1109,7 @@ ALTER TABLE `module`
 -- AUTO_INCREMENT for table `module_learned`
 --
 ALTER TABLE `module_learned`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=132;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=136;
 
 --
 -- AUTO_INCREMENT for table `module_question`
@@ -1518,7 +1121,7 @@ ALTER TABLE `module_question`
 -- AUTO_INCREMENT for table `module_question_choice`
 --
 ALTER TABLE `module_question_choice`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=200;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=512;
 
 --
 -- AUTO_INCREMENT for table `pelajaran`
@@ -1530,31 +1133,31 @@ ALTER TABLE `pelajaran`
 -- AUTO_INCREMENT for table `pre_test_answer`
 --
 ALTER TABLE `pre_test_answer`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=261;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=272;
 
 --
 -- AUTO_INCREMENT for table `pre_test_result`
 --
 ALTER TABLE `pre_test_result`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=249;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=254;
 
 --
 -- AUTO_INCREMENT for table `quiz_result`
 --
 ALTER TABLE `quiz_result`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=32;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=35;
 
 --
 -- AUTO_INCREMENT for table `quiz_result_e_learning`
 --
 ALTER TABLE `quiz_result_e_learning`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=34;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=39;
 
 --
 -- AUTO_INCREMENT for table `student`
 --
 ALTER TABLE `student`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=152;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=158;
 
 --
 -- AUTO_INCREMENT for table `sub_topic`
@@ -1572,13 +1175,13 @@ ALTER TABLE `survey_question`
 -- AUTO_INCREMENT for table `survey_result`
 --
 ALTER TABLE `survey_result`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=241;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=247;
 
 --
 -- AUTO_INCREMENT for table `teachers`
 --
 ALTER TABLE `teachers`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=61;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=62;
 
 --
 -- AUTO_INCREMENT for table `topic`
@@ -1590,17 +1193,115 @@ ALTER TABLE `topic`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=426;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=433;
 
 --
 -- Constraints for dumped tables
 --
 
 --
+-- Constraints for table `admin`
+--
+ALTER TABLE `admin`
+  ADD CONSTRAINT `admin_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT;
+
+--
+-- Constraints for table `class_attendance`
+--
+ALTER TABLE `class_attendance`
+  ADD CONSTRAINT `fk_attendance_class_id` FOREIGN KEY (`class_id`) REFERENCES `class` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_attendance_teacher_id` FOREIGN KEY (`teacher_id`) REFERENCES `teachers` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Constraints for table `gagal_post_test`
+--
+ALTER TABLE `gagal_post_test`
+  ADD CONSTRAINT `fk_gagal_post_test_user_id` FOREIGN KEY (`student_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Constraints for table `level_student`
+--
+ALTER TABLE `level_student`
+  ADD CONSTRAINT `fk_levet_student_student_id` FOREIGN KEY (`student_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Constraints for table `materi`
+--
+ALTER TABLE `materi`
+  ADD CONSTRAINT `fk_materi_module_id` FOREIGN KEY (`module_id`) REFERENCES `module` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Constraints for table `module`
+--
+ALTER TABLE `module`
+  ADD CONSTRAINT `fk_module_sub_topic_id` FOREIGN KEY (`sub_topic_id`) REFERENCES `sub_topic` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Constraints for table `module_learned`
+--
+ALTER TABLE `module_learned`
+  ADD CONSTRAINT `fk_module_learned_module_id` FOREIGN KEY (`module_id`) REFERENCES `module` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_module_learned_users_id` FOREIGN KEY (`student_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Constraints for table `module_question`
+--
+ALTER TABLE `module_question`
+  ADD CONSTRAINT `fk_module_question_module_id` FOREIGN KEY (`module_id`) REFERENCES `module` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Constraints for table `module_question_choice`
+--
+ALTER TABLE `module_question_choice`
+  ADD CONSTRAINT `fk_module_question_choice_question_id` FOREIGN KEY (`question_id`) REFERENCES `module_question` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Constraints for table `pre_test_answer`
+--
+ALTER TABLE `pre_test_answer`
+  ADD CONSTRAINT `fk_pre_test_answer_student_id` FOREIGN KEY (`student_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Constraints for table `pre_test_result`
+--
+ALTER TABLE `pre_test_result`
+  ADD CONSTRAINT `fk_pre_test_result_users_id` FOREIGN KEY (`student_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Constraints for table `quiz_result`
+--
+ALTER TABLE `quiz_result`
+  ADD CONSTRAINT `fk_lquiz_result_users_id` FOREIGN KEY (`student_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Constraints for table `quiz_result_e_learning`
+--
+ALTER TABLE `quiz_result_e_learning`
+  ADD CONSTRAINT `fk_quiz_result_e_learning_users_id` FOREIGN KEY (`student_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Constraints for table `sub_topic`
+--
+ALTER TABLE `sub_topic`
+  ADD CONSTRAINT `fk_sub_topic_topic_id` FOREIGN KEY (`topic_id`) REFERENCES `topic` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
 -- Constraints for table `survey_question`
 --
 ALTER TABLE `survey_question`
   ADD CONSTRAINT `survey_question_ibfk_1` FOREIGN KEY (`id_mapel`) REFERENCES `pelajaran` (`id_mapel`) ON DELETE RESTRICT ON UPDATE RESTRICT;
+
+--
+-- Constraints for table `survey_result`
+--
+ALTER TABLE `survey_result`
+  ADD CONSTRAINT `fk_survey_result_users_id` FOREIGN KEY (`student_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Constraints for table `teachers`
+--
+ALTER TABLE `teachers`
+  ADD CONSTRAINT `teachers_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT;
 
 --
 -- Constraints for table `topic`

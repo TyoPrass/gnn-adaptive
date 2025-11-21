@@ -7,6 +7,19 @@ if (!isset($_SESSION['name'])) {
     header('location: ../sign-in.php');
 }
 
+// Cek apakah user sudah mengerjakan pre-test e-learning
+$sql_pretest = "SELECT * FROM quiz_result_e_learning WHERE student_id = '{$_SESSION['student_id']}'";
+$query_pretest = mysqli_query($conn, $sql_pretest);
+
+if (mysqli_num_rows($query_pretest) > 0) {
+    $pretest_result = mysqli_fetch_assoc($query_pretest);
+    $pretest_score = $pretest_result['nilai'];
+} else {
+    // Jika belum mengerjakan pre-test, redirect ke dashboard
+    header('location: index.php');
+    exit();
+}
+
 // mengambil data jawaban pre_test dari murid
 $pre_test = mysqli_query($conn, "SELECT * FROM pre_test_answer where student_id = '{$_SESSION['student_id']}'");
 $pre_test_row = mysqli_num_rows($pre_test);
@@ -213,6 +226,37 @@ $level_modul = [1, 2, 3];
         .status-locked {
             background: var(--elearning-warning);
             color: white;
+        }
+        
+        .locked-card {
+            opacity: 0.6;
+            filter: grayscale(50%);
+            position: relative;
+        }
+        
+        .lock-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.85);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-radius: 15px;
+            z-index: 10;
+            color: #666;
+        }
+        
+        .lock-overlay i {
+            color: #999;
+        }
+        
+        .lock-overlay p {
+            font-weight: 600;
+            font-size: 0.9rem;
         }
         
         .progress-section {
@@ -448,7 +492,6 @@ $level_modul = [1, 2, 3];
                     <li class="nav-item">
                         <a class="nav-link text-white" href="index.php">
                             <i class="fas fa-home me-1"></i>Dashboard
-                            <?php echo $_SESSION['student_id']; ?>
                         </a>
                     </li>
                     <li class="nav-item">
@@ -488,6 +531,15 @@ $level_modul = [1, 2, 3];
                                         <i class="fas fa-laptop-code me-3"></i>E-Learning Biologi
                                     </h1>
                                     <p class="lead mb-3">Jelajahi dunia biologi melalui pembelajaran interaktif dan menyenangkan</p>
+                                    
+                                    <?php if (isset($pretest_score)) { ?>
+                                    <div class="mb-3">
+                                        <span class="badge" style="background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%); color: white; font-size: 1.2rem; padding: 0.8rem 1.5rem; box-shadow: 0 4px 15px rgba(255,165,0,0.3);">
+                                            <i class="fas fa-trophy me-2"></i>Nilai Pre-Test E-Learning: <?php echo number_format($pretest_score, 0); ?>
+                                        </span>
+                                    </div>
+                                    <?php } ?>
+                                    
                                     <div class="d-flex flex-wrap gap-3">
                                         <span class="badge bg-light text-dark p-2">
                                             <i class="fas fa-play me-1"></i>Pembelajaran Interaktif
@@ -508,6 +560,24 @@ $level_modul = [1, 2, 3];
                     </div>
                 </div>
             </div>
+
+            <!-- Error Alert - Locked Module -->
+            <?php if (isset($_GET['error']) && $_GET['error'] == 'locked') { ?>
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="alert alert-warning alert-dismissible fade show" role="alert" style="border-radius: 15px; border-left: 5px solid #FF8800;">
+                        <h5 class="alert-heading">
+                            <i class="fas fa-lock me-2"></i>Modul Terkunci!
+                        </h5>
+                        <p class="mb-0">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Anda harus menyelesaikan modul sebelumnya terlebih dahulu. Pastikan Anda sudah <strong>lulus post-test</strong> untuk membuka modul berikutnya.
+                        </p>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                </div>
+            </div>
+            <?php } ?>
 
             <!-- Error Alert -->
             <?php if (isset($_SESSION['gagal_post_test'])) { ?>
@@ -572,29 +642,59 @@ $level_modul = [1, 2, 3];
             <div class="row">
                 <?php
                 if (isset($level_modul)) {
-                    $sql = "SELECT * FROM module";
+                    $sql = "SELECT * FROM module ORDER BY id ASC";
                     $query = mysqli_query($conn, $sql);
                     $result = mysqli_fetch_all($query, MYSQLI_ASSOC);
                     
-                    // Get learned modules for status checking
-                    $learned_modules_query = mysqli_query($conn, "SELECT module_id FROM module_learned WHERE student_id = '{$_SESSION['student_id']}'");
-                    $learned_modules = [];
-                    while ($row = mysqli_fetch_assoc($learned_modules_query)) {
-                        $learned_modules[] = $row['module_id'];
+                    // HANYA CEK dari post_test_e_learning_result yang status LULUS
+                    $passed_modules_query = mysqli_query($conn, "SELECT DISTINCT module_id FROM post_test_e_learning_result WHERE student_id = '{$_SESSION['student_id']}' AND status = 'lulus'");
+                    $completed_modules = [];
+                    while ($row = mysqli_fetch_assoc($passed_modules_query)) {
+                        $completed_modules[] = $row['module_id'];
                     }
                     
                     foreach ($result as $key => $r) {
-                        $is_completed = in_array($r['id'], $learned_modules);
-                        $status_class = $is_completed ? 'status-completed' : 'status-available';
-                        $status_text = $is_completed ? 'Selesai' : 'Tersedia';
-                        $status_icon = $is_completed ? 'fas fa-check-circle' : 'fas fa-play-circle';
+                        $is_completed = in_array($r['id'], $completed_modules);
+                        
+                        // Cek apakah modul sebelumnya sudah selesai (untuk modul 2 dst)
+                        $is_locked = false;
+                        if ($key > 0) {
+                            $previous_module_id = $result[$key - 1]['id'];
+                            $is_locked = !in_array($previous_module_id, $completed_modules);
+                        }
+                        
+                        // Set status
+                        if ($is_completed) {
+                            $status_class = 'status-completed';
+                            $status_text = 'Selesai';
+                            $status_icon = 'fas fa-check-circle';
+                        } elseif ($is_locked) {
+                            $status_class = 'status-locked';
+                            $status_text = 'Terkunci';
+                            $status_icon = 'fas fa-lock';
+                        } else {
+                            $status_class = 'status-available';
+                            $status_text = 'Tersedia';
+                            $status_icon = 'fas fa-play-circle';
+                        }
                 ?>
                 <div class="col-lg-4 col-md-6 mb-4">
+                    <?php if (!$is_locked) { ?>
                     <a href="module-e-learning.php?module=<?php echo $r['id']; ?>" class="text-decoration-none">
-                        <div class="module-card">
+                    <?php } else { ?>
+                    <div class="text-decoration-none" style="cursor: not-allowed;">
+                    <?php } ?>
+                        <div class="module-card <?php echo $is_locked ? 'locked-card' : ''; ?>">
                             <?php if ($is_completed) { ?>
                             <div class="completion-badge">
                                 <i class="fas fa-check"></i>
+                            </div>
+                            <?php } ?>
+                            
+                            <?php if ($is_locked) { ?>
+                            <div class="lock-overlay">
+                                <i class="fas fa-lock fa-3x"></i>
+                                <p class="mt-2 mb-0">Selesaikan modul sebelumnya</p>
                             </div>
                             <?php } ?>
                             
@@ -617,11 +717,19 @@ $level_modul = [1, 2, 3];
                                 </span>
                                 
                                 <div class="text-end">
+                                    <?php if (!$is_locked) { ?>
                                     <i class="fas fa-arrow-right" style="color: #00C851;"></i>
+                                    <?php } else { ?>
+                                    <i class="fas fa-lock" style="color: #999;"></i>
+                                    <?php } ?>
                                 </div>
                             </div>
                         </div>
+                    <?php if (!$is_locked) { ?>
                     </a>
+                    <?php } else { ?>
+                    </div>
+                    <?php } ?>
                 </div>
                 <?php
                     }
@@ -638,44 +746,6 @@ $level_modul = [1, 2, 3];
                     </div>
                 </div>
                 <?php } ?>
-            </div>
-
-            <!-- Quiz Section -->
-            <div class="row">
-                <div class="col-12">
-                    <div class="quiz-section">
-                        <div class="row align-items-center">
-                            <div class="col-lg-8">
-                                <h2 class="mb-3">
-                                    <i class="fas fa-trophy me-3"></i>Quiz E-Learning
-                                </h2>
-                                <p class="lead mb-3">
-                                    Uji pemahaman Anda dengan quiz interaktif biologi
-                                </p>
-                                <div class="stats-row">
-                                    <div class="stat-item">
-                                        <span class="stat-number"><?php echo $learned_module; ?></span>
-                                        <small>Modul Tersedia</small>
-                                    </div>
-                                    <div class="stat-item">
-                                        <span class="stat-number">∞</span>
-                                        <small>Quiz Tersedia</small>
-                                    </div>
-                                </div>
-                                <p class="mb-0">
-                                    <i class="fas fa-lightbulb me-2"></i>
-                                    Siap menguji kemampuan biologi Anda?
-                                </p>
-                            </div>
-                            <div class="col-lg-4 text-center">
-                                <a href="quiz-e-learning.php" class="btn-quiz">
-                                    <i class="fas fa-play me-2"></i>
-                                    MULAI QUIZ
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
             </div>
         </div>
     </div>    <!-- Bootstrap JS -->

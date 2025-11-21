@@ -1,1 +1,0 @@
-# myirt-adaptive

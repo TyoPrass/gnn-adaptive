@@ -13,6 +13,8 @@ $query = mysqli_query($conn, $sql);
 
 if(mysqli_num_rows($query) > 0){
     $quiz_done = true;
+    $quiz_result = mysqli_fetch_assoc($query);
+    $quiz_score = $quiz_result['nilai'];
 }
 ?>
 
@@ -536,7 +538,14 @@ if(mysqli_num_rows($query) > 0){
                             <div class="text-center">
                                 <i class="fas fa-check-circle" style="font-size: 5rem; margin-bottom: 1rem; opacity: 0.9;"></i>
                                 <h1 class="display-4 fw-bold mb-3">Selamat! 🎉</h1>
-                                <p class="lead mb-0">Anda telah berhasil menyelesaikan Quiz Biologi</p>
+                                <p class="lead mb-3">Anda telah berhasil menyelesaikan Quiz Biologi</p>
+                                <?php if (isset($quiz_score)) { ?>
+                                <div class="mt-3">
+                                    <span class="badge" style="background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%); color: white; font-size: 1.5rem; padding: 1rem 2rem; box-shadow: 0 5px 20px rgba(255,165,0,0.4);">
+                                        <i class="fas fa-award me-2"></i>Nilai Anda: <?php echo number_format($quiz_score, 0); ?>
+                                    </span>
+                                </div>
+                                <?php } ?>
                             </div>
                         </div>
                     </div>

@@ -45,6 +45,16 @@ if (mysqli_num_rows($query) > 0) {
     $_SESSION['pre_test_taken'] = false;
 }
 
+// mengambil data hasil quiz e-learning (pre-test untuk e-learning)
+$sql_elearning = "SELECT * FROM quiz_result_e_learning WHERE student_id = '{$_SESSION['student_id']}'";
+$query_elearning = mysqli_query($conn, $sql_elearning);
+if (mysqli_num_rows($query_elearning) > 0) {
+    $_SESSION['pre_test_elearning_taken'] = true;
+    $elearning_result = mysqli_fetch_assoc($query_elearning);
+    $_SESSION['pre_test_elearning_score'] = $elearning_result['nilai'];
+} else {
+    $_SESSION['pre_test_elearning_taken'] = false;
+}
 
 ?>
 
@@ -540,15 +550,32 @@ if (mysqli_num_rows($query) > 0) {
                         </p>
                         
                         <div class="mb-3">
-                            <span class="status-badge status-completed">
-                                <i class="fas fa-check-circle me-1"></i>Selalu Tersedia
-                            </span>
+                            <?php if ($_SESSION['pre_test_elearning_taken']) { ?>
+                                <span class="status-badge status-completed">
+                                    <i class="fas fa-check-circle me-1"></i>Pre-Test Selesai
+                                </span>
+                                <div class="mt-2">
+                                    <span class="badge bg-success" style="font-size: 1rem; padding: 0.5rem 1rem;">
+                                        <i class="fas fa-award me-1"></i>Nilai Pre-Test: <?php echo number_format($_SESSION['pre_test_elearning_score'], 0); ?>
+                                    </span>
+                                </div>
+                            <?php } else { ?>
+                                <span class="status-badge status-warning">
+                                    <i class="fas fa-exclamation-triangle me-1"></i>Pre-Test Belum Diambil
+                                </span>
+                            <?php } ?>
                         </div>
                         
                         <div class="d-grid">
-                            <a href="index-e-learning.php" class="quick-action-btn btn-elearning">
-                                <i class="fas fa-play me-2"></i>Mulai E-Learning
-                            </a>
+                            <?php if ($_SESSION['pre_test_elearning_taken']) { ?>
+                                <a href="index-e-learning.php" class="quick-action-btn btn-elearning">
+                                    <i class="fas fa-play me-2"></i>Mulai E-Learning
+                                </a>
+                            <?php } else { ?>
+                                <a href="quiz-e-learning.php" class="quick-action-btn btn-warning">
+                                    <i class="fas fa-edit me-2"></i>Ambil Pre-Test Dulu
+                                </a>
+                            <?php } ?>
                         </div>
                     </div>
                 </div>

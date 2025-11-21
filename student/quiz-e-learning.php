@@ -8,11 +8,14 @@ if (!isset($_SESSION['name'])) {
 
 include('../config/db.php');
 
+// Cek apakah user sudah mengerjakan pre-test e-learning
 $sql = "SELECT * FROM quiz_result_e_learning WHERE student_id = '{$_SESSION['student_id']}'";
 $query = mysqli_query($conn, $sql);
 
 if(mysqli_num_rows($query) > 0){
-    $quiz_done = true;
+    // Jika sudah mengerjakan, redirect ke index-e-learning
+    header('location: index-e-learning.php');
+    exit();
 }
 ?>
 

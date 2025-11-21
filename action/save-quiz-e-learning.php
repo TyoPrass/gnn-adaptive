@@ -80,6 +80,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // ✅ Hitung nilai persentase
     $nilai = ($total_benar / $total_soal) * 100;
     
+    // Cek apakah user sudah pernah mengerjakan quiz e-learning
+    $sql_check = "SELECT * FROM quiz_result_e_learning WHERE student_id = '{$_SESSION['student_id']}'";
+    $query_check = mysqli_query($conn, $sql_check);
+    
+    if (mysqli_num_rows($query_check) > 0) {
+        // Jika sudah pernah mengerjakan, redirect ke index-e-learning
+        header('location: ../student/index-e-learning.php');
+        exit();
+    }
+    
     // Simpan ke database
     $sql = "INSERT INTO quiz_result_e_learning (student_id, nilai) VALUES ('{$_SESSION['student_id']}', $nilai)";
     $query = mysqli_query($conn, $sql);
@@ -89,7 +99,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         echo mysqli_error($conn);
     } else {
         $_SESSION['quiz_finish_e_learning'] = true;
-        header('location: ../student/quiz-e-learning.php');
+        header('location: ../student/index-e-learning.php');
     }
 }
 

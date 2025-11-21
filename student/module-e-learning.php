@@ -9,9 +9,51 @@ if (!isset($_SESSION['name'])) {
 
 // mengambil data modul dari database sesuai id di url
 $modul = mysqli_real_escape_string($conn, $_GET['module']);
+
+// VALIDASI: Cek apakah modul sebelumnya sudah lulus post-test (HANYA dari post_test_e_learning_result)
+$sql_check_order = "SELECT * FROM module WHERE id = '{$modul}'";
+$query_check_order = mysqli_query($conn, $sql_check_order);
+$current_module = mysqli_fetch_assoc($query_check_order);
+
+if ($current_module) {
+    // Ambil modul sebelumnya
+    $sql_previous = "SELECT id FROM module WHERE id < '{$modul}' ORDER BY id DESC LIMIT 1";
+    $query_previous = mysqli_query($conn, $sql_previous);
+    
+    if (mysqli_num_rows($query_previous) > 0) {
+        $previous_module = mysqli_fetch_assoc($query_previous);
+        $previous_module_id = $previous_module['id'];
+        
+        // CEK HANYA dari post_test_e_learning_result dengan status LULUS
+        $sql_check_passed = "SELECT * FROM post_test_e_learning_result 
+                             WHERE student_id = '{$_SESSION['student_id']}' 
+                             AND module_id = '{$previous_module_id}' 
+                             AND status = 'lulus'";
+        $query_check_passed = mysqli_query($conn, $sql_check_passed);
+        
+        // Jika modul sebelumnya belum lulus post-test, BLOCK akses
+        if (mysqli_num_rows($query_check_passed) == 0) {
+            header('location: index-e-learning.php?error=locked&module=' . $modul . '&required=' . $previous_module_id);
+            exit();
+        }
+    }
+}
+
 $sql = "SELECT * from materi where module_id = '{$modul}'";
 $query = mysqli_query($conn, $sql);
 $materi = mysqli_fetch_array($query, MYSQLI_ASSOC);
+
+// Cek apakah user sudah lulus post-test untuk modul ini
+$sql_posttest = "SELECT * FROM post_test_e_learning_result WHERE student_id = '{$_SESSION['student_id']}' AND module_id = '{$modul}' AND status = 'lulus'";
+$query_posttest = mysqli_query($conn, $sql_posttest);
+$has_passed = mysqli_num_rows($query_posttest) > 0;
+
+// Ambil nilai post-test jika ada
+$posttest_score = null;
+if ($has_passed) {
+    $posttest_result = mysqli_fetch_assoc($query_posttest);
+    $posttest_score = $posttest_result['nilai'];
+}
 
 ?>
 
@@ -289,6 +331,45 @@ $materi = mysqli_fetch_array($query, MYSQLI_ASSOC);
 
     <div class="container-fluid py-4">
         <div class="container">
+            <?php if (isset($_GET['posttest'])) { ?>
+            <?php if ($_GET['posttest'] == 'passed') { ?>
+            <!-- Success Alert - Lulus Post-Test -->
+            <div class="alert alert-success alert-dismissible fade show mb-4" role="alert" style="border-radius: 15px; border-left: 5px solid #00C851;">
+                <h5 class="alert-heading">
+                    <i class="fas fa-trophy me-2"></i>Selamat! Post-Test Berhasil! 🎉
+                </h5>
+                <p class="mb-2">
+                    Anda telah <strong>LULUS</strong> post-test dengan nilai <strong><?php echo number_format($_SESSION['posttest_score'], 0); ?></strong>!
+                </p>
+                <hr>
+                <p class="mb-0">
+                    <i class="fas fa-arrow-right me-2"></i>Silakan lanjutkan pembelajaran ke modul berikutnya di bawah ini.
+                </p>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            <?php } elseif ($_GET['posttest'] == 'failed') { ?>
+            <!-- Warning Alert - Gagal Post-Test -->
+            <div class="alert alert-warning alert-dismissible fade show mb-4" role="alert" style="border-radius: 15px; border-left: 5px solid #FF8800;">
+                <h5 class="alert-heading">
+                    <i class="fas fa-exclamation-triangle me-2"></i>Post-Test Belum Berhasil
+                </h5>
+                <p class="mb-2">
+                    Nilai Anda: <strong><?php echo number_format($_SESSION['posttest_score'], 0); ?></strong> (Minimal: 70)
+                </p>
+                <hr>
+                <p class="mb-0">
+                    <i class="fas fa-redo me-2"></i>Silakan <strong>pelajari kembali materi di bawah</strong>, lalu coba post-test lagi untuk melanjutkan.
+                </p>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            <?php } ?>
+            <?php 
+            // Clear session after displaying
+            unset($_SESSION['posttest_status']);
+            unset($_SESSION['posttest_score']);
+            unset($_SESSION['posttest_module']);
+            ?>
+            <?php } ?>
             <!-- Navigation Breadcrumb -->
             <div class="module-navigation">
                 <nav aria-label="breadcrumb">
@@ -461,23 +542,47 @@ $materi = mysqli_fetch_array($query, MYSQLI_ASSOC);
     }
     
     function addCompletionButton() {
+        <?php if ($has_passed) { ?>
+        // User sudah lulus post-test, tampilkan badge selesai
         const completionSection = `
             <div class="text-center py-5 mt-5" style="border-top: 2px solid #e9ecef;">
                 <div class="mb-4">
-                    <i class="fas fa-check-circle fa-5x" style="color: #00C851;"></i>
+                    <i class="fas fa-trophy fa-5x" style="color: #FFD700;"></i>
                 </div>
-                <h4 class="mb-3">Selesaikan Pembelajaran</h4>
-                <p class="lead text-muted mb-4">Tandai modul ini sebagai selesai dan lanjutkan ke pembelajaran berikutnya</p>
+                <h4 class="mb-3" style="color: #00C851;">Modul Telah Selesai!</h4>
+                <div class="mb-4">
+                    <span class="badge" style="background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%); color: white; font-size: 1.2rem; padding: 0.8rem 1.5rem;">
+                        <i class="fas fa-award me-2"></i>Nilai Post-Test: <?php echo number_format($posttest_score, 0); ?>
+                    </span>
+                </div>
+                <p class="lead text-muted mb-4">Anda telah lulus post-test untuk modul ini</p>
                 <div class="d-flex flex-wrap gap-3 justify-content-center">
-                    <button onclick="markAsCompleted()" class="btn btn-success btn-lg rounded-pill px-4">
-                        <i class="fas fa-check me-2"></i>Tandai Selesai
-                    </button>
+                    <a href="index-e-learning.php" class="btn btn-success btn-lg rounded-pill px-4">
+                        <i class="fas fa-arrow-left me-2"></i>Kembali ke E-Learning
+                    </a>
+                </div>
+            </div>
+        `;
+        <?php } else { ?>
+        // User belum lulus, tampilkan tombol post-test
+        const completionSection = `
+            <div class="text-center py-5 mt-5" style="border-top: 2px solid #e9ecef;">
+                <div class="mb-4">
+                    <i class="fas fa-clipboard-check fa-5x" style="color: #00C851;"></i>
+                </div>
+                <h4 class="mb-3">Selesaikan Modul dengan Post-Test</h4>
+                <p class="lead text-muted mb-4">Uji pemahaman Anda dengan mengikuti post-test. Nilai minimal 70 untuk lulus.</p>
+                <div class="d-flex flex-wrap gap-3 justify-content-center">
+                    <a href="post-test-e-learning.php?module=<?php echo $modul; ?>" class="btn btn-warning btn-lg rounded-pill px-4">
+                        <i class="fas fa-pen me-2"></i>Mulai Post-Test
+                    </a>
                     <a href="index-e-learning.php" class="btn btn-outline-secondary btn-lg rounded-pill px-4">
                         <i class="fas fa-arrow-left me-2"></i>Kembali ke E-Learning
                     </a>
                 </div>
             </div>
         `;
+        <?php } ?>
         $('#moduleContent').append(completionSection);
     }
     
