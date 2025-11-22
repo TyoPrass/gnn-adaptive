@@ -4,161 +4,226 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET' && realpath(__FILE__) == realpath($_SERV
     die(header('location: ../index.php'));
 }
 
-
 include('../config/db.php');
 session_start();
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-
-    $modul_1 = array();
-    $modul_2 = array();
-    $modul_3 = array();
-    $modul_4 = array();
-    $modul_5 = array();
-    $modul_6 = array();
-    $modul_7 = array();
-    // $modul_8 = array();
-    // $modul_9 = array();
-    // $modul_10 = array();
-    // $modul_11 = array();
-    // $modul_12 = array();
-
-    foreach ($_POST as $key =>  $p) {
-        $question_id = substr($key, 8);
-        $sql = "SELECT * FROM module_question WHERE id = '{$question_id}'";
-        $query = mysqli_query($conn, $sql);
-        $mq = mysqli_fetch_array($query, MYSQLI_ASSOC);
-        // echo '<br/> Module id : ';
-        // echo $mq['module_id'];
-        if ($mq['answer'] == $p) {
-            if ($mq['module_id'] == 1) {
-                $modul_1[] = 1;
-            } else if ($mq['module_id'] == 2) {
-                $modul_2[] = 1;
-            } else if ($mq['module_id'] == 3) {
-                $modul_3[] = 1;            
-            } else if ($mq['module_id'] == 4) {
-                $modul_4[] = 1;
-            } else if ($mq['module_id'] == 5) {
-                $modul_5[] = 1;
-            } else if ($mq['module_id'] == 6) {
-                $modul_6[] = 1;
-            } else if ($mq['module_id'] == 7) {
-                $modul_7[] = 1;
-            // } else if ($mq['module_id'] == 8) {
-            //     $modul_8[] = 1;
-            // } else if ($mq['module_id'] == 9) {
-            //     $modul_9[] = 1;
-            // } else if ($mq['module_id'] == 10) {
-            //     $modul_10[] = 1;
-            // } else if ($mq['module_id'] == 11) {
-            //     $modul_11[] = 1;
-            // } else {
-            //     $modul_12[] = 1;
-            }
-        } else {
-            if ($mq['module_id'] == 1) {
-                $modul_1[] = 0;
-            } else if ($mq['module_id'] == 2) {
-                $modul_2[] = 0;
-            } else if ($mq['module_id'] == 3) {
-                $modul_3[] = 0;            
-            } else if ($mq['module_id'] == 4) {
-                $modul_4[] = 0;
-            } else if ($mq['module_id'] == 5) {
-                $modul_5[] = 0;
-            } else if ($mq['module_id'] == 6) {
-                $modul_6[] = 0;
-            } else if ($mq['module_id'] == 7) {
-                $modul_7[] = 0;
-            // } else if ($mq['module_id'] == 8) {
-            //     $modul_8[] = 0;
-            // } else if ($mq['module_id'] == 9) {
-            //     $modul_9[] = 0;
-            // } else if ($mq['module_id'] == 10) {
-            //     $modul_10[] = 0;
-            // } else if ($mq['module_id'] == 11) {
-            //     $modul_11[] = 0;
-            // } else {
-            //     $modul_12[] = 0;
-            }
+    
+    $student_id = $_SESSION['student_id'];
+    
+    // Array untuk menyimpan hasil per modul
+    $module_results = array();
+    $module_answers = array();
+    
+    // Inisialisasi array untuk 7 modul
+    for ($i = 1; $i <= 7; $i++) {
+        $module_answers[$i] = array();
+    }
+    
+    // Process semua jawaban
+    foreach ($_POST as $key => $user_answer_index) {
+        if (strpos($key, 'question') === 0) {
+            $question_id = substr($key, 8);
+            
+            // Get question info dan correct answer (dalam bentuk index)
+            $sql = "SELECT module_id, answer FROM module_question WHERE id = '{$question_id}'";
+            $query = mysqli_query($conn, $sql);
+            $question_data = mysqli_fetch_array($query, MYSQLI_ASSOC);
+            $module_id = $question_data['module_id'];
+            $correct_answer_index = (int)$question_data['answer']; // Index jawaban benar: 0, 1, 2, 3
+            
+            // Convert user input to integer
+            $user_answer_index = (int)$user_answer_index;
+            
+            // Bandingkan index user dengan correct answer index
+            $is_correct = ($user_answer_index === $correct_answer_index) ? 1 : 0;
+            
+            // Simpan ke array modul
+            $module_answers[$module_id][] = $is_correct;
+            
+            // Insert ke table pretest_modul (detail jawaban)
+            $insert_detail = "INSERT INTO pretest_modul (student_id, module_id, question_id, answer_id, is_correct) 
+                             VALUES ('{$student_id}', '{$module_id}', '{$question_id}', '{$user_answer_index}', '{$is_correct}')";
+            mysqli_query($conn, $insert_detail);
         }
     }
-    // var_dump($modul_1);
-    // echo '<br/>';
-    // var_dump($modul_2);
-    // echo '<br/>';
-    // var_dump($modul_3);
-    // echo '<br/>';
-    // var_dump($modul_4);
-    // echo '<br/>';
-    // var_dump($modul_5);
-    // echo '<br/>';
-    // var_dump($modul_6);
-    // echo '<br/>';
-    // var_dump($modul_7);
-    // echo '<br/>';
-    // var_dump($modul_8);
-    // echo '<br/>';
-    // var_dump($modul_9);
-    // echo '<br/>';
-    // var_dump($modul_10);
-    // echo '<br/>';
-    // var_dump($modul_11);
-    // echo '<br/>';
-    // var_dump($modul_12);
-    // echo '<br/>';
-
-    //Hitung modul1
-    $hitung_modul_1 = max(1, mode($modul_1));
-    //Hitung modul2
-    $hitung_modul_2 = max(1, mode($modul_2));
-    //Hitung modul3
-    $hitung_modul_3 = max(1, mode($modul_3));
-    //Hitung modul4
-    $hitung_modul_4 = max(1, mode($modul_4));
-    // //Hitung modul5
-    $hitung_modul_5 = max(1, mode($modul_5));
-    // //Hitung modul6
-    $hitung_modul_6 = max(1, mode($modul_6));
-    // //Hitung modul7
-    $hitung_modul_7 = max(1, mode($modul_7));
-    // //Hitung modul8
-    // $hitung_modul_8 = mode($modul_8);
-    // //Hitung modul9
-    // $hitung_modul_9 = mode($modul_9);
-    //Hitung modul10
-    // $hitung_modul_10 = mode($modul_10);
-    // //Hitung modul11
-    // $hitung_modul_11 = mode($modul_11);
-    // //Hitung modul12
-    // $hitung_modul_12 = mode($modul_12);
-
-    // $result = mysqli_query($conn, "INSERT INTO pre_test_answer (student_id, modul_1, modul_2, modul_3, modul_4, modul_5, modul_6, modul_7, modul_8, modul_9, modul_10, modul_11, modul_12) VALUES ('{$_SESSION['student_id']}', '{$hitung_modul_1}','{$hitung_modul_2}','{$hitung_modul_3}','{$hitung_modul_4}','{$hitung_modul_5}','{$hitung_modul_6}','{$hitung_modul_7}','{$hitung_modul_8}','{$hitung_modul_9}','{$hitung_modul_10}','{$hitung_modul_11}','{$hitung_modul_12}')");
-    $result = mysqli_query($conn, 
-    "INSERT INTO pre_test_answer (student_id, modul_1, modul_2, modul_3, modul_4, modul_5, modul_6, modul_7) VALUES ('{$_SESSION['student_id']}', '{$hitung_modul_1}','{$hitung_modul_2}','{$hitung_modul_3}','{$hitung_modul_4}','{$hitung_modul_5}','{$hitung_modul_6}','{$hitung_modul_7}')");
-    if (!$result) {
-        echo mysqli_error($conn);
-    } else {
-        header('location: ../student/index-adaptive-learning.php');
+    
+    // Hitung score untuk setiap modul
+    foreach ($module_answers as $module_id => $answers) {
+        if (!empty($answers)) {
+            $correct_count = array_sum($answers);
+            $total_questions = count($answers);
+            
+            // Hitung score berdasarkan ketentuan baru
+            if ($correct_count == 0) {
+                $score = 0;
+            } else if ($correct_count == 1) {
+                $score = 50;
+            } else if ($correct_count == 2) {
+                $score = 85;
+            } else if ($correct_count >= 3) {
+                $score = 100;
+            } else {
+                $score = 0;
+            }
+            
+            $module_results[] = array(
+                'module_id' => $module_id,
+                'correct_answers' => $correct_count,
+                'total_questions' => $total_questions,
+                'score' => $score
+            );
+            
+            // Insert ke table result_hasil_pretest
+            $insert_result = "INSERT INTO result_hasil_pretest 
+                             (student_id, module_id, total_questions, correct_answers, score, recommended_level) 
+                             VALUES ('{$student_id}', '{$module_id}', '{$total_questions}', '{$correct_count}', '{$score}', 1)
+                             ON DUPLICATE KEY UPDATE 
+                             total_questions = '{$total_questions}',
+                             correct_answers = '{$correct_count}',
+                             score = '{$score}',
+                             updated_at = CURRENT_TIMESTAMP";
+            mysqli_query($conn, $insert_result);
+        }
     }
+    
+    // Call GNN API untuk mendapatkan prediksi
+    $gnn_prediction = callGNNAPI($student_id, $module_results);
+    
+    if ($gnn_prediction && isset($gnn_prediction['predictions'])) {
+        // Update hasil dengan prediksi GNN
+        foreach ($gnn_prediction['predictions'] as $prediction) {
+            $module_id = $prediction['module_id'];
+            $gnn_pred = $prediction['predicted_level'];
+            $confidence = $prediction['confidence'];
+            
+            $update_gnn = "UPDATE result_hasil_pretest 
+                          SET gnn_prediction = '{$confidence}',
+                              gnn_confidence = '{$confidence}',
+                              recommended_level = '{$gnn_pred}'
+                          WHERE student_id = '{$student_id}' 
+                          AND module_id = '{$module_id}'";
+            mysqli_query($conn, $update_gnn);
+        }
+        
+        // Simpan overall level ke pre_test_result
+        $overall_level = $gnn_prediction['overall_level'];
+        $insert_overall = "INSERT INTO pre_test_result (student_id, level) 
+                          VALUES ('{$student_id}', '{$overall_level}')
+                          ON DUPLICATE KEY UPDATE level = '{$overall_level}'";
+        mysqli_query($conn, $insert_overall);
+        
+        // Simpan ke level_student
+        $insert_level = "INSERT INTO level_student (student_id, level) 
+                        VALUES ('{$student_id}', '{$overall_level}')
+                        ON DUPLICATE KEY UPDATE level = '{$overall_level}'";
+        mysqli_query($conn, $insert_level);
+    }
+    
+    // Set session message
+    $_SESSION['pretest_message'] = 'Pre-test berhasil diselesaikan! Lihat hasil dan rekomendasi modul Anda.';
+    
+    // Redirect ke halaman hasil pretest (NEW)
+    header('location: ../student/hasil-pretest.php');
 }
 
-function mode($armodul)
-{
-    // Jika array kosong, return 1 (modul minimum)
-    if (empty($armodul)) {
-        return 1;
+/**
+ * Call GNN API untuk mendapatkan prediksi level
+ */
+function callGNNAPI($student_id, $module_results) {
+    // Try multiple ports for GNN API
+    $api_ports = [5001, 5000, 5002]; // Try 5001 first, then 5000, then 5002
+    $api_url = null;
+    
+    foreach ($api_ports as $port) {
+        $test_url = "http://localhost:{$port}/health";
+        $ch_test = curl_init($test_url);
+        curl_setopt($ch_test, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch_test, CURLOPT_TIMEOUT, 2);
+        curl_setopt($ch_test, CURLOPT_CONNECTTIMEOUT, 1);
+        $test_result = curl_exec($ch_test);
+        $http_code = curl_getinfo($ch_test, CURLINFO_HTTP_CODE);
+        curl_close($ch_test);
+        
+        if ($http_code == 200) {
+            $api_url = "http://localhost:{$port}/predict";
+            break;
+        }
     }
     
-    $total = 1; // Default ke modul 1
-    $v = array_count_values($armodul);
-    arsort($v);
-    foreach ($v as $k => $v) {
-        $total = $k;
-        break;
+    if (!$api_url) {
+        error_log("GNN API not available on any port. Using fallback.");
+        return null;
     }
     
-    // Pastikan tidak kurang dari 1
-    return max(1, $total);
+    $data = array(
+        'student_id' => $student_id,
+        'module_results' => $module_results
+    );
+    
+    $options = array(
+        'http' => array(
+            'header'  => "Content-type: application/json\r\n",
+            'method'  => 'POST',
+            'content' => json_encode($data),
+            'timeout' => 10
+        )
+    );
+    
+    $context  = stream_context_create($options);
+    $result = @file_get_contents($api_url, false, $context);
+    
+    if ($result === FALSE) {
+        // Jika API gagal, gunakan perhitungan fallback
+        return calculateFallbackLevel($module_results);
+    }
+    
+    return json_decode($result, true);
+}
+
+/**
+ * Fallback calculation jika GNN API tidak tersedia
+ */
+function calculateFallbackLevel($module_results) {
+    $scores = array();
+    $predictions = array();
+    
+    foreach ($module_results as $module) {
+        $score = $module['score'];
+        $scores[] = $score;
+        
+        // Simple rule-based prediction
+        if ($score >= 85) {
+            $level = 3;
+        } else if ($score >= 50) {
+            $level = 2;
+        } else {
+            $level = 1;
+        }
+        
+        $predictions[] = array(
+            'module_id' => $module['module_id'],
+            'score' => $score,
+            'predicted_level' => $level,
+            'confidence' => 0.5
+        );
+    }
+    
+    $avg_score = array_sum($scores) / count($scores);
+    
+    if ($avg_score >= 85) {
+        $overall_level = 3;
+    } else if ($avg_score >= 50) {
+        $overall_level = 2;
+    } else {
+        $overall_level = 1;
+    }
+    
+    return array(
+        'student_id' => null,
+        'predictions' => $predictions,
+        'overall_level' => $overall_level,
+        'average_score' => $avg_score,
+        'recommended_start_module' => 1
+    );
 }

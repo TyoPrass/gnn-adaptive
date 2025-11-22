@@ -10,11 +10,17 @@ if (!isset($_SESSION['name'])) {
 // set variable
 $level_student = 0;
 
-// mengambil data level student dari database
-$query = mysqli_query($conn, "SELECT * FROM level_student WHERE student_id = '{$_SESSION['student_id']}'");
-if (mysqli_num_rows($query) > 0) {
+// Cek apakah ada hasil pretest di tabel result_hasil_pretest (GNN calculation)
+$sql_hasil = "SELECT COUNT(*) as count FROM result_hasil_pretest WHERE student_id = '{$_SESSION['student_id']}'";
+$query_hasil = mysqli_query($conn, $sql_hasil);
+$hasil_data = mysqli_fetch_assoc($query_hasil);
+$_SESSION['pretest_completed'] = ($hasil_data['count'] > 0);
+
+// mengambil data level student dari tabel level_student
+$query_level = mysqli_query($conn, "SELECT * FROM level_student WHERE student_id = '{$_SESSION['student_id']}'");
+if (mysqli_num_rows($query_level) > 0) {
     // jika data ada set level student
-    $result = mysqli_fetch_array($query);
+    $result = mysqli_fetch_array($query_level);
     $level_student = $result['level'];
     $_SESSION['level'] = $result['level'];
     $_SESSION['test_processed'] = true;
@@ -81,10 +87,10 @@ if (mysqli_num_rows($query_elearning) > 0) {
     <style>
         :root {
             --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            --success-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-            --warning-gradient: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
-            --info-gradient: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            --secondary-gradient: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);
+            --success-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --warning-gradient: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);
+            --info-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         }
         
         body {
@@ -328,7 +334,7 @@ if (mysqli_num_rows($query_elearning) > 0) {
         }
         
         .success-icon {
-            color: #4CAF50;
+            color: #667eea;
             animation: scaleIn 0.5s ease;
         }
         
@@ -404,19 +410,19 @@ if (mysqli_num_rows($query_elearning) > 0) {
                                     <i class="fas fa-hand-wave me-3"></i>Selamat Datang, <?php echo $_SESSION['name']; ?>!
                                 </h1>
                                 <p class="lead mb-3">Mulai perjalanan belajar adaptif Anda hari ini</p>
-                                <div class="d-flex align-items-center">
+                                <!-- <div class="d-flex align-items-center">
                                     <span class="me-3">Progress Keseluruhan:</span>
                                     <div class="progress-container flex-grow-1">
                                         <?php
-                                        $progress = 0;
-                                        if ($_SESSION['survey_taken']) $progress += 25;
-                                        if ($_SESSION['pre_test_taken']) $progress += 25;
-                                        if ($_SESSION['test_processed']) $progress += 50;
-                                        ?>
+                                        // $progress = 0;
+                                        // if ($_SESSION['survey_taken']) $progress += 25;
+                                        // if ($_SESSION['pre_test_taken']) $progress += 25;
+                                        // if ($_SESSION['test_processed']) $progress += 50;
+                                        // ?>
                                         <div class="progress-bar-custom" style="width: <?php echo $progress; ?>%"></div>
                                     </div>
                                     <span class="ms-3 fw-bold"><?php echo $progress; ?>%</span>
-                                </div>
+                                </div> -->
                             </div>
                             <div class="col-lg-4 text-center">
                                 <img src="../assets/images/study.png" alt="Study" class="img-fluid" style="max-height: 200px;">
@@ -427,7 +433,7 @@ if (mysqli_num_rows($query_elearning) > 0) {
             </div>
 
             <!-- Status Cards -->
-            <div class="row mb-4">
+            <!-- <div class="row mb-4">
                 <div class="col-lg-3 col-md-6 mb-3">
                     <div class="stats-card dashboard-card">
                         <div class="d-flex align-items-center justify-content-between">
@@ -447,7 +453,7 @@ if (mysqli_num_rows($query_elearning) > 0) {
                                 <div class="stats-number"><?php echo $_SESSION['survey_taken'] ? '✓' : '✗'; ?></div>
                                 <small class="text-muted">Survey</small>
                             </div>
-                            <i class="fas fa-poll-h fa-2x" style="color: #f093fb;"></i>
+                            <i class="fas fa-poll-h fa-2x" style="color: #9b59b6;"></i>
                         </div>
                     </div>
                 </div>
@@ -459,7 +465,7 @@ if (mysqli_num_rows($query_elearning) > 0) {
                                 <div class="stats-number"><?php echo $_SESSION['pre_test_taken'] ? '✓' : '✗'; ?></div>
                                 <small class="text-muted">Pre-test</small>
                             </div>
-                            <i class="fas fa-clipboard-check fa-2x" style="color: #4facfe;"></i>
+                            <i class="fas fa-clipboard-check fa-2x" style="color: #8e44ad;"></i>
                         </div>
                     </div>
                 </div>
@@ -471,11 +477,11 @@ if (mysqli_num_rows($query_elearning) > 0) {
                                 <div class="stats-number"><?php echo $_SESSION['test_processed'] ? '✓' : '✗'; ?></div>
                                 <small class="text-muted">Tes Diproses</small>
                             </div>
-                            <i class="fas fa-cogs fa-2x" style="color: #43e97b;"></i>
+                            <i class="fas fa-cogs fa-2x" style="color: #9b59b6;"></i>
                         </div>
                     </div>
                 </div>
-            </div>
+            </div> -->
 
             <!-- Learning Options -->
             <div class="row mb-4">
@@ -505,29 +511,39 @@ if (mysqli_num_rows($query_elearning) > 0) {
                                 <span class="status-badge status-pending">
                                     <i class="fas fa-clock me-1"></i>Pre-test Belum Diambil
                                 </span>
-                            <?php } elseif (!$_SESSION['test_processed']) { ?>
+                            <?php } elseif (!$_SESSION['pretest_completed']) { ?>
                                 <span class="status-badge status-pending">
-                                    <i class="fas fa-calculator me-1"></i>Siap Dihitung
+                                    <i class="fas fa-calculator me-1"></i>Menunggu Perhitungan
                                 </span>
                             <?php } else { ?>
                                 <span class="status-badge status-completed">
-                                    <i class="fas fa-check-circle me-1"></i>Siap Digunakan
+                                    <i class="fas fa-check-circle me-1"></i>Pre-test Selesai
                                 </span>
+                                <?php if ($level_student > 0) { ?>
+                                <div class="mt-2">
+                                    <span class="badge bg-success" style="font-size: 1rem; padding: 0.5rem 1rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;">
+                                        <i class="fas fa-layer-group me-1"></i>Level: <?php echo $level_student; ?>
+                                    </span>
+                                </div>
+                                <?php } ?>
                             <?php } ?>
                         </div>
                         
-                        <div class="d-grid">
-                            <?php if ($_SESSION['survey_taken'] && $_SESSION['pre_test_taken'] && $_SESSION['test_processed']) { ?>
-                                <a href="index-adaptive-learning.php" class="quick-action-btn btn-adaptive">
-                                    <i class="fas fa-play me-2"></i>Mulai Adaptive Learning
-                                </a>
-                            <?php } elseif (!$_SESSION['survey_taken']) { ?>
+                        <div class="d-grid gap-2">
+                            <?php if (!$_SESSION['survey_taken']) { ?>
                                 <a href="survey.php" class="quick-action-btn btn-adaptive">
                                     <i class="fas fa-poll me-2"></i>Ambil Survey Dulu
                                 </a>
                             <?php } elseif (!$_SESSION['pre_test_taken']) { ?>
                                 <a href="pre-test.php" class="quick-action-btn btn-adaptive">
                                     <i class="fas fa-edit me-2"></i>Ambil Pre-test Dulu
+                                </a>
+                            <?php } elseif ($_SESSION['pretest_completed']) { ?>
+                                <a href="hasil-pretest.php" class="quick-action-btn btn-adaptive mb-2">
+                                    <i class="fas fa-chart-line me-2"></i>Lihat Hasil Pre-test
+                                </a>
+                                <a href="modul-rekomendasi.php" class="quick-action-btn btn-adaptive">
+                                    <i class="fas fa-route me-2"></i>Mulai Belajar
                                 </a>
                             <?php } else { ?>
                                 <button class="quick-action-btn btn-adaptive" id="calculateBtn" onclick="calculateAdaptive()">
@@ -555,7 +571,7 @@ if (mysqli_num_rows($query_elearning) > 0) {
                                     <i class="fas fa-check-circle me-1"></i>Pre-Test Selesai
                                 </span>
                                 <div class="mt-2">
-                                    <span class="badge bg-success" style="font-size: 1rem; padding: 0.5rem 1rem;">
+                                    <span class="badge bg-success" style="font-size: 1rem; padding: 0.5rem 1rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;">
                                         <i class="fas fa-award me-1"></i>Nilai Pre-Test: <?php echo number_format($_SESSION['pre_test_elearning_score'], 0); ?>
                                     </span>
                                 </div>
@@ -572,7 +588,7 @@ if (mysqli_num_rows($query_elearning) > 0) {
                                     <i class="fas fa-play me-2"></i>Mulai E-Learning
                                 </a>
                             <?php } else { ?>
-                                <a href="quiz-e-learning.php" class="quick-action-btn btn-warning">
+                                <a href="quiz-e-learning.php" class="quick-action-btn btn-adaptive">
                                     <i class="fas fa-edit me-2"></i>Ambil Pre-Test Dulu
                                 </a>
                             <?php } ?>
@@ -595,12 +611,12 @@ if (mysqli_num_rows($query_elearning) > 0) {
                                 </a>
                             </div>
                             <div class="col-md-3 col-sm-6 mb-2">
-                                <a href="modul.php" class="btn btn-outline-info w-100">
+                                <a href="modul-rekomendasi.php" class="btn btn-outline-primary w-100">
                                     <i class="fas fa-book me-2"></i>Modul Belajar
                                 </a>
                             </div>
                             <div class="col-md-3 col-sm-6 mb-2">
-                                <a href="quiz.php" class="btn btn-outline-success w-100">
+                                <a href="quiz.php" class="btn btn-outline-primary w-100">
                                     <i class="fas fa-question-circle me-2"></i>Quiz
                                 </a>
                             </div>
@@ -761,7 +777,7 @@ if (mysqli_num_rows($query_elearning) > 0) {
                             <div class="result-icon success-icon">
                                 <i class="fas fa-check-circle"></i>
                             </div>
-                            <h3 class="fw-bold mb-3" style="color: #4CAF50;">Perhitungan Berhasil!</h3>
+                            <h3 class="fw-bold mb-3" style="color: #667eea;">Perhitungan Berhasil!</h3>
                             <div class="mb-3">
                                 <div class="row g-3">
                                     <div class="col-6">

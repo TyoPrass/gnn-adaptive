@@ -416,6 +416,34 @@ if (mysqli_num_rows($query) > 0) {
                                     <div class="level-badge">
                                         <i class="fas fa-graduation-cap me-2"></i>Level <?php echo $level_student ?>
                                     </div>
+                                    <?php 
+                                    // Tampilkan info GNN jika ada
+                                    $gnn_result = mysqli_query($conn, "SELECT * FROM result_hasil_pretest WHERE student_id = '{$_SESSION['student_id']}' ORDER BY id DESC LIMIT 1");
+                                    if ($gnn_result && mysqli_num_rows($gnn_result) > 0) {
+                                        $gnn_data = mysqli_fetch_assoc($gnn_result);
+                                        if ($gnn_data['gnn_predicted_level']) {
+                                    ?>
+                                    <div class="mt-4 p-3 bg-light rounded">
+                                        <small class="text-muted d-block mb-2">
+                                            <i class="fas fa-brain me-1"></i>Prediksi menggunakan: <?php echo $gnn_data['method']; ?>
+                                        </small>
+                                        <?php if ($gnn_data['method'] != 'IRT Fallback') { ?>
+                                        <div class="row">
+                                            <div class="col-6">
+                                                <small class="text-muted">GNN Level: </small>
+                                                <strong><?php echo $gnn_data['gnn_predicted_level']; ?></strong>
+                                            </div>
+                                            <div class="col-6">
+                                                <small class="text-muted">Confidence: </small>
+                                                <strong><?php echo number_format($gnn_data['gnn_confidence'] * 100, 1); ?>%</strong>
+                                            </div>
+                                        </div>
+                                        <?php } ?>
+                                    </div>
+                                    <?php 
+                                        }
+                                    }
+                                    ?>
                                 </div>
                             <?php } else { ?>
                                 <!-- Pre-test Status -->
