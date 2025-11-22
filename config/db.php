@@ -10,7 +10,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET' && realpath(__FILE__) == realpath($_SERV
 
 
 // Prodn
-$user = '127.0.0.1'; 
+$host = '127.0.0.1'; 
 $db = 'u636744980_hgt_gnn'; 
 $user = 'u636744980_hgt_gnn'; 
 $pass = 'Jerapah@09';
