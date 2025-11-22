@@ -45,6 +45,12 @@ if (mysqli_num_rows($query) > 0) {
     $_SESSION['pre_test_taken'] = false;
 }
 
+// Cek apakah ada hasil pretest (GNN)
+$sql_hasil = "SELECT COUNT(*) as count FROM result_hasil_pretest WHERE student_id = '{$_SESSION['student_id']}'";
+$query_hasil = mysqli_query($conn, $sql_hasil);
+$hasil_data = mysqli_fetch_assoc($query_hasil);
+$_SESSION['pretest_completed'] = ($hasil_data['count'] > 0);
+
 // mengambil data hasil quiz e-learning (pre-test untuk e-learning)
 $sql_elearning = "SELECT * FROM quiz_result_e_learning WHERE student_id = '{$_SESSION['student_id']}'";
 $query_elearning = mysqli_query($conn, $sql_elearning);
@@ -505,6 +511,10 @@ if (mysqli_num_rows($query_elearning) > 0) {
                                 <span class="status-badge status-pending">
                                     <i class="fas fa-clock me-1"></i>Pre-test Belum Diambil
                                 </span>
+                            <?php } elseif (!$_SESSION['pretest_completed']) { ?>
+                                <span class="status-badge status-pending">
+                                    <i class="fas fa-calculator me-1"></i>Menunggu Perhitungan
+                                </span>
                             <?php } elseif (!$_SESSION['test_processed']) { ?>
                                 <span class="status-badge status-pending">
                                     <i class="fas fa-calculator me-1"></i>Siap Dihitung
@@ -517,9 +527,13 @@ if (mysqli_num_rows($query_elearning) > 0) {
                         </div>
                         
                         <div class="d-grid">
-                            <?php if ($_SESSION['survey_taken'] && $_SESSION['pre_test_taken'] && $_SESSION['test_processed']) { ?>
-                                <a href="index-adaptive-learning.php" class="quick-action-btn btn-adaptive">
-                                    <i class="fas fa-play me-2"></i>Mulai Adaptive Learning
+                            <?php if ($_SESSION['survey_taken'] && $_SESSION['pre_test_taken'] && $_SESSION['pretest_completed'] && $_SESSION['test_processed']) { ?>
+                                <a href="modul-rekomendasi.php" class="quick-action-btn btn-adaptive">
+                                    <i class="fas fa-route me-2"></i>Lihat Rekomendasi Modul
+                                </a>
+                            <?php } elseif ($_SESSION['pretest_completed']) { ?>
+                                <a href="hasil-pretest.php" class="quick-action-btn btn-success">
+                                    <i class="fas fa-chart-line me-2"></i>Lihat Hasil Pre-test
                                 </a>
                             <?php } elseif (!$_SESSION['survey_taken']) { ?>
                                 <a href="survey.php" class="quick-action-btn btn-adaptive">
@@ -595,7 +609,7 @@ if (mysqli_num_rows($query_elearning) > 0) {
                                 </a>
                             </div>
                             <div class="col-md-3 col-sm-6 mb-2">
-                                <a href="modul.php" class="btn btn-outline-info w-100">
+                                <a href="modul-rekomendasi.php" class="btn btn-outline-info w-100">
                                     <i class="fas fa-book me-2"></i>Modul Belajar
                                 </a>
                             </div>

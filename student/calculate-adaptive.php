@@ -3,6 +3,7 @@ error_reporting(E_ALL);
 ini_set('display_errors', 0);
 
 include('../config/db.php');
+include('../data/gnn_helper.php');
 session_start();
 
 header('Content-Type: application/json');
@@ -168,6 +169,56 @@ try {
 
     // Hitung level akhir (minimum dari pre-test dan survey)
     $level = max(1, min($level_pre_test, $level_survey)); // Pastikan min level 1
+    
+    // === INTEGRASI GNN ===
+    // Siapkan data module results untuk GNN API
+    $module_results = array();
+    for ($i = 1; $i <= 7; $i++) {
+        $correct = ($sum_modul[$i] >= 0.5) ? 1 : 0; // Convert probability to binary
+        $module_results[] = array(
+            'module_id' => $i,
+            'correct_answers' => $correct,
+            'total_questions' => 1,
+            'probability' => $iterasi_harap[$i]
+        );
+    }
+    
+    // Call GNN API for prediction
+    $gnn_prediction = callGNNAPI($student_id, $module_results);
+    
+    // Jika GNN berhasil, gunakan prediksi GNN
+    if ($gnn_prediction && isset($gnn_prediction['predicted_level'])) {
+        $gnn_level = $gnn_prediction['predicted_level'];
+        $gnn_confidence = $gnn_prediction['confidence'];
+        
+        // Simpan hasil GNN ke database result_hasil_pretest
+        $correct_count = 0;
+        foreach ($module_results as $mod) {
+            $correct_count += $mod['correct_answers'];
+        }
+        
+        $score = calculateGNNScore($correct_count, 7);
+        $insert_gnn = mysqli_query($conn, 
+            "INSERT INTO result_hasil_pretest (student_id, jawaban_benar, total_soal, score, gnn_predicted_level, gnn_confidence, method) 
+            VALUES ('$student_id', '$correct_count', 7, '$score', '$gnn_level', '$gnn_confidence', 'GNN')"
+        );
+        
+        // Gunakan level GNN jika confidence tinggi (> 0.6), otherwise fallback ke IRT
+        if ($gnn_confidence > 0.6) {
+            $level = $gnn_level;
+            $method_used = 'GNN';
+        } else {
+            // Rata-rata antara GNN dan IRT jika confidence rendah
+            $level = max(1, round(($gnn_level + $level) / 2));
+            $method_used = 'Hybrid (GNN + IRT)';
+        }
+    } else {
+        // Fallback to IRT level if GNN fails
+        $method_used = 'IRT Fallback';
+        $gnn_level = null;
+        $gnn_confidence = null;
+    }
+    // === END INTEGRASI GNN ===
 
     // Simpan level student
     $insert_level = mysqli_query($conn, "INSERT INTO level_student (student_id, level) VALUES ('$student_id', '$level')");
@@ -180,6 +231,14 @@ try {
     $_SESSION['level'] = $level;
     $_SESSION['test_processed'] = true;
     
+    // Hitung total jawaban benar
+    $total_correct = 0;
+    $total_questions = 7;
+    foreach ($module_results as $mod) {
+        $total_correct += $mod['correct_answers'];
+    }
+    $percentage = round(($total_correct / $total_questions) * 100, 2);
+    
     echo json_encode([
         'success' => true,
         'message' => 'Perhitungan berhasil!',
@@ -187,7 +246,14 @@ try {
             'level' => $level,
             'level_pre_test' => $level_pre_test,
             'level_survey' => $level_survey,
+            'gnn_level' => $gnn_level,
+            'gnn_confidence' => $gnn_confidence,
+            'method_used' => $method_used,
             'ability' => round($ability, 4),
+            'theta' => round($ability, 4),
+            'correct_answers' => $total_correct,
+            'total_questions' => $total_questions,
+            'percentage' => $percentage,
             'modules_not_mastered' => $moduls
         ]
     ]);

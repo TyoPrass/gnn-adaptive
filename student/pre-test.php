@@ -4,9 +4,26 @@ session_start();
 
 if (!isset($_SESSION['name'])) {
     header('location: ../sign-in.php');
+    exit;
 }
 
 include('../config/db.php');
+
+// CEK APAKAH STUDENT SUDAH MENGERJAKAN PRETEST
+$student_id = $_SESSION['student_id'];
+$check_query = "SELECT COUNT(*) as count FROM result_hasil_pretest WHERE student_id = ?";
+$stmt = mysqli_prepare($conn, $check_query);
+mysqli_stmt_bind_param($stmt, "i", $student_id);
+mysqli_stmt_execute($stmt);
+$check_result = mysqli_stmt_get_result($stmt);
+$check_data = mysqli_fetch_assoc($check_result);
+
+// Jika sudah mengerjakan, redirect ke halaman hasil
+if ($check_data['count'] > 0) {
+    $_SESSION['pretest_message'] = 'Anda sudah mengerjakan pre-test. Berikut adalah hasilnya.';
+    header('location: hasil-pretest.php');
+    exit;
+}
 ?>
 
 <!doctype html>
@@ -427,7 +444,7 @@ include('../config/db.php');
                                                 <input type="radio" 
                                                        id="q<?php echo $q['id']; ?>_a<?php echo $a['id']; ?>"
                                                        name="question<?php echo $q['id']; ?>"
-                                                       value="<?php echo $a['id']; ?>" 
+                                                       value="<?php echo $key; ?>" 
                                                        required>
                                                 <label for="q<?php echo $q['id']; ?>_a<?php echo $a['id']; ?>">
                                                     <?php echo $a['answer_desc']; ?>
