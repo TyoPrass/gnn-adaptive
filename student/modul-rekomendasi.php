@@ -31,15 +31,27 @@ if ($check_data['count'] == 0) {
     exit;
 }
 
-// Ambil hasil pretest per modul dengan GNN prediction
+// Ambil hasil pretest per modul dengan GNN prediction dan hasil post-test
 $query = "SELECT 
             rhp.*,
             m.module_desc,
             m.module_level,
             m.number as module_number,
-            m.id as module_id
+            m.id as module_id,
+            ptr.score as post_test_score,
+            ptr.correct_answers as post_test_correct,
+            ptr.total_questions as post_test_total,
+            ptr.status as post_test_status
           FROM result_hasil_pretest rhp
           JOIN module m ON m.id = rhp.module_id
+          LEFT JOIN post_test_adaptive_result ptr ON ptr.module_id = m.id 
+                                                   AND ptr.student_id = rhp.student_id 
+                                                   AND ptr.id = (
+                                                       SELECT id FROM post_test_adaptive_result 
+                                                       WHERE module_id = m.id 
+                                                       AND student_id = rhp.student_id 
+                                                       ORDER BY score DESC, id DESC LIMIT 1
+                                                   )
           WHERE rhp.student_id = ?
           ORDER BY m.number ASC";
 
@@ -49,7 +61,35 @@ mysqli_stmt_execute($stmt);
 $results = mysqli_stmt_get_result($stmt);
 
 $modules_data = [];
+
 while ($row = mysqli_fetch_assoc($results)) {
+    // Simpan score asli pre-test dan post-test
+    $row['pretest_score'] = $row['score'];
+    $row['pretest_correct'] = $row['correct_answers'];
+    $row['pretest_total'] = $row['total_questions'];
+    
+    // Cek apakah pre-test sudah lulus (score >= 70)
+    $row['pretest_passed'] = ($row['score'] >= 70);
+    
+    // Gunakan nilai TERBAIK antara pre-test dan post-test
+    if (!empty($row['post_test_score'])) {
+        if ($row['post_test_score'] > $row['score']) {
+            // Post-test lebih baik, gunakan nilai post-test
+            $row['score'] = $row['post_test_score'];
+            $row['correct_answers'] = $row['post_test_correct'];
+            $row['total_questions'] = $row['post_test_total'];
+            $row['best_source'] = 'post-test';
+        } else {
+            // Pre-test lebih baik, tetap gunakan nilai pre-test
+            $row['best_source'] = 'pre-test';
+        }
+    } else {
+        $row['best_source'] = 'pre-test';
+    }
+    
+    // Cek apakah modul ini LULUS (score >= 70 dari nilai terbaik)
+    $row['is_passed'] = ($row['score'] >= 70);
+    
     $modules_data[] = $row;
 }
 
@@ -60,98 +100,79 @@ mysqli_stmt_bind_param($stmt, "i", $student_id);
 mysqli_stmt_execute($stmt);
 $survey_result = mysqli_stmt_get_result($stmt);
 $survey_data = mysqli_fetch_assoc($survey_result);
-$user_interest_level = $survey_data ? $survey_data['level_result'] : 2;
+$user_interest_level = $survey_data ? $survey_data['level_result'] : 1;
 
-// Ambil level student dari level_student
+// Ambil level student dari tabel level_student (hasil perhitungan GNN)
 $level_query = "SELECT level FROM level_student WHERE student_id = ?";
 $stmt = mysqli_prepare($conn, $level_query);
 mysqli_stmt_bind_param($stmt, "i", $student_id);
 mysqli_stmt_execute($stmt);
 $level_result = mysqli_stmt_get_result($stmt);
 $level_data = mysqli_fetch_assoc($level_result);
-$student_level = $level_data ? $level_data['level'] : 2;
+
+// Gunakan level dari tabel level_student, default ke 1 jika tidak ada
+$student_level = $level_data ? (int)$level_data['level'] : 1;
 
 // ========================================
 // ALGORITMA REKOMENDASI SEQUENCE MODUL
 // ========================================
 
 /**
- * Strategi Rekomendasi:
- * 1. Modul dengan score rendah (0-50) → Prioritas tinggi (harus dikuasai dulu)
- * 2. Modul dengan score sedang (50-85) → Prioritas menengah (perlu penguatan)
- * 3. Modul dengan score tinggi (85-100) → Prioritas rendah (sudah dikuasai)
- * 4. Urutkan berdasarkan: score rendah → level rendah → minat user
+ * Strategi Rekomendasi - URUTAN SEQUENTIAL:
+ * 1. Urutkan dari SCORE TERENDAH ke TERTINGGI (termudah ke tersulit)
+ * 2. Modul dengan score rendah (belum dikuasai) → dipelajari PERTAMA
+ * 3. Modul dengan score tinggi (sudah dikuasai) → dipelajari TERAKHIR
+ * 4. Lock system: Modul dibuka SATU PER SATU secara berurutan
  */
 
-function generateModuleSequence($modules, $user_interest, $student_level) {
-    $weak_modules = [];      // Score 0-50
-    $medium_modules = [];    // Score 50-85
-    $strong_modules = [];    // Score 85-100
+function generateModuleSequence($modules) {
+    // Urutkan berdasarkan SCORE TERENDAH ke TERTINGGI
+    // Jika score sama, urutkan berdasarkan module_number
+    usort($modules, function($a, $b) {
+        if ($a['score'] == $b['score']) {
+            return $a['module_number'] <=> $b['module_number'];
+        }
+        return $a['score'] <=> $b['score']; // Score TERENDAH dulu (termudah)
+    });
     
-    foreach ($modules as $module) {
-        $module['priority_score'] = calculatePriority($module, $user_interest, $student_level);
-        
-        if ($module['score'] < 50) {
-            $weak_modules[] = $module;
-        } elseif ($module['score'] < 85) {
-            $medium_modules[] = $module;
+    return $modules;
+}
+
+// Generate sequence - Urutkan dari termudah ke tersulit
+$recommended_sequence = generateModuleSequence($modules_data);
+
+// ========================================
+// LOCK LOGIC - Setelah urutan ditentukan
+// ========================================
+// Modul yang SUDAH LULUS (score >= 70) TIDAK DIKUNCI
+// Modul yang BELUM LULUS dikunci berdasarkan urutan sequential
+// Hanya modul belum lulus yang mengikuti aturan: buka SATU PER SATU
+
+$previous_module_passed = true; // Modul pertama selalu unlocked
+
+foreach ($recommended_sequence as $index => &$module) {
+    // Jika modul sudah LULUS, TIDAK PERLU DIKUNCI
+    if ($module['is_passed']) {
+        $module['is_locked'] = false;
+        $previous_module_passed = true; // Karena sudah lulus, modul berikutnya bisa dibuka
+    } else {
+        // Modul belum lulus
+        if ($index == 0) {
+            // Modul pertama selalu terbuka (meskipun belum lulus)
+            $module['is_locked'] = false;
+            $previous_module_passed = false; // Belum lulus, jadi modul berikutnya terkunci
         } else {
-            $strong_modules[] = $module;
+            // Modul berikutnya terkunci jika modul sebelumnya belum lulus
+            $module['is_locked'] = !$previous_module_passed;
+            
+            // Update status untuk modul berikutnya
+            if (!$module['is_locked']) {
+                $previous_module_passed = false; // Modul ini belum lulus
+            }
         }
     }
-    
-    // Sort setiap kategori berdasarkan priority score
-    usort($weak_modules, function($a, $b) {
-        return $b['priority_score'] <=> $a['priority_score'];
-    });
-    
-    usort($medium_modules, function($a, $b) {
-        return $b['priority_score'] <=> $a['priority_score'];
-    });
-    
-    usort($strong_modules, function($a, $b) {
-        return $a['module_level'] <=> $b['module_level'];
-    });
-    
-    // Gabungkan: weak → medium → strong
-    return array_merge($weak_modules, $medium_modules, $strong_modules);
 }
-
-/**
- * Hitung priority score untuk modul
- * Semakin tinggi score, semakin prioritas
- */
-function calculatePriority($module, $user_interest, $student_level) {
-    $score = 0;
-    
-    // 1. Score rendah = prioritas tinggi (inverse)
-    $score += (100 - $module['score']) * 2;
-    
-    // 2. Level modul sesuai dengan kemampuan user
-    $level_match = 3 - abs($module['module_level'] - $student_level);
-    $score += $level_match * 15;
-    
-    // 3. Sesuai dengan minat dari survey
-    $interest_match = 3 - abs($module['module_level'] - $user_interest);
-    $score += $interest_match * 10;
-    
-    // 4. GNN confidence (jika ada)
-    if (isset($module['gnn_confidence']) && $module['gnn_confidence'] > 0) {
-        $score += $module['gnn_confidence'] * 20;
-    }
-    
-    // 5. Recommended level dari GNN
-    if (isset($module['recommended_level'])) {
-        if ($module['recommended_level'] <= $student_level) {
-            $score += 25; // Modul yang direkomendasikan GNN untuk level user
-        }
-    }
-    
-    return $score;
-}
-
-// Generate sequence
-$recommended_sequence = generateModuleSequence($modules_data, $user_interest_level, $student_level);
+unset($module); // Break reference
 
 // Hitung statistik
 $total_modules = count($recommended_sequence);
@@ -278,6 +299,27 @@ $strong_count = count(array_filter($recommended_sequence, function($m) { return 
         .module-item.priority-low {
             border-left-color: #00C851;
             background: linear-gradient(135deg, rgba(0, 200, 81, 0.05) 0%, white 100%);
+        }
+        
+        .module-item.module-locked {
+            position: relative;
+            border-left-color: #999;
+            background: linear-gradient(135deg, rgba(150, 150, 150, 0.1) 0%, white 100%);
+        }
+        
+        .lock-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            z-index: 10;
+            color: #666;
+        }
+        
+        .module-item.module-locked:hover {
+            transform: translateX(0);
+            cursor: not-allowed;
         }
         
         .sequence-number {
@@ -442,28 +484,28 @@ $strong_count = count(array_filter($recommended_sequence, function($m) { return 
         </div>
 
         <!-- Statistics -->
-        <div class="stats-container">
+        <!-- <div class="stats-container">
             <div class="stat-box">
                 <i class="fas fa-layer-group stat-icon" style="color: #667eea;"></i>
-                <div class="stat-value"><?php echo $student_level; ?></div>
+                <div class="stat-value"><?php // echo $student_level; ?></div>
                 <div class="stat-label">Level Anda</div>
             </div>
             <div class="stat-box">
                 <i class="fas fa-heart stat-icon" style="color: #f093fb;"></i>
-                <div class="stat-value"><?php echo $user_interest_level; ?></div>
+                <div class="stat-value"><?php //echo $user_interest_level; ?></div>
                 <div class="stat-label">Minat Level</div>
             </div>
             <div class="stat-box">
                 <i class="fas fa-exclamation-circle stat-icon" style="color: #ff4444;"></i>
-                <div class="stat-value"><?php echo $weak_count; ?></div>
+                <div class="stat-value"><?php //echo $weak_count; ?></div>
                 <div class="stat-label">Perlu Penguatan</div>
             </div>
             <div class="stat-box">
                 <i class="fas fa-check-circle stat-icon" style="color: #00C851;"></i>
-                <div class="stat-value"><?php echo $strong_count; ?></div>
+                <div class="stat-value"><?php //echo $strong_count; ?></div>
                 <div class="stat-label">Sudah Dikuasai</div>
             </div>
-        </div>
+        </div> -->
 
         <!-- Recommendation Info -->
         <div class="recommendation-box">
@@ -540,19 +582,46 @@ $strong_count = count(array_filter($recommended_sequence, function($m) { return 
                 }
             ?>
             
-            <div class="module-item <?php echo $priority_class; ?>">
+            <div class="module-item <?php echo $priority_class; ?> <?php echo $module['is_locked'] ? 'module-locked' : ''; ?>">
                 <div class="sequence-number"><?php echo $index + 1; ?></div>
-                <div class="module-content">
+                <?php if ($module['is_locked']): ?>
+                <div class="lock-overlay">
+                    <i class="fas fa-lock fa-3x"></i>
+                    <p class="mt-2 mb-0"><strong>Modul Terkunci</strong></p>
+                    <small>Selesaikan modul sebelumnya terlebih dahulu</small>
+                </div>
+                <?php endif; ?>
+                <div class="module-content <?php echo $module['is_locked'] ? 'opacity-50' : ''; ?>">
                     <div class="d-flex justify-content-between align-items-start mb-2">
                         <div>
-                            <h5 class="mb-2"><?php echo $module['module_desc']; ?></h5>
+                            <h5 class="mb-2">
+                                <?php if ($module['is_locked']): ?>
+                                <i class="fas fa-lock me-2 text-secondary"></i>
+                                <?php endif; ?>
+                                <?php echo $module['module_desc']; ?>
+                            </h5>
                             <div class="d-flex gap-2 flex-wrap">
+                                <?php if ($module['is_passed']): ?>
+                                <span class="badge bg-success">
+                                    <i class="fas fa-check-circle me-1"></i>LULUS
+                                </span>
+                                <?php else: ?>
                                 <span class="priority-badge <?php echo $priority_badge_class; ?>">
                                     <i class="fas <?php echo $priority_icon; ?> me-1"></i><?php echo $priority_text; ?>
                                 </span>
+                                <?php endif; ?>
                                 <span class="badge bg-secondary">
                                     <i class="fas fa-layer-group me-1"></i>Level <?php echo $module['module_level']; ?>
                                 </span>
+                                <?php if ($module['best_source'] == 'post-test'): ?>
+                                <span class="badge bg-info">
+                                    <i class="fas fa-star me-1"></i>Nilai Terbaik: Post-Test
+                                </span>
+                                <?php elseif (!empty($module['post_test_score'])): ?>
+                                <span class="badge bg-warning">
+                                    <i class="fas fa-star me-1"></i>Nilai Terbaik: Pre-Test
+                                </span>
+                                <?php endif; ?>
                                 <?php if (isset($module['recommended_level'])): ?>
                                 <span class="badge bg-primary">
                                     <i class="fas fa-robot me-1"></i>GNN: Level <?php echo $module['recommended_level']; ?>
@@ -576,20 +645,57 @@ $strong_count = count(array_filter($recommended_sequence, function($m) { return 
                     
                     <div class="mt-2">
                         <small class="text-muted">
-                            <i class="fas fa-check-circle me-1"></i>
+                            <i class="fas fa-trophy me-1 text-warning"></i>
+                            <strong>Nilai Terbaik (<?php echo ucfirst($module['best_source']); ?>):</strong> 
                             Benar: <?php echo $module['correct_answers']; ?>/<?php echo $module['total_questions']; ?>
                             <?php if (isset($module['gnn_confidence']) && $module['gnn_confidence'] > 0): ?>
                                 | <i class="fas fa-chart-line me-1"></i>
                                 Confidence: <?php echo number_format($module['gnn_confidence'] * 100, 1); ?>%
                             <?php endif; ?>
                         </small>
+                        <?php if (!empty($module['post_test_score']) && $module['best_source'] == 'pre-test'): ?>
+                        <br>
+                        <small class="text-warning">
+                            <i class="fas fa-info-circle me-1"></i>
+                            Post-Test: <?php echo number_format($module['post_test_score'], 0); ?> | Pre-Test: <?php echo number_format($module['pretest_score'], 0); ?> (Pre-test lebih tinggi)
+                        </small>
+                        <?php elseif (empty($module['post_test_score'])): ?>
+                        <br>
+                        <small class="text-muted">
+                            <i class="fas fa-info-circle me-1"></i>
+                            Score Pre-test: <?php echo number_format($module['pretest_score'], 0); ?> | 
+                            <?php if ($module['is_passed']): ?>
+                                <span class="text-success">Sudah lulus, modul berikutnya terbuka</span>
+                            <?php else: ?>
+                                <span class="text-danger">Belum lulus, selesaikan post-test untuk unlock modul berikutnya</span>
+                            <?php endif; ?>
+                        </small>
+                        <?php endif; ?>
                     </div>
                     
                     <div class="mt-3">
-                        <a href="module.php?module=<?php echo $module['module_id']; ?>" 
-                           class="btn btn-sm btn-primary">
-                            <i class="fas fa-book-open me-1"></i>Mulai Belajar Modul Ini
-                        </a>
+                        <?php if ($module['is_locked']): ?>
+                        <button class="btn btn-sm btn-secondary" disabled>
+                            <i class="fas fa-lock me-1"></i>Modul Terkunci
+                        </button>
+                        <?php else: ?>
+                            <a href="module.php?module=<?php echo $module['module_id']; ?>" 
+                               class="btn btn-sm btn-primary">
+                                <i class="fas fa-book-open me-1"></i>Belajar Modul
+                            </a>
+                            <?php if (!empty($module['post_test_score'])): ?>
+                            <a href="hasil-post-test.php?module=<?php echo $module['module_id']; ?>" 
+                               class="btn btn-sm btn-info">
+                                <i class="fas fa-chart-bar me-1"></i>Lihat Hasil
+                            </a>
+                            <?php endif; ?>
+                            <?php if ($module['is_passed']): ?>
+                            <a href="post_test.php?module=<?php echo $module['module_id']; ?>" 
+                               class="btn btn-sm btn-warning">
+                                <i class="fas fa-redo me-1"></i>Perbaiki Nilai
+                            </a>
+                            <?php endif; ?>
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>

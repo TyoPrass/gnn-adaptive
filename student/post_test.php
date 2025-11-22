@@ -5,13 +5,37 @@ session_start();
 
 if (!isset($_SESSION['name'])) {
     header('location: ../sign-in.php');
+    exit();
 }
 
 // mengambil data materi dari database
-$modul = mysqli_real_escape_string($conn, $_GET['module']);
-$sql = "SELECT * from module where id = '{$modul}'";
+$module_id = mysqli_real_escape_string($conn, $_GET['module']);
+$student_id = $_SESSION['student_id'];
+
+$sql = "SELECT * FROM module WHERE id = '{$module_id}'";
 $query = mysqli_query($conn, $sql);
 $modul = mysqli_fetch_array($query, MYSQLI_ASSOC);
+
+// Cek apakah user sudah pernah mengerjakan post-test untuk modul ini
+$sql_check = "SELECT * FROM post_test_adaptive_result 
+              WHERE student_id = '{$student_id}' 
+              AND module_id = '{$module_id}' 
+              ORDER BY id DESC LIMIT 1";
+$query_check = mysqli_query($conn, $sql_check);
+$has_taken = mysqli_num_rows($query_check) > 0;
+$last_result = $has_taken ? mysqli_fetch_assoc($query_check) : null;
+
+// Cek apakah user ingin retry untuk perbaiki nilai (dari parameter URL)
+$allow_retry = isset($_GET['retry']) && $_GET['retry'] == '1';
+
+// PROTEKSI: Jika sudah lulus dan TIDAK retry, redirect ke halaman hasil
+if ($has_taken && $last_result['status'] == 'lulus' && !$allow_retry) {
+    header('location: hasil-post-test.php?module=' . $module_id);
+    exit();
+}
+
+// Set flag untuk tampilan
+$is_retry_mode = ($has_taken && $last_result['status'] == 'lulus' && $allow_retry);
 ?>
 
 <!doctype html>
@@ -398,6 +422,51 @@ $modul = mysqli_fetch_array($query, MYSQLI_ASSOC);
 
     <div class="container-fluid py-4">
         <div class="container">
+            <?php if ($is_retry_mode) { ?>
+            <!-- Alert Mode Retry -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="alert alert-info alert-dismissible fade show" role="alert">
+                        <h5 class="alert-heading">
+                            <i class="fas fa-redo me-2"></i>
+                            Mode Perbaikan Nilai
+                        </h5>
+                        <p class="mb-2">
+                            <strong>Nilai Terakhir:</strong> <?php echo number_format($last_result['score'], 0); ?> | 
+                            <strong>Status:</strong> LULUS ✓
+                        </p>
+                        <hr>
+                        <p class="mb-0">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Anda sudah lulus, tetapi bisa mengerjakan ulang untuk memperbaiki nilai. 
+                            <strong>Sistem akan menyimpan nilai TERBAIK</strong> antara nilai lama dan nilai baru Anda.
+                        </p>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                </div>
+            </div>
+            <?php } elseif ($has_taken && $last_result) { ?>
+            <!-- Alert Nilai Terakhir -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                        <h5 class="alert-heading">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            Nilai Terakhir
+                        </h5>
+                        <p class="mb-2">
+                            <strong>Nilai:</strong> <?php echo number_format($last_result['score'], 0); ?> | 
+                            <strong>Benar:</strong> <?php echo $last_result['correct_answers']; ?>/<?php echo $last_result['total_questions']; ?> | 
+                            <strong>Status:</strong> <?php echo strtoupper($last_result['status']); ?>
+                        </p>
+                        <hr>
+                        <p class="mb-0"><i class="fas fa-info-circle me-2"></i>Anda perlu nilai minimal 70 untuk lulus. Silakan coba lagi!</p>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                </div>
+            </div>
+            <?php } ?>
+            
             <!-- Header Section -->
             <div class="row mb-4">
                 <div class="col-12">
@@ -464,8 +533,8 @@ $modul = mysqli_fetch_array($query, MYSQLI_ASSOC);
             <div class="row">
                 <div class="col-12">
                     <div class="quiz-container">
-                        <form action="../data/modul.php?action=submitPostTest" method="POST" id="postTestForm">
-                            <input type="hidden" name="module" value="<?php echo $_GET['module'] ?>">
+                        <form action="../action/save-post-test-adaptive.php" method="POST" id="postTestForm">
+                            <input type="hidden" name="module_id" value="<?php echo $module_id ?>">
                             <?php
                             //GET QUESTION
                             $sql = "SELECT * FROM module_question WHERE module_id = '{$_GET['module']}' ORDER BY RAND()";
@@ -497,10 +566,10 @@ $modul = mysqli_fetch_array($query, MYSQLI_ASSOC);
                                                         <input class="form-check-input" type="radio" 
                                                                name="question<?php echo $r['id'] ?>" 
                                                                value="<?php echo $key ?>" 
-                                                               id="q<?php echo $r['id'] ?>_a<?php echo $a['id'] ?>" 
+                                                               id="q<?php echo $r['id'] ?>_a<?php echo $key ?>" 
                                                                required>
                                                         <label class="form-check-label" 
-                                                               for="q<?php echo $r['id'] ?>_a<?php echo $a['id'] ?>">
+                                                               for="q<?php echo $r['id'] ?>_a<?php echo $key ?>">
                                                             <?php echo $a['answer_desc'] ?>
                                                         </label>
                                                     </div>

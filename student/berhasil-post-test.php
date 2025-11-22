@@ -14,6 +14,7 @@ if (!isset($_GET['module_id']) || empty($_GET['module_id'])) {
 }
 
 $completed_module_id = mysqli_real_escape_string($conn, $_GET['module_id']);
+$student_id = $_SESSION['student_id'];
 
 // Ambil data module yang selesai
 $sql_module = "SELECT * FROM module WHERE id = '{$completed_module_id}'";
@@ -25,6 +26,37 @@ if (mysqli_num_rows($query_module) == 0) {
 }
 
 $module_data = mysqli_fetch_array($query_module, MYSQLI_ASSOC);
+
+// Ambil hasil post-test dari session atau database
+$score = isset($_SESSION['posttest_score']) ? $_SESSION['posttest_score'] : null;
+$correct = isset($_SESSION['posttest_correct']) ? $_SESSION['posttest_correct'] : null;
+$total = isset($_SESSION['posttest_total']) ? $_SESSION['posttest_total'] : null;
+$is_perfect = isset($_SESSION['posttest_perfect']) ? $_SESSION['posttest_perfect'] : false;
+
+// Jika tidak ada di session, ambil dari database
+if ($score === null) {
+    $sql_result = "SELECT * FROM post_test_adaptive_result 
+                   WHERE student_id = '{$student_id}' 
+                   AND module_id = '{$completed_module_id}' 
+                   AND status = 'lulus'
+                   ORDER BY id DESC LIMIT 1";
+    $query_result = mysqli_query($conn, $sql_result);
+    
+    if (mysqli_num_rows($query_result) > 0) {
+        $result_data = mysqli_fetch_assoc($query_result);
+        $score = $result_data['score'];
+        $correct = $result_data['correct_answers'];
+        $total = $result_data['total_questions'];
+        $is_perfect = ($correct == $total);
+    }
+}
+
+// Clear session setelah digunakan
+unset($_SESSION['posttest_score']);
+unset($_SESSION['posttest_correct']);
+unset($_SESSION['posttest_total']);
+unset($_SESSION['posttest_status']);
+unset($_SESSION['posttest_perfect']);
 
 if ($_SESSION['level_user'] == 3) {
     $survey = mysqli_query($conn, "SELECT * FROM survey_result where student_id = '{$_SESSION['student_id']}'");
@@ -273,9 +305,24 @@ if ($_SESSION['level_user'] == 3) {
             animation: rotate 3s linear infinite;
         }
         
+        .achievement-badge .badge-icon .fa-crown {
+            animation: crownPulse 2s ease-in-out infinite;
+        }
+        
         @keyframes rotate {
             from { transform: rotate(0deg); }
             to { transform: rotate(360deg); }
+        }
+        
+        @keyframes crownPulse {
+            0%, 100% { 
+                transform: scale(1) rotate(0deg); 
+                filter: drop-shadow(0 0 10px rgba(255,215,0,0.5));
+            }
+            50% { 
+                transform: scale(1.2) rotate(-10deg); 
+                filter: drop-shadow(0 0 20px rgba(255,215,0,0.8));
+            }
         }
         
         .stats-container {
@@ -398,11 +445,26 @@ if ($_SESSION['level_user'] == 3) {
                                     <h1 class="display-5 fw-bold mb-3">
                                         <i class="fas fa-check-circle me-3"></i>Selamat! Post Test Berhasil
                                     </h1>
+                                    <?php if ($is_perfect) { ?>
+                                    <div class="alert alert-warning mb-3" style="background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%); border: none; color: white;">
+                                        <h5 class="mb-2">
+                                            <i class="fas fa-crown me-2"></i>🎉 PERFECT SCORE! 🎉
+                                        </h5>
+                                        <p class="mb-0">
+                                            <strong>Luar Biasa!</strong> Anda menjawab SEMUA pertanyaan dengan benar! Ini adalah pencapaian sempurna!
+                                        </p>
+                                    </div>
+                                    <?php } ?>
                                     <p class="lead mb-3">Anda telah menyelesaikan modul ini dengan sangat baik!</p>
                                     <div class="d-flex flex-wrap gap-3">
                                         <span class="badge bg-light text-dark p-2">
                                             <i class="fas fa-trophy me-1"></i>Lulus Post Test
                                         </span>
+                                        <?php if ($is_perfect) { ?>
+                                        <span class="badge p-2" style="background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%); color: white;">
+                                            <i class="fas fa-crown me-1"></i>Perfect Score
+                                        </span>
+                                        <?php } ?>
                                         <span class="badge bg-light text-dark p-2">
                                             <i class="fas fa-arrow-right me-1"></i>Modul Selanjutnya Terbuka
                                         </span>
@@ -430,16 +492,59 @@ if ($_SESSION['level_user'] == 3) {
                         <div class="success-alert">
                             <i class="fas fa-check-circle fa-3x mb-3"></i>
                             <h3 class="mb-3">Post Test Berhasil Diselesaikan!</h3>
+                            <?php if ($score !== null) { ?>
+                            <div class="mt-4 mb-3">
+                                <div class="row justify-content-center">
+                                    <div class="col-md-8">
+                                        <div class="score-display p-4 bg-white rounded-3 shadow-sm">
+                                            <div class="row text-center">
+                                                <div class="col-4">
+                                                    <div class="score-item">
+                                                        <i class="fas fa-star text-warning fa-2x mb-2"></i>
+                                                        <h2 class="mb-0 fw-bold" style="color: #00C851;"><?php echo number_format($score, 0); ?></h2>
+                                                        <small class="text-muted">Nilai Anda</small>
+                                                    </div>
+                                                </div>
+                                                <div class="col-4">
+                                                    <div class="score-item">
+                                                        <i class="fas fa-check-circle text-success fa-2x mb-2"></i>
+                                                        <h2 class="mb-0 fw-bold" style="color: #00C851;"><?php echo $correct; ?>/<?php echo $total; ?></h2>
+                                                        <small class="text-muted">Jawaban Benar</small>
+                                                    </div>
+                                                </div>
+                                                <div class="col-4">
+                                                    <div class="score-item">
+                                                        <i class="fas fa-trophy text-warning fa-2x mb-2"></i>
+                                                        <h2 class="mb-0 fw-bold" style="color: #00C851;"><?php echo number_format(($correct/$total)*100, 0); ?>%</h2>
+                                                        <small class="text-muted">Persentase</small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <?php } ?>
                             <p class="lead mb-0">Anda telah mencapai passing grade dan modul ini telah selesai</p>
                         </div>
                         
                         <!-- Achievement Badge -->
                         <div class="achievement-badge">
                             <div class="badge-icon">
+                                <?php if ($is_perfect) { ?>
+                                <i class="fas fa-crown" style="color: #FFD700;"></i>
+                                <?php } else { ?>
                                 <i class="fas fa-trophy"></i>
+                                <?php } ?>
                             </div>
-                            <h4 class="mb-2">Pencapaian Baru!</h4>
-                            <p class="text-muted mb-0">Modul berhasil diselesaikan dengan nilai memuaskan</p>
+                            <h4 class="mb-2"><?php echo $is_perfect ? 'Perfect Achievement!' : 'Pencapaian Baru!'; ?></h4>
+                            <p class="text-muted mb-0">
+                                <?php if ($is_perfect) { ?>
+                                    🌟 Sempurna! Semua jawaban benar - Anda adalah Master di modul ini! 🌟
+                                <?php } else { ?>
+                                    Modul berhasil diselesaikan dengan nilai memuaskan
+                                <?php } ?>
+                            </p>
                         </div>
                         
                         <!-- Info Box -->
@@ -451,7 +556,7 @@ if ($_SESSION['level_user'] == 3) {
 
                         <!-- Action Buttons -->
                         <div class="text-center mt-4">
-                            <a href="modul.php" class="action-button btn-success-custom">
+                            <a href="modul-rekomendasi.php" class="action-button btn-success-custom">
                                 <i class="fas fa-book-open me-2"></i>
                                 LANJUT KE MODUL SELANJUTNYA
                             </a>

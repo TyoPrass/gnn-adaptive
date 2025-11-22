@@ -296,6 +296,22 @@ $materi = mysqli_fetch_array($query, MYSQLI_ASSOC);
 
     <div class="container-fluid py-4">
         <div class="container">
+            <?php if (isset($_SESSION['info_message'])) { ?>
+            <!-- Info Message Alert -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="alert alert-info alert-dismissible fade show" role="alert">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <?php 
+                        echo $_SESSION['info_message']; 
+                        unset($_SESSION['info_message']);
+                        ?>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                </div>
+            </div>
+            <?php } ?>
+            
             <!-- Header Section -->
             <div class="row mb-4">
                 <div class="col-12">

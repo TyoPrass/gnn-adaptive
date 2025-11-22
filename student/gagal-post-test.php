@@ -7,6 +7,42 @@ if (!isset($_SESSION['name'])) {
     header('location: ../sign-in.php');
 }
 
+$student_id = $_SESSION['student_id'];
+
+// Ambil module_id dari URL atau session
+$module_id = isset($_GET['module_id']) ? mysqli_real_escape_string($conn, $_GET['module_id']) : null;
+
+// Ambil hasil post-test dari session atau database
+$score = isset($_SESSION['posttest_score']) ? $_SESSION['posttest_score'] : null;
+$correct = isset($_SESSION['posttest_correct']) ? $_SESSION['posttest_correct'] : null;
+$total = isset($_SESSION['posttest_total']) ? $_SESSION['posttest_total'] : null;
+
+// Jika tidak ada di session dan ada module_id, ambil dari database
+if ($score === null && $module_id !== null) {
+    $sql_result = "SELECT * FROM post_test_adaptive_result 
+                   WHERE student_id = '{$student_id}' 
+                   AND module_id = '{$module_id}' 
+                   AND status = 'gagal'
+                   ORDER BY id DESC LIMIT 1";
+    $query_result = mysqli_query($conn, $sql_result);
+    
+    if (mysqli_num_rows($query_result) > 0) {
+        $result_data = mysqli_fetch_assoc($query_result);
+        $score = $result_data['score'];
+        $correct = $result_data['correct_answers'];
+        $total = $result_data['total_questions'];
+    }
+}
+
+// Clear session setelah digunakan
+$saved_score = $score;
+$saved_correct = $correct;
+$saved_total = $total;
+unset($_SESSION['posttest_score']);
+unset($_SESSION['posttest_correct']);
+unset($_SESSION['posttest_total']);
+unset($_SESSION['posttest_status']);
+
 if ($_SESSION['level_user'] == 3) {
     $survey = mysqli_query($conn, "SELECT * FROM survey_result where student_id = '{$_SESSION['student_id']}'");
     $survey_row = mysqli_num_rows($survey);
@@ -382,6 +418,45 @@ if ($_SESSION['level_user'] == 3) {
                             <div class="failure-alert">
                                 <i class="fas fa-exclamation-triangle fa-3x mb-3"></i>
                                 <h3 class="mb-3">Post Test Tidak Lulus</h3>
+                                <?php if ($saved_score !== null) { ?>
+                                <div class="mt-4 mb-3">
+                                    <div class="row justify-content-center">
+                                        <div class="col-md-8">
+                                            <div class="score-display p-4 bg-white rounded-3 shadow-sm border border-danger">
+                                                <div class="row text-center">
+                                                    <div class="col-4">
+                                                        <div class="score-item">
+                                                            <i class="fas fa-chart-line text-danger fa-2x mb-2"></i>
+                                                            <h2 class="mb-0 fw-bold text-danger"><?php echo number_format($saved_score, 0); ?></h2>
+                                                            <small class="text-muted">Nilai Anda</small>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-4">
+                                                        <div class="score-item">
+                                                            <i class="fas fa-tasks text-warning fa-2x mb-2"></i>
+                                                            <h2 class="mb-0 fw-bold text-warning"><?php echo $saved_correct; ?>/<?php echo $saved_total; ?></h2>
+                                                            <small class="text-muted">Jawaban Benar</small>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-4">
+                                                        <div class="score-item">
+                                                            <i class="fas fa-bullseye text-info fa-2x mb-2"></i>
+                                                            <h2 class="mb-0 fw-bold text-info">70</h2>
+                                                            <small class="text-muted">Nilai Minimum</small>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="mt-3 text-center">
+                                                    <p class="mb-0 text-muted">
+                                                        <i class="fas fa-info-circle me-1"></i>
+                                                        Anda perlu <?php echo (70 - $saved_score); ?> poin lagi untuk lulus
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <?php } ?>
                                 <p class="lead mb-0">Anda belum berhasil mencapai passing grade yang diperlukan</p>
                             </div>
                             
@@ -404,10 +479,10 @@ if ($_SESSION['level_user'] == 3) {
                                 <div class="text-center">
                                     <form action="../data/level-down.php" method="POST" class="d-inline">
                                         <?php if ($_SESSION['cek_level']==false) : ?>
-                                            <button type="submit" class="action-button btn-danger-custom">
+                                            <!-- <button type="submit" class="action-button btn-danger-custom">
                                                 <i class="fas fa-level-down-alt me-2"></i>
                                                 TURUNKAN LEVEL BELAJAR
-                                            </button>
+                                            </button> -->
                                         <?php endif ?>
                                     </form>
                                     
@@ -434,13 +509,13 @@ if ($_SESSION['level_user'] == 3) {
                                     <h6>Belajar Lagi</h6>
                                     <small class="text-muted">Pelajari materi dengan lebih mendalam</small>
                                 </div>
-                                <div class="stat-item">
+                                <!-- <div class="stat-item">
                                     <div class="stat-icon text-warning">
                                         <i class="fas fa-level-down-alt"></i>
                                     </div>
                                     <h6>Turun Level</h6>
                                     <small class="text-muted">Mulai dari level yang lebih mudah</small>
-                                </div>
+                                </div> -->
                                 <div class="stat-item">
                                     <div class="stat-icon text-success">
                                         <i class="fas fa-graduation-cap"></i>

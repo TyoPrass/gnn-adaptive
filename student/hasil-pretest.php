@@ -30,14 +30,26 @@ if ($check_data['count'] == 0) {
     exit;
 }
 
-// Ambil hasil pretest per modul
+// Ambil hasil pretest per modul dengan hasil post-test (best score)
 $query = "SELECT 
             rhp.*,
             m.module_desc,
             m.module_level,
-            m.number as module_number
+            m.number as module_number,
+            ptr.score as post_test_score,
+            ptr.correct_answers as post_test_correct,
+            ptr.total_questions as post_test_total,
+            ptr.status as post_test_status
           FROM result_hasil_pretest rhp
           JOIN module m ON m.id = rhp.module_id
+          LEFT JOIN post_test_adaptive_result ptr ON ptr.module_id = m.id 
+                                                   AND ptr.student_id = rhp.student_id 
+                                                   AND ptr.id = (
+                                                       SELECT id FROM post_test_adaptive_result 
+                                                       WHERE module_id = m.id 
+                                                       AND student_id = rhp.student_id 
+                                                       ORDER BY score DESC, id DESC LIMIT 1
+                                                   )
           WHERE rhp.student_id = ?
           ORDER BY m.number ASC";
 
@@ -54,6 +66,27 @@ $module_count = 0;
 
 $modules_data = [];
 while ($row = mysqli_fetch_assoc($results)) {
+    // Simpan score asli pre-test
+    $row['pretest_score'] = $row['score'];
+    $row['pretest_correct'] = $row['correct_answers'];
+    $row['pretest_total'] = $row['total_questions'];
+    
+    // Gunakan nilai TERBAIK antara pre-test dan post-test untuk perhitungan level
+    if (!empty($row['post_test_score'])) {
+        if ($row['post_test_score'] > $row['score']) {
+            // Post-test lebih baik, gunakan nilai post-test
+            $row['score'] = $row['post_test_score'];
+            $row['correct_answers'] = $row['post_test_correct'];
+            $row['total_questions'] = $row['post_test_total'];
+            $row['best_source'] = 'post-test';
+        } else {
+            // Pre-test lebih baik, tetap gunakan nilai pre-test
+            $row['best_source'] = 'pre-test';
+        }
+    } else {
+        $row['best_source'] = 'pre-test';
+    }
+    
     $total_correct += $row['correct_answers'];
     $total_questions += $row['total_questions'];
     $total_score += $row['score'];
@@ -64,29 +97,40 @@ while ($row = mysqli_fetch_assoc($results)) {
 $average_score = $module_count > 0 ? round($total_score / $module_count, 2) : 0;
 $overall_percentage = $total_questions > 0 ? round(($total_correct / $total_questions) * 100, 2) : 0;
 
-// Tentukan level berdasarkan average score
-if ($average_score >= 85) {
-    $overall_level = 3;
-    $level_label = 'Tinggi';
-    $level_color = 'success';
-} elseif ($average_score >= 50) {
-    $overall_level = 2;
-    $level_label = 'Sedang';
-    $level_color = 'warning';
-} else {
-    $overall_level = 1;
-    $level_label = 'Dasar';
-    $level_color = 'info';
-}
-
-// Ambil level dari level_student
+// Ambil level dari level_student (sama dengan modul rekomendasi)
 $level_query = "SELECT level FROM level_student WHERE student_id = ?";
 $stmt = mysqli_prepare($conn, $level_query);
 mysqli_stmt_bind_param($stmt, "i", $student_id);
 mysqli_stmt_execute($stmt);
 $level_result = mysqli_stmt_get_result($stmt);
 $level_data = mysqli_fetch_assoc($level_result);
-$final_level = $level_data ? $level_data['level'] : $overall_level;
+
+// Gunakan level dari tabel level_student (hasil GNN)
+// Jika tidak ada, hitung berdasarkan average score
+if ($level_data) {
+    $final_level = (int)$level_data['level'];
+} else {
+    // Fallback: tentukan level berdasarkan average score
+    if ($average_score >= 85) {
+        $final_level = 3;
+    } elseif ($average_score >= 50) {
+        $final_level = 2;
+    } else {
+        $final_level = 1;
+    }
+}
+
+// Tentukan label dan warna berdasarkan final level
+if ($final_level == 3) {
+    $level_label = 'Tinggi';
+    $level_color = 'success';
+} elseif ($final_level == 2) {
+    $level_label = 'Sedang';
+    $level_color = 'warning';
+} else {
+    $level_label = 'Dasar';
+    $level_color = 'info';
+}
 ?>
 
 <!DOCTYPE html>
