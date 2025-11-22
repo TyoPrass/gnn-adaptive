@@ -577,17 +577,40 @@ if (!isset($_SESSION['name'])) {
                             <p class="text-muted mb-0">Manajemen data guru dan akses</p>
                         </a>
                     </div>
-                    
-                    <div class="col-lg-4 col-md-6 mb-3">
-                        <a href="pre-test.php" class="quick-action-card">
-                            <div class="action-icon" style="background: var(--guru-secondary);">
-                                <i class="fas fa-calculator"></i>
-                            </div>
-                            <h5 class="mb-2">Hitung Level</h5>
-                            <p class="text-muted mb-0">Proses dan hitung level siswa</p>
-                        </a>
-                    </div>
                 <?php } ?>
+                
+                <!-- Card untuk Kelola Survey -->
+                <div class="col-lg-4 col-md-6 mb-3">
+                    <a href="survey.php" class="quick-action-card">
+                        <div class="action-icon" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                            <i class="fas fa-poll"></i>
+                        </div>
+                        <h5 class="mb-2">Kelola Survey</h5>
+                        <p class="text-muted mb-0">Kelola pertanyaan survey motivasi siswa</p>
+                    </a>
+                </div>
+                
+                <!-- Card untuk Kelola Soal -->
+                <div class="col-lg-4 col-md-6 mb-3">
+                    <a href="soal-management.php" class="quick-action-card">
+                        <div class="action-icon" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                            <i class="fas fa-question-circle"></i>
+                        </div>
+                        <h5 class="mb-2">Kelola Soal</h5>
+                        <p class="text-muted mb-0">Manajemen soal dan pilihan jawaban</p>
+                    </a>
+                </div>
+                
+                <!-- Card untuk Hitung Pre-test -->
+                <div class="col-lg-4 col-md-6 mb-3">
+                    <a href="pre-test.php" class="quick-action-card">
+                        <div class="action-icon" style="background: var(--guru-secondary);">
+                            <i class="fas fa-calculator"></i>
+                        </div>
+                        <h5 class="mb-2">Hitung Pre-Test</h5>
+                        <p class="text-muted mb-0">Proses perhitungan level siswa per kelas</p>
+                    </a>
+                </div>
                 
                 <div class="col-lg-4 col-md-6 mb-3">
                     <a href="hasil-pre-test.php" class="quick-action-card">
