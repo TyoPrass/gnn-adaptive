@@ -605,22 +605,17 @@ if (mysqli_num_rows($query_elearning) > 0) {
                             <i class="fas fa-bolt me-2" style="color: #667eea;"></i>Aksi Cepat
                         </h5>
                         <div class="row">
-                            <div class="col-md-3 col-sm-6 mb-2">
-                                <a href="topik.php" class="btn btn-outline-primary w-100">
-                                    <i class="fas fa-list me-2"></i>Lihat Topik
-                                </a>
-                            </div>
-                            <div class="col-md-3 col-sm-6 mb-2">
+                            <div class="col-md-4 col-sm-6 mb-2">
                                 <a href="modul-rekomendasi.php" class="btn btn-outline-primary w-100">
                                     <i class="fas fa-book me-2"></i>Modul Belajar
                                 </a>
                             </div>
-                            <div class="col-md-3 col-sm-6 mb-2">
+                            <div class="col-md-4 col-sm-6 mb-2">
                                 <a href="quiz.php" class="btn btn-outline-primary w-100">
                                     <i class="fas fa-question-circle me-2"></i>Quiz
                                 </a>
                             </div>
-                            <div class="col-md-3 col-sm-6 mb-2">
+                            <div class="col-md-4 col-sm-6 mb-2">
                                 <a href="../sign-out.php" class="btn btn-outline-danger w-100">
                                     <i class="fas fa-sign-out-alt me-2"></i>Logout
                                 </a>

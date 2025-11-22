@@ -584,9 +584,9 @@ if(mysqli_num_rows($query) > 0){
                             <a href="index.php" class="btn btn-light btn-lg px-4" style="position: relative; z-index: 100;">
                                 <i class="fas fa-home me-2"></i>Kembali ke Dashboard
                             </a>
-                            <a href="topik.php" class="btn btn-outline-light btn-lg px-4" style="position: relative; z-index: 100;">
+                            <!-- <a href="topik.php" class="btn btn-outline-light btn-lg px-4" style="position: relative; z-index: 100;">
                                 <i class="fas fa-book me-2"></i>Lihat Materi
-                            </a>
+                            </a> -->
                         </div>
                     </div>
                 </div>
