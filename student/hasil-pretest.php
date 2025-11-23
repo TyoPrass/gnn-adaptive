@@ -97,40 +97,71 @@ while ($row = mysqli_fetch_assoc($results)) {
 $average_score = $module_count > 0 ? round($total_score / $module_count, 2) : 0;
 $overall_percentage = $total_questions > 0 ? round(($total_correct / $total_questions) * 100, 2) : 0;
 
-// Ambil level dari level_student (sama dengan modul rekomendasi)
-$level_query = "SELECT level FROM level_student WHERE student_id = ?";
-$stmt = mysqli_prepare($conn, $level_query);
+// Ambil level TERKINI dari pre_test_result (level yang bisa naik dari post-test)
+$current_level_query = "SELECT level FROM pre_test_result WHERE student_id = ?";
+$stmt = mysqli_prepare($conn, $current_level_query);
 mysqli_stmt_bind_param($stmt, "i", $student_id);
 mysqli_stmt_execute($stmt);
-$level_result = mysqli_stmt_get_result($stmt);
-$level_data = mysqli_fetch_assoc($level_result);
+$current_level_result = mysqli_stmt_get_result($stmt);
+$current_level_data = mysqli_fetch_assoc($current_level_result);
 
-// Gunakan level dari tabel level_student (hasil GNN)
-// Jika tidak ada, hitung berdasarkan average score
-if ($level_data) {
-    $final_level = (int)$level_data['level'];
+// Ambil level AWAL dari level_student (hasil pre-test GNN)
+$initial_level_query = "SELECT level FROM level_student WHERE student_id = ?";
+$stmt = mysqli_prepare($conn, $initial_level_query);
+mysqli_stmt_bind_param($stmt, "i", $student_id);
+mysqli_stmt_execute($stmt);
+$initial_level_result = mysqli_stmt_get_result($stmt);
+$initial_level_data = mysqli_fetch_assoc($initial_level_result);
+
+// Level terkini (bisa naik dari post-test)
+if ($current_level_data && !empty($current_level_data['level'])) {
+    $current_level = (int)$current_level_data['level'];
 } else {
-    // Fallback: tentukan level berdasarkan average score
-    if ($average_score >= 85) {
-        $final_level = 3;
-    } elseif ($average_score >= 50) {
-        $final_level = 2;
-    } else {
-        $final_level = 1;
-    }
+    // Fallback ke level awal
+    $current_level = $initial_level_data ? (int)$initial_level_data['level'] : 1;
 }
 
-// Tentukan label dan warna berdasarkan final level
+// Level awal (dari pre-test)
+$initial_level = $initial_level_data ? (int)$initial_level_data['level'] : $current_level;
+
+// Cek apakah ada kenaikan level
+$level_up = ($current_level > $initial_level);
+
+// Gunakan current_level untuk tampilan
+$final_level = $current_level;
+
+// Tentukan label dan warna berdasarkan current level
 if ($final_level == 3) {
-    $level_label = 'Tinggi';
+    $level_label = 'Ahli';
     $level_color = 'success';
+    $level_icon = 'fa-crown';
 } elseif ($final_level == 2) {
-    $level_label = 'Sedang';
+    $level_label = 'Mahir';
     $level_color = 'warning';
+    $level_icon = 'fa-star';
 } else {
-    $level_label = 'Dasar';
+    $level_label = 'Menengah';
     $level_color = 'info';
+    $level_icon = 'fa-leaf';
 }
+
+// Hitung progress modul untuk info tambahan
+$sql_passed_modules = "SELECT COUNT(DISTINCT module_id) as passed 
+                       FROM post_test_adaptive_result 
+                       WHERE student_id = ? AND status = 'lulus'";
+$stmt = mysqli_prepare($conn, $sql_passed_modules);
+mysqli_stmt_bind_param($stmt, "i", $student_id);
+mysqli_stmt_execute($stmt);
+$passed_result = mysqli_stmt_get_result($stmt);
+$passed_data = mysqli_fetch_assoc($passed_result);
+$total_passed = $passed_data['passed'] ?? 0;
+
+$sql_total_modules = "SELECT COUNT(DISTINCT id) as total FROM module";
+$total_modules_result = mysqli_query($conn, $sql_total_modules);
+$total_modules_data = mysqli_fetch_assoc($total_modules_result);
+$total_all_modules = $total_modules_data['total'] ?? 0;
+
+$pass_percentage = ($total_all_modules > 0) ? round(($total_passed / $total_all_modules) * 100, 1) : 0;
 ?>
 
 <!DOCTYPE html>
@@ -360,14 +391,62 @@ if ($final_level == 3) {
             <h1 class="display-4 fw-bold mb-3">Hasil Pre-Test</h1>
             <p class="lead mb-0">Berikut adalah hasil pre-test Anda</p>
         </div>
+        
+        <?php if ($level_up) { ?>
+        <!-- Level Up Notification -->
+        <div class="alert alert-dismissible fade show mb-4" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; color: white; box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);">
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert"></button>
+            <div class="d-flex align-items-center">
+                <div class="flex-shrink-0 me-3">
+                    <i class="fas fa-rocket fa-3x"></i>
+                </div>
+                <div class="flex-grow-1">
+                    <h4 class="alert-heading mb-2">
+                        <i class="fas fa-star me-2"></i>🎊 Selamat! Level Anda Naik! 🎊
+                    </h4>
+                    <p class="mb-2">
+                        Anda telah meningkat dari <strong>Level <?php echo $initial_level; ?></strong> ke <strong>Level <?php echo $current_level; ?> (<?php echo $level_label; ?>)</strong>!
+                    </p>
+                    <div class="d-flex align-items-center gap-3 mt-3">
+                        <span class="badge bg-white text-dark p-2 px-3">
+                            <i class="fas fa-arrow-up me-1"></i>Level <?php echo $initial_level; ?> → Level <?php echo $current_level; ?>
+                        </span>
+                        <span class="badge bg-white text-dark p-2 px-3">
+                            <i class="fas <?php echo $level_icon; ?> me-1"></i><?php echo $level_label; ?>
+                        </span>
+                        <span class="badge bg-white text-dark p-2 px-3">
+                            <i class="fas fa-chart-line me-1"></i><?php echo $total_passed; ?>/<?php echo $total_all_modules; ?> Modul Lulus
+                        </span>
+                    </div>
+                    <hr style="background-color: rgba(255,255,255,0.3); margin: 1rem 0;">
+                    <p class="mb-0 small">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Terus tingkatkan kemampuan Anda dengan menyelesaikan lebih banyak modul!
+                    </p>
+                </div>
+            </div>
+        </div>
+        <?php } ?>
 
         <!-- Overall Statistics -->
         <div class="row mb-4">
             <div class="col-md-3 mb-3">
-                <div class="stat-card">
-                    <i class="fas fa-graduation-cap stat-icon"></i>
-                    <div class="stat-value"><?php echo $final_level; ?></div>
-                    <div class="stat-label">Level Akhir</div>
+                <div class="stat-card" style="border-left: 4px solid <?php echo $level_color == 'success' ? '#28a745' : ($level_color == 'warning' ? '#ffc107' : '#17a2b8'); ?>;">
+                    <i class="fas <?php echo $level_icon; ?> stat-icon"></i>
+                    <div class="stat-value">
+                        <?php echo $final_level; ?>
+                        <?php if ($level_up) { ?>
+                        <span class="badge bg-<?php echo $level_color; ?> ms-2" style="font-size: 0.5em; vertical-align: super;">
+                            <i class="fas fa-arrow-up"></i> Naik
+                        </span>
+                        <?php } ?>
+                    </div>
+                    <div class="stat-label">
+                        Level Terkini: <?php echo $level_label; ?>
+                        <?php if ($initial_level != $current_level) { ?>
+                        <br><small class="text-muted">(Awal: Level <?php echo $initial_level; ?>)</small>
+                        <?php } ?>
+                    </div>
                 </div>
             </div>
             <div class="col-md-3 mb-3">

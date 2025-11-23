@@ -88,6 +88,62 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             mysqli_query($conn, $sql_learned);
         }
         
+        // ===== SISTEM NAIK LEVEL =====
+        // Hitung total modul yang lulus dan persentase kelulusan
+        $sql_total_modules = "SELECT COUNT(DISTINCT id) as total FROM module WHERE 1";
+        $query_total = mysqli_query($conn, $sql_total_modules);
+        $data_total = mysqli_fetch_assoc($query_total);
+        $total_all_modules = $data_total['total'];
+        
+        // Hitung modul yang sudah lulus
+        $sql_passed_modules = "SELECT COUNT(DISTINCT module_id) as passed 
+                               FROM post_test_adaptive_result 
+                               WHERE student_id = '{$student_id}' 
+                               AND status = 'lulus'";
+        $query_passed = mysqli_query($conn, $sql_passed_modules);
+        $data_passed = mysqli_fetch_assoc($query_passed);
+        $total_passed_modules = $data_passed['passed'];
+        
+        // Hitung persentase
+        $pass_percentage = ($total_all_modules > 0) ? ($total_passed_modules / $total_all_modules) * 100 : 0;
+        
+        // Get current level
+        $sql_current_level = "SELECT level FROM pre_test_result WHERE student_id = '{$student_id}'";
+        $query_level = mysqli_query($conn, $sql_current_level);
+        $current_level_data = mysqli_fetch_assoc($query_level);
+        $current_level = $current_level_data['level'] ?? 1;
+        
+        $new_level = $current_level;
+        $level_up = false;
+        
+        // Logic naik level
+        if ($pass_percentage >= 80 && $current_level < 3) {
+            // Lebih dari 80% modul lulus -> Level 3 (Ahli)
+            $new_level = 3;
+            $level_up = true;
+        } elseif ($pass_percentage >= 50 && $current_level < 2) {
+            // Lebih dari 50% modul lulus -> Level 2 (Mahir)
+            $new_level = 2;
+            $level_up = true;
+        }
+        
+        // Update level jika naik
+        if ($level_up) {
+            $sql_update_level = "UPDATE pre_test_result SET level = '{$new_level}' WHERE student_id = '{$student_id}'";
+            mysqli_query($conn, $sql_update_level);
+            
+            // Set session untuk notifikasi level up
+            $_SESSION['level_up'] = true;
+            $_SESSION['old_level'] = $current_level;
+            $_SESSION['new_level'] = $new_level;
+        }
+        
+        // Simpan info progress untuk ditampilkan
+        $_SESSION['pass_percentage'] = number_format($pass_percentage, 1);
+        $_SESSION['total_passed_modules'] = $total_passed_modules;
+        $_SESSION['total_all_modules'] = $total_all_modules;
+        // ===== END SISTEM NAIK LEVEL =====
+        
         // Check if perfect score (semua benar)
         $is_perfect = ($correct_answers == $total_questions);
         $_SESSION['posttest_perfect'] = $is_perfect;
