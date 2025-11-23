@@ -455,6 +455,48 @@ if ($_SESSION['level_user'] == 3) {
                                         </p>
                                     </div>
                                     <?php } ?>
+                                    
+                                    <?php 
+                                    // Tampilkan notifikasi Level Up
+                                    if (isset($_SESSION['level_up']) && $_SESSION['level_up']) { 
+                                        $old_level = $_SESSION['old_level'];
+                                        $new_level = $_SESSION['new_level'];
+                                        $level_name = ($new_level == 3) ? 'Ahli' : (($new_level == 2) ? 'Mahir' : 'Menengah');
+                                        $level_icon = ($new_level == 3) ? 'fa-crown' : (($new_level == 2) ? 'fa-star' : 'fa-leaf');
+                                    ?>
+                                    <div class="alert mb-3" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; color: white; box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);">
+                                        <h4 class="mb-3">
+                                            <i class="fas fa-rocket me-2"></i>🎊 LEVEL UP! 🎊
+                                        </h4>
+                                        <p class="mb-2" style="font-size: 1.1rem;">
+                                            <strong>Selamat! Anda naik ke Level <?php echo $new_level; ?>!</strong>
+                                        </p>
+                                        <div class="d-flex align-items-center justify-content-start gap-3 mt-3">
+                                            <span class="badge bg-white text-dark p-2 px-3">
+                                                <i class="fas fa-arrow-up me-1"></i>Level <?php echo $old_level; ?> → Level <?php echo $new_level; ?>
+                                            </span>
+                                            <span class="badge bg-white text-dark p-2 px-3">
+                                                <i class="fas <?php echo $level_icon; ?> me-1"></i><?php echo $level_name; ?>
+                                            </span>
+                                        </div>
+                                        <?php if (isset($_SESSION['pass_percentage'])) { ?>
+                                        <p class="mb-0 mt-3" style="font-size: 0.95rem;">
+                                            <i class="fas fa-chart-line me-2"></i>
+                                            Progress: <strong><?php echo $_SESSION['total_passed_modules']; ?>/<?php echo $_SESSION['total_all_modules']; ?></strong> modul lulus 
+                                            (<strong><?php echo $_SESSION['pass_percentage']; ?>%</strong>)
+                                        </p>
+                                        <?php } ?>
+                                    </div>
+                                    <?php 
+                                        // Clear session level up
+                                        unset($_SESSION['level_up']);
+                                        unset($_SESSION['old_level']);
+                                        unset($_SESSION['new_level']);
+                                        unset($_SESSION['pass_percentage']);
+                                        unset($_SESSION['total_passed_modules']);
+                                        unset($_SESSION['total_all_modules']);
+                                    } 
+                                    ?>
                                     <p class="lead mb-3">Anda telah menyelesaikan modul ini dengan sangat baik!</p>
                                     <div class="d-flex flex-wrap gap-3">
                                         <span class="badge bg-light text-dark p-2">
