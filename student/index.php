@@ -43,12 +43,23 @@ if ($survey_row == 1) {
 }
 
 // mengambil data jawaban pre test untuk mengecek apakah murid sudah mengambil pretest
-$sql = "SELECT * FROM pre_test_answer WHERE student_id = '{$_SESSION['student_id']}'";
-$query = mysqli_query($conn, $sql);
-if (mysqli_num_rows($query) > 0) {
+// Prioritas cek dari result_hasil_pretest (GNN), fallback ke pre_test_answer (legacy)
+$sql_result_pretest = "SELECT COUNT(*) as count FROM result_hasil_pretest WHERE student_id = '{$_SESSION['student_id']}'";
+$query_result_pretest = mysqli_query($conn, $sql_result_pretest);
+$result_pretest_data = mysqli_fetch_assoc($query_result_pretest);
+
+if ($result_pretest_data['count'] > 0) {
+    // Jika ada di result_hasil_pretest, berarti sudah mengambil pre-test
     $_SESSION['pre_test_taken'] = true;
 } else {
-    $_SESSION['pre_test_taken'] = false;
+    // Fallback ke pre_test_answer untuk backward compatibility
+    $sql = "SELECT * FROM pre_test_answer WHERE student_id = '{$_SESSION['student_id']}'";
+    $query = mysqli_query($conn, $sql);
+    if (mysqli_num_rows($query) > 0) {
+        $_SESSION['pre_test_taken'] = true;
+    } else {
+        $_SESSION['pre_test_taken'] = false;
+    }
 }
 
 // mengambil data hasil quiz e-learning (pre-test untuk e-learning)
@@ -511,18 +522,23 @@ if (mysqli_num_rows($query_elearning) > 0) {
                                 <span class="status-badge status-pending">
                                     <i class="fas fa-clock me-1"></i>Pre-test Belum Diambil
                                 </span>
-                            <?php } elseif (!$_SESSION['pretest_completed']) { ?>
-                                <span class="status-badge status-pending">
-                                    <i class="fas fa-calculator me-1"></i>Menunggu Perhitungan
-                                </span>
                             <?php } else { ?>
                                 <span class="status-badge status-completed">
-                                    <i class="fas fa-check-circle me-1"></i>Pre-test Selesai
+                                    <i class="fas fa-check-circle me-1"></i>Pre-test Selesai - Siap Belajar!
                                 </span>
-                                <?php if ($level_student > 0) { ?>
+                                <?php 
+                                // Ambil rata-rata level dari result_hasil_pretest
+                                $query_avg_level = mysqli_query($conn, "SELECT ROUND(AVG(recommended_level)) as avg_level 
+                                                                        FROM result_hasil_pretest 
+                                                                        WHERE student_id = '{$_SESSION['student_id']}'");
+                                $avg_level_data = mysqli_fetch_assoc($query_avg_level);
+                                $display_level = $avg_level_data['avg_level'] ?? $level_student;
+                                
+                                if ($display_level > 0) { 
+                                ?>
                                 <div class="mt-2">
                                     <span class="badge bg-success" style="font-size: 1rem; padding: 0.5rem 1rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;">
-                                        <i class="fas fa-layer-group me-1"></i>Level: <?php echo $level_student; ?>
+                                        <i class="fas fa-layer-group me-1"></i>Level Rekomendasi: <?php echo $display_level; ?>
                                     </span>
                                 </div>
                                 <?php } ?>
@@ -538,17 +554,13 @@ if (mysqli_num_rows($query_elearning) > 0) {
                                 <a href="pre-test.php" class="quick-action-btn btn-adaptive">
                                     <i class="fas fa-edit me-2"></i>Ambil Pre-test Dulu
                                 </a>
-                            <?php } elseif ($_SESSION['pretest_completed']) { ?>
+                            <?php } else { ?>
                                 <a href="hasil-pretest.php" class="quick-action-btn btn-adaptive mb-2">
                                     <i class="fas fa-chart-line me-2"></i>Lihat Hasil Pre-test
                                 </a>
-                                <a href="modul-rekomendasi.php" class="quick-action-btn btn-adaptive">
-                                    <i class="fas fa-route me-2"></i>Mulai Belajar
-                                </a>
-                            <?php } else { ?>
-                                <button class="quick-action-btn btn-adaptive" id="calculateBtn" onclick="calculateAdaptive()">
-                                    <i class="fas fa-calculator me-2"></i>Hitung Adaptive Learning
-                                </button>
+                                <!-- <a href="index-adaptive-learning.php" class="quick-action-btn btn-adaptive">
+                                    <i class="fas fa-brain me-2"></i>Mulai Belajar Adaptive
+                                </a> -->
                             <?php } ?>
                         </div>
                     </div>

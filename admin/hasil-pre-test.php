@@ -310,7 +310,6 @@ if (!isset($_SESSION['name'])) {
     // Get statistics
     $total_students = 0;
     $completed_pretest = 0;
-    $completed_survey = 0;
     
     $result = mysqli_query($conn, "SELECT COUNT(*) as count FROM student");
     if ($result) {
@@ -318,18 +317,12 @@ if (!isset($_SESSION['name'])) {
         $total_students = $row['count'];
     }
     
-    // Count completed pretest (using correct table name)
-    $result = mysqli_query($conn, "SELECT COUNT(DISTINCT student_id) as count FROM pre_test_result WHERE 1");
+    // Count completed pretest - menggunakan result_hasil_pretest sebagai acuan utama
+    // User dianggap sudah melakukan pretest jika ada data di result_hasil_pretest
+    $result = mysqli_query($conn, "SELECT COUNT(DISTINCT student_id) as count FROM result_hasil_pretest WHERE 1");
     if ($result) {
         $row = mysqli_fetch_assoc($result);
         $completed_pretest = $row['count'];
-    }
-    
-    // Count completed survey (using correct table name)
-    $result = mysqli_query($conn, "SELECT COUNT(DISTINCT student_id) as count FROM survey_result WHERE 1");
-    if ($result) {
-        $row = mysqli_fetch_assoc($result);
-        $completed_survey = $row['count'];
     }
     ?>
     
@@ -418,7 +411,7 @@ if (!isset($_SESSION['name'])) {
                 </h1>
                 <div class="subtitle">
                     <i class="fas fa-analytics me-2"></i>
-                    Pantau progress dan level pembelajaran siswa berdasarkan hasil pre-test dan survei
+                    Perhitungan Level Pembelajaran Siswa 
                     <span class="badge bg-light text-dark ms-3">
                         <i class="fas fa-calendar me-1"></i>
                         <?php echo date('d F Y'); ?>
@@ -430,7 +423,7 @@ if (!isset($_SESSION['name'])) {
         <div class="container">
             <!-- Statistics Cards -->
             <div class="row mb-4">
-                <div class="col-md-4 mb-3">
+                <div class="col-md-6 mb-3">
                     <div class="stat-card">
                         <div class="stat-number"><?php echo $total_students; ?></div>
                         <div class="stat-label">
@@ -438,19 +431,11 @@ if (!isset($_SESSION['name'])) {
                         </div>
                     </div>
                 </div>
-                <div class="col-md-4 mb-3">
+                <div class="col-md-6 mb-3">
                     <div class="stat-card">
                         <div class="stat-number"><?php echo $completed_pretest; ?></div>
                         <div class="stat-label">
                             <i class="fas fa-clipboard-check me-1"></i>Selesai Pre-Test
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4 mb-3">
-                    <div class="stat-card">
-                        <div class="stat-number"><?php echo $completed_survey; ?></div>
-                        <div class="stat-label">
-                            <i class="fas fa-poll me-1"></i>Selesai Survei
                         </div>
                     </div>
                 </div>
@@ -464,7 +449,7 @@ if (!isset($_SESSION['name'])) {
                             <i class="fas fa-table text-primary me-2"></i>
                             Data Hasil Level Siswa
                         </h3>
-                        <p class="text-muted mb-0">Tabel lengkap hasil pre-test, survei, dan level pembelajaran siswa</p>
+                        <p class="text-muted mb-0">Tabel lengkap hasil level pembelajaran siswa berdasarkan perhitungan pre-test</p>
                     </div>
                     <div class="d-flex gap-2">
                         <button class="btn btn-outline-primary btn-sm" onclick="exportData()">
@@ -484,9 +469,7 @@ if (!isset($_SESSION['name'])) {
                                 <th><i class="fas fa-user-graduate me-1"></i>Murid</th>
                                 <th><i class="fas fa-id-card me-1"></i>NIS/Login</th>
                                 <th><i class="fas fa-school me-1"></i>Kelas</th>
-                                <th><i class="fas fa-poll me-1"></i>Survei</th>
-                                <th><i class="fas fa-clipboard-check me-1"></i>Pre-Test</th>
-                                <th><i class="fas fa-layer-group me-1"></i>Level</th>
+                                <th><i class="fas fa-layer-group me-1"></i>Level Siswa</th>
                             </tr>
                         </thead>
                     </table>
@@ -526,19 +509,19 @@ if (!isset($_SESSION['name'])) {
                     }
                 },
                 columnDefs: [{
-                    targets: [0, 4, 5, 6],
+                    targets: [0, 4],
                     orderable: false
                 }],
                 columns: [
                     { 
                         data: "no", 
                         name: "no",
-                        width: "5%"
+                        width: "10%"
                     },
                     { 
                         data: "murid", 
                         name: "murid",
-                        width: "20%",
+                        width: "30%",
                         render: function(data, type, row) {
                             return `<div class="d-flex align-items-center">
                                         <div class="avatar me-2">
@@ -554,7 +537,7 @@ if (!isset($_SESSION['name'])) {
                     { 
                         data: "nis", 
                         name: "nis",
-                        width: "15%",
+                        width: "20%",
                         render: function(data, type, row) {
                             return `<span class="badge bg-secondary">${data || '-'}</span>`;
                         }
@@ -562,87 +545,44 @@ if (!isset($_SESSION['name'])) {
                     { 
                         data: "kelas", 
                         name: "kelas",
-                        width: "10%",
+                        width: "15%",
                         render: function(data, type, row) {
                             return `<span class="badge bg-primary">${data || '-'}</span>`;
                         }
                     },
                     { 
-                        data: "hasilSurvei", 
-                        name: "hasilSurvei",
-                        width: "15%",
+                        data: "avgLevel", 
+                        name: "avgLevel",
+                        width: "25%",
                         render: function(data, type, row) {
-                            if (data && data.includes('Level')) {
-                                return `<span class="status-badge status-completed">
-                                            <i class="fas fa-check me-1"></i>${data}
-                                        </span>`;
-                            } else {
-                                return `<span class="status-badge status-pending">
-                                            <i class="fas fa-clock me-1"></i>${data || 'Belum'}
-                                        </span>`;
-                            }
-                        }
-                    },
-                    { 
-                        data: "hasilIrt", 
-                        name: "hasilIrt",
-                        width: "15%",
-                        render: function(data, type, row) {
-                            if (data && data.includes('Level ') && !data.includes('belum')) {
-                                return `<span class="status-badge status-completed">
-                                            <i class="fas fa-check me-1"></i>${data}
-                                        </span>`;
-                            } else if (data && data.includes('belum')) {
-                                return `<span class="status-badge status-pending">
-                                            <i class="fas fa-hourglass me-1"></i>${data}
-                                        </span>`;
-                            } else {
-                                return `<span class="status-badge status-not-started">
-                                            <i class="fas fa-clock me-1"></i>${data || 'Belum'}
-                                        </span>`;
-                            }
-                        }
-                    },
-                    { 
-                        data: "hasilPreTest", 
-                        name: "hasilPreTest",
-                        width: "20%",
-                        render: function(data, type, row) {
-                            if (data && data.includes('Level ') && !data.includes('belum')) {
-                                // Extract level number from string like "Level 1", "Level 2", etc.
-                                const levelMatch = data.match(/Level\s+(\d+)/i);
+                            if (data && data !== '-' && data !== 'Belum ambil Pre Test') {
+                                // Extract level number
+                                const levelNum = parseInt(data);
                                 let levelClass = 'level-beginner';
                                 let levelText = 'Pemula';
                                 let levelIcon = 'fa-seedling';
                                 
-                                if (levelMatch) {
-                                    const levelNum = parseInt(levelMatch[1]);
-                                    if (levelNum >= 3) {
-                                        levelClass = 'level-expert';
-                                        levelText = 'Ahli';
-                                        levelIcon = 'fa-crown';
-                                    } else if (levelNum >= 2) {
-                                        levelClass = 'level-advanced';
-                                        levelText = 'Mahir';
-                                        levelIcon = 'fa-star';
-                                    } else {
-                                        levelClass = 'level-intermediate';
-                                        levelText = 'Menengah';
-                                        levelIcon = 'fa-leaf';
-                                    }
+                                if (levelNum >= 3) {
+                                    levelClass = 'level-expert';
+                                    levelText = 'Ahli';
+                                    levelIcon = 'fa-crown';
+                                } else if (levelNum >= 2) {
+                                    levelClass = 'level-advanced';
+                                    levelText = 'Mahir';
+                                    levelIcon = 'fa-star';
+                                } else if (levelNum >= 1) {
+                                    levelClass = 'level-intermediate';
+                                    levelText = 'Menengah';
+                                    levelIcon = 'fa-leaf';
                                 }
                                 
                                 return `<div class="level-badge ${levelClass}">
                                             <i class="fas ${levelIcon} me-1"></i>
-                                            ${data}
+                                            Level ${levelNum}
                                         </div>`;
-                            } else if (data && data.includes('belum')) {
-                                return `<span class="status-badge status-pending">
-                                            <i class="fas fa-hourglass me-1"></i>${data}
-                                        </span>`;
                             } else {
                                 return `<span class="status-badge status-not-started">
-                                            <i class="fas fa-clock me-1"></i>${data || 'Belum Dimulai'}
+                                            <i class="fas fa-clock me-1"></i>${data || 'Belum Pre-Test'}
                                         </span>`;
                             }
                         }
