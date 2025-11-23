@@ -477,26 +477,15 @@ if ($_SESSION['level_user'] == 3) {
                                 <?php endif ?>
                                 
                                 <div class="text-center">
-                                    <form action="../data/level-down.php" method="POST" class="d-inline">
-                                        <?php if ($_SESSION['cek_level']==false) : ?>
-                                            <!-- <button type="submit" class="action-button btn-danger-custom">
-                                                <i class="fas fa-level-down-alt me-2"></i>
-                                                TURUNKAN LEVEL BELAJAR
-                                            </button> -->
-                                        <?php endif ?>
-                                    </form>
+                                    <a href="post_test.php?module=<?php echo $module_id; ?>&retry=1" class="action-button btn-warning-custom">
+                                        <i class="fas fa-redo me-2"></i>
+                                        COBA LAGI
+                                    </a>
                                     
-                                    <?php if ($_SESSION['cek_level']==false) { ?>
-                                        <a href="modul.php" class="action-button btn-warning-custom">
-                                            <i class="fas fa-redo me-2"></i>
-                                            ULANGI PEMBELAJARAN
-                                        </a>
-                                    <?php } else { ?>
-                                        <a href="modul.php" class="action-button btn-warning-custom">
-                                            <i class="fas fa-arrow-down me-2"></i>
-                                            TURUN LEVEL
-                                        </a>
-                                    <?php } ?>
+                                    <a href="modul-rekomendasi.php" class="action-button btn-primary-custom">
+                                        <i class="fas fa-book me-2"></i>
+                                        KEMBALI KE MODUL
+                                    </a>
                                 </div>
                             </div>
                             
