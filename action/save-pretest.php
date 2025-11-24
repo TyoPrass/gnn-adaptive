@@ -67,6 +67,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $score = 0;
             }
             
+            // HITUNG LEVEL BERDASARKAN JAWABAN BENAR (sama seperti post-test)
+            if ($correct_count <= 1) {
+                $recommended_level = 1; // 0-1 benar = Level 1
+            } else if ($correct_count == 2) {
+                $recommended_level = 2; // 2 benar = Level 2
+            } else {
+                $recommended_level = 3; // 3+ benar = Level 3
+            }
+            
             $module_results[] = array(
                 'module_id' => $module_id,
                 'correct_answers' => $correct_count,
@@ -74,14 +83,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 'score' => $score
             );
             
-            // Insert ke table result_hasil_pretest
+            // Insert ke table result_hasil_pretest dengan LEVEL YANG DIHITUNG
             $insert_result = "INSERT INTO result_hasil_pretest 
-                             (student_id, module_id, total_questions, correct_answers, score, recommended_level) 
-                             VALUES ('{$student_id}', '{$module_id}', '{$total_questions}', '{$correct_count}', '{$score}', 1)
+                             (student_id, module_id, total_questions, correct_answers, score, recommended_level, method) 
+                             VALUES ('{$student_id}', '{$module_id}', '{$total_questions}', '{$correct_count}', '{$score}', '{$recommended_level}', 'PRE-TEST')
                              ON DUPLICATE KEY UPDATE 
                              total_questions = '{$total_questions}',
                              correct_answers = '{$correct_count}',
                              score = '{$score}',
+                             recommended_level = '{$recommended_level}',
+                             method = 'PRE-TEST',
                              updated_at = CURRENT_TIMESTAMP";
             mysqli_query($conn, $insert_result);
         }
@@ -90,35 +101,54 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Call GNN API untuk mendapatkan prediksi
     $gnn_prediction = callGNNAPI($student_id, $module_results);
     
+    // Hitung average level dari result_hasil_pretest (level yang sudah dihitung)
+    $sql_avg = "SELECT ROUND(AVG(recommended_level)) as avg_level 
+                FROM result_hasil_pretest 
+                WHERE student_id = '{$student_id}'";
+    $result_avg = mysqli_query($conn, $sql_avg);
+    $row_avg = mysqli_fetch_assoc($result_avg);
+    $calculated_level = $row_avg['avg_level'] ? (int)$row_avg['avg_level'] : 1;
+    
     if ($gnn_prediction && isset($gnn_prediction['predictions'])) {
-        // Update hasil dengan prediksi GNN
+        // Update hasil dengan prediksi GNN (hanya confidence, jangan override level yang sudah benar)
         foreach ($gnn_prediction['predictions'] as $prediction) {
             $module_id = $prediction['module_id'];
             $gnn_pred = $prediction['predicted_level'];
             $confidence = $prediction['confidence'];
             
+            // Simpan prediksi GNN, tapi gunakan max antara level yang dihitung dan GNN
             $update_gnn = "UPDATE result_hasil_pretest 
                           SET gnn_prediction = '{$confidence}',
                               gnn_confidence = '{$confidence}',
-                              recommended_level = '{$gnn_pred}'
+                              gnn_predicted_level = '{$gnn_pred}'
                           WHERE student_id = '{$student_id}' 
                           AND module_id = '{$module_id}'";
             mysqli_query($conn, $update_gnn);
         }
         
-        // Simpan overall level ke pre_test_result
-        $overall_level = $gnn_prediction['overall_level'];
-        $insert_overall = "INSERT INTO pre_test_result (student_id, level) 
-                          VALUES ('{$student_id}', '{$overall_level}')
-                          ON DUPLICATE KEY UPDATE level = '{$overall_level}'";
-        mysqli_query($conn, $insert_overall);
-        
-        // Simpan ke level_student
-        $insert_level = "INSERT INTO level_student (student_id, level) 
-                        VALUES ('{$student_id}', '{$overall_level}')
-                        ON DUPLICATE KEY UPDATE level = '{$overall_level}'";
-        mysqli_query($conn, $insert_level);
+        // Gunakan level tertinggi antara calculated dan GNN overall_level
+        $gnn_overall_level = $gnn_prediction['overall_level'];
+        $final_level = max($calculated_level, $gnn_overall_level);
+    } else {
+        // Jika GNN tidak tersedia, gunakan level yang sudah dihitung
+        $final_level = $calculated_level;
     }
+    
+    // Simpan final level ke pre_test_result
+    $insert_overall = "INSERT INTO pre_test_result (student_id, level) 
+                      VALUES ('{$student_id}', '{$final_level}')
+                      ON DUPLICATE KEY UPDATE level = '{$final_level}'";
+    mysqli_query($conn, $insert_overall);
+    
+    // Simpan ke level_student
+    $insert_level = "INSERT INTO level_student (student_id, level) 
+                    VALUES ('{$student_id}', '{$final_level}')
+                    ON DUPLICATE KEY UPDATE level = '{$final_level}'";
+    mysqli_query($conn, $insert_level);
+    
+    // Refresh session level
+    $_SESSION['level'] = $final_level;
+    $_SESSION['debug_pretest_calc'] = "Calculated: {$calculated_level}, GNN: " . ($gnn_prediction ? $gnn_overall_level : 'N/A') . ", Final: {$final_level}";
     
     // Set session message
     $_SESSION['pretest_message'] = 'Pre-test berhasil diselesaikan! Lihat hasil dan rekomendasi modul Anda.';

@@ -537,9 +537,9 @@ if (mysqli_num_rows($query_elearning) > 0) {
                                 if ($display_level > 0) { 
                                 ?>
                                 <div class="mt-2">
-                                    <span class="badge bg-success" style="font-size: 1rem; padding: 0.5rem 1rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;">
+                                    <!-- <span class="badge bg-success" style="font-size: 1rem; padding: 0.5rem 1rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;">
                                         <i class="fas fa-layer-group me-1"></i>Level Rekomendasi: <?php echo $display_level; ?>
-                                    </span>
+                                    </span> -->
                                 </div>
                                 <?php } ?>
                             <?php } ?>

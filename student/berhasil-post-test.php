@@ -51,6 +51,14 @@ if ($score === null) {
     }
 }
 
+// Refresh level dari database untuk memastikan data terbaru
+$sql_refresh_level = "SELECT level FROM level_student WHERE student_id = '{$student_id}'";
+$query_refresh = mysqli_query($conn, $sql_refresh_level);
+if ($query_refresh && mysqli_num_rows($query_refresh) > 0) {
+    $level_data = mysqli_fetch_assoc($query_refresh);
+    $_SESSION['level'] = $level_data['level'];
+}
+
 // Clear session setelah digunakan
 unset($_SESSION['posttest_score']);
 unset($_SESSION['posttest_correct']);
@@ -58,7 +66,7 @@ unset($_SESSION['posttest_total']);
 unset($_SESSION['posttest_status']);
 unset($_SESSION['posttest_perfect']);
 
-if ($_SESSION['level_user'] == 3) {
+if (isset($_SESSION['level']) && $_SESSION['level'] == 3) {
     $survey = mysqli_query($conn, "SELECT * FROM survey_result where student_id = '{$_SESSION['student_id']}'");
     $survey_row = mysqli_num_rows($survey);
     if ($survey_row == 1) {

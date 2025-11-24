@@ -358,7 +358,7 @@ $materi = mysqli_fetch_array($query, MYSQLI_ASSOC);
                 <div class="col-12">
                     <div class="navigation-card">
                         <div class="d-flex flex-wrap gap-3 align-items-center">
-                            <a href="modul.php" class="nav-button">
+                            <a href="modul-rekomendasi.php" class="nav-button">
                                 <i class="fas fa-arrow-left me-2"></i>Kembali ke Daftar Modul
                             </a>
                             <div class="text-muted">
