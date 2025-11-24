@@ -280,7 +280,7 @@ $modules_result = mysqli_query($conn, $modules_query);
                 <i class="fas fa-question-circle"></i>
                 Kelola Soal Pembelajaran
             </h1>
-            <p class="mb-0 mt-2 opacity-90">Versi Simple - Tanpa AJAX/DataTables (Server-Side Rendering)</p>
+            <p class="mb-0 mt-2 opacity-90">Manajemen Kelola Soal</p>
         </div>
 
         <div class="content-wrapper">
