@@ -1,8 +1,18 @@
 <?php
+// ✅ Start output buffering untuk mencegah output tidak sengaja
+ob_start();
+
 include('../config/db.php');
 
+// ✅ Clear any output yang tidak diinginkan
+ob_clean();
+
 // Set header untuk JSON response
-header('Content-Type: application/json');
+header('Content-Type: application/json; charset=utf-8');
+
+// ✅ Disable error display (gunakan error_log saja)
+ini_set('display_errors', 0);
+error_reporting(E_ALL);
 
 // Fungsi untuk memendekkan teks
 function truncateText($text, $length = 100) {
@@ -35,7 +45,9 @@ if (isset($_POST['action'])) {
             break;
         default:
             echo json_encode(['status' => 'error', 'message' => 'Invalid action']);
+            exit;
     }
+    exit; // ✅ Exit setelah handle action
 }
 
 function getSoalList() {
@@ -47,10 +59,9 @@ function getSoalList() {
     $search = $_POST['search']['value'] ?? '';
     $modul_filter = $_POST['modul'] ?? '';
     
-    // Base query menggunakan struktur yang diminta
+    // ✅ Base query TANPA JOIN ke module_question_choice (tidak perlu untuk list)
     $base_query = "FROM module AS a
                    JOIN module_question AS m ON m.module_id = a.id
-                   JOIN module_question_choice AS mm ON mm.question_id = m.id
                    WHERE 1=1";
     
     // Add module filter if specified
@@ -61,17 +72,28 @@ function getSoalList() {
     // Add search filter
     if (!empty($search)) {
         $base_query .= " AND (a.module_desc LIKE '%" . mysqli_real_escape_string($conn, $search) . "%' 
-                        OR m.question LIKE '%" . mysqli_real_escape_string($conn, $search) . "%' 
-                        OR mm.answer_desc LIKE '%" . mysqli_real_escape_string($conn, $search) . "%')";
+                        OR m.question LIKE '%" . mysqli_real_escape_string($conn, $search) . "%')";
     }
     
-    // Count total records (distinct questions)
-    $count_query = "SELECT COUNT(DISTINCT m.id) as total " . $base_query;
+    // Count total records
+    $count_query = "SELECT COUNT(m.id) as total " . $base_query;
     $count_result = mysqli_query($conn, $count_query);
+    
+    if (!$count_result) {
+        echo json_encode([
+            'draw' => intval($draw),
+            'recordsTotal' => 0,
+            'recordsFiltered' => 0,
+            'data' => [],
+            'error' => mysqli_error($conn)
+        ]);
+        return;
+    }
+    
     $total_records = mysqli_fetch_assoc($count_result)['total'];
     
-    // Get data with pagination (distinct questions)
-    $data_query = "SELECT DISTINCT 
+    // Get data with pagination
+    $data_query = "SELECT 
                    m.id as question_id,
                    a.module_desc, 
                    m.question, 
@@ -81,6 +103,17 @@ function getSoalList() {
                    " ORDER BY m.id DESC LIMIT $start, $length";
     
     $data_result = mysqli_query($conn, $data_query);
+    
+    if (!$data_result) {
+        echo json_encode([
+            'draw' => intval($draw),
+            'recordsTotal' => 0,
+            'recordsFiltered' => 0,
+            'data' => [],
+            'error' => mysqli_error($conn)
+        ]);
+        return;
+    }
     
     $data = [];
     $no = $start + 1;
@@ -138,7 +171,6 @@ function getSoalList() {
             'no' => $no++,
             'module_desc' => htmlspecialchars($row['module_desc']),
             'question_text' => truncateText(htmlspecialchars($row['question']), 100),
-            'correct_answer' => $choices_display,
             'action' => $actions
         ];
     }
@@ -149,6 +181,7 @@ function getSoalList() {
         'recordsFiltered' => $total_records,
         'data' => $data
     ]);
+    exit; // ✅ Pastikan tidak ada output setelah ini
 }
 
 function getSoalDetail() {
@@ -206,6 +239,7 @@ function getSoalDetail() {
             'choices' => $choices
         ]
     ]);
+    exit;
 }
 
 function saveSoal() {
@@ -214,35 +248,36 @@ function saveSoal() {
     $question_id = $_POST['question_id'] ?? 0;
     $module_id = $_POST['module_id'] ?? '';
     $question_text = $_POST['question_text'] ?? '';
-    $correct_answer_index = $_POST['correct_answer_index'] ?? '';
+    // ✅ Terima dari correct_answer ATAU correct_answer_index
+    $correct_answer_index = $_POST['correct_answer_index'] ?? $_POST['correct_answer'] ?? '';
     $choices = $_POST['choices'] ?? [];
     
     // Validasi input
     if (empty($question_text)) {
         echo json_encode(['status' => 'error', 'message' => 'Pertanyaan tidak boleh kosong']);
-        return;
+        exit;
     }
     
     if (empty($module_id)) {
         echo json_encode(['status' => 'error', 'message' => 'Modul harus dipilih']);
-        return;
+        exit;
     }
     
     if (count($choices) < 2) {
         echo json_encode(['status' => 'error', 'message' => 'Minimal harus ada 2 pilihan jawaban']);
-        return;
+        exit;
     }
     
     if ($correct_answer_index === '') {
         echo json_encode(['status' => 'error', 'message' => 'Jawaban benar harus dipilih']);
-        return;
+        exit;
     }
     
     // Validasi index jawaban benar
     $correct_answer_index = intval($correct_answer_index);
     if ($correct_answer_index < 0 || $correct_answer_index >= count($choices)) {
         echo json_encode(['status' => 'error', 'message' => 'Index jawaban benar tidak valid']);
-        return;
+        exit;
     }
     
     mysqli_begin_transaction($conn);
@@ -298,10 +333,11 @@ function saveSoal() {
         
         mysqli_commit($conn);
         echo json_encode(['status' => 'success', 'message' => 'Soal berhasil disimpan']);
-        
+        exit;
     } catch (Exception $e) {
         mysqli_rollback($conn);
         echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+        exit;
     }
 }
 
@@ -332,10 +368,11 @@ function deleteSoal() {
         
         mysqli_commit($conn);
         echo json_encode(['status' => 'success', 'message' => 'Soal berhasil dihapus']);
-        
+        exit;
     } catch (Exception $e) {
         mysqli_rollback($conn);
         echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+        exit;
     }
 }
 
@@ -354,6 +391,7 @@ function getModules() {
         'status' => 'success',
         'data' => $modules
     ]);
+    exit;
 }
 
 function getSoalStats() {
@@ -382,5 +420,8 @@ function getSoalStats() {
             'total_choices' => $total_choices
         ]
     ]);
+    exit;
 }
-?>
+
+// ✅ Jangan jalankan ob_end_flush jika sudah exit di semua fungsi
+// File akan berakhir di sini tanpa output tambahan

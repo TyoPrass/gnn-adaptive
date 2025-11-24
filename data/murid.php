@@ -338,26 +338,36 @@ if ($_GET['action'] == 'getHasilPretest') {
             $query = mysqli_query($conn, "SELECT login FROM users WHERE id = '{$r['user_id']}'");
             $nis = mysqli_fetch_array($query);
 
-            // Ambil level langsung dari pre_test_result
-            $queryLevel = mysqli_query($conn, "SELECT level FROM pre_test_result WHERE student_id = '{$r['id']}'");
+            // ✅ Ambil level dari level_student (PRIORITAS UTAMA - paling update)
+            $queryLevel = mysqli_query($conn, "SELECT level FROM level_student WHERE student_id = '{$r['id']}'");
             $levelData = mysqli_fetch_array($queryLevel, MYSQLI_ASSOC);
             
             if ($levelData && !empty($levelData['level'])) {
+                // Level ditemukan di level_student
                 $avgLevel = $levelData['level'];
             } else {
-                // Fallback: coba hitung dari result_hasil_pretest jika belum ada di pre_test_result
-                $queryAvgLevel = mysqli_query($conn, "SELECT ROUND(AVG(recommended_level)) as avg_level, COUNT(*) as total_modules 
-                                                       FROM result_hasil_pretest 
-                                                       WHERE student_id = '{$r['id']}'");
-                $avgLevelData = mysqli_fetch_array($queryAvgLevel, MYSQLI_ASSOC);
+                // Fallback 1: Cek pre_test_result
+                $queryLevel = mysqli_query($conn, "SELECT level FROM pre_test_result WHERE student_id = '{$r['id']}'");
+                $levelData = mysqli_fetch_array($queryLevel, MYSQLI_ASSOC);
                 
-                if ($avgLevelData && $avgLevelData['total_modules'] > 0) {
-                    $avgLevel = $avgLevelData['avg_level'];
-                    
-                    // Simpan ke pre_test_result
-                    mysqli_query($conn, "INSERT INTO pre_test_result (student_id, level) VALUES ('{$r['id']}', '{$avgLevel}')");
+                if ($levelData && !empty($levelData['level'])) {
+                    $avgLevel = $levelData['level'];
                 } else {
-                    $avgLevel = 'Belum ambil Pre Test';
+                    // Fallback 2: Hitung dari result_hasil_pretest
+                    $queryAvgLevel = mysqli_query($conn, "SELECT ROUND(AVG(recommended_level)) as avg_level, COUNT(*) as total_modules 
+                                                           FROM result_hasil_pretest 
+                                                           WHERE student_id = '{$r['id']}'");
+                    $avgLevelData = mysqli_fetch_array($queryAvgLevel, MYSQLI_ASSOC);
+                    
+                    if ($avgLevelData && $avgLevelData['total_modules'] > 0) {
+                        $avgLevel = $avgLevelData['avg_level'];
+                        
+                        // Simpan ke level_student dan pre_test_result
+                        mysqli_query($conn, "INSERT INTO level_student (student_id, level) VALUES ('{$r['id']}', '{$avgLevel}') ON DUPLICATE KEY UPDATE level = '{$avgLevel}'");
+                        mysqli_query($conn, "INSERT INTO pre_test_result (student_id, level) VALUES ('{$r['id']}', '{$avgLevel}') ON DUPLICATE KEY UPDATE level = '{$avgLevel}'");
+                    } else {
+                        $avgLevel = 'Belum ambil Pre Test';
+                    }
                 }
             }
 
